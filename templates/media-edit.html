@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Editing - {{ path }}</title>
+    {% include "nav-bar.html" %}
+    <style>
+    </style>
+</head>
+<body>
+    <form class="edit-form" action="/action/edit-media" method="POST">
+        <input type="hidden" name="oldname" value="{{ path[session["user"]["username"]|length+1:] }}" />
+        <label for="filenameInput">File Name:</label>
+        <input type="text" id="filenameInput" name="filename" value="{{ path[session["user"]["username"]|length+1:] }}" required>
+	
+		<input type="radio" name="mode" value="r" {% if current_mode == "r" %}checked{% endif %}/> Raw
+  	    <input type="radio" name="mode" value="s" {% if current_mode == "s" %}checked{% endif %}/> Show
+    	| Visibility: 
+        <input type="radio" name="visibility" value="p" {% if current_visibility == "p" %}checked{% endif %}/> Public
+	    <input type="radio" name="visibility" value="h" {% if current_visibility == "h" %}checked{% endif %}/> Hide
+	    <input type="radio" name="visibility" value="o" {% if current_visibility == "o" %}checked{% endif %}/> Once
+	    <input type="submit" value="save">
+        <a href="/dashboard">Back</a>
+        <br>
+
+        <!--{% if filetype == "image" %}-->
+        <img src="{{ path }}" />
+        <!--{% elif filetype == "audio" %}-->
+        <audio>
+        <source src="{{ path }}">
+        </audio>
+        <!--{% elif filetype == "video" %}-->
+        <video>
+        <source src="{{ path }}" >
+        </video>
+        <!--{% endif %}-->
+    </form>
+</body>
+</html>

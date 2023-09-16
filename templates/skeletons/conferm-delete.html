@@ -1,0 +1,11 @@
+<!--conferm-delete.html-->
+<h1>Do you really want to delete the file {{ file.name }} at {{ file.path }}?</h1>
+{% if file.type in imagefiletypes %}
+<img src="{{ file.path }}">
+{% else %}
+<textarea style="height:80%;width:90%;margin:auto;"readonly>{{ file.content }}</textarea><br>
+<form action="/action/delete" method="POST">
+<input type="hidden" name="id" value="{{ file.id }}">
+<input type="submit" value="Delete" /><a href="/dashboard">Back</a>
+</form>
+{% endif %}

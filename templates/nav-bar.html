@@ -1,0 +1,15 @@
+<div class="links">
+	<a href="/">Home</a>
+	{% if not session.get("user") %}
+    <a href="/login">Log in</a>
+    <a href="/registration">Register</a>
+    {% else %}
+    <a href="/action/logout">Log out</a>
+    <a href="/notifications" >Notifications
+    {% if session["user"]["notifications"] > 0 %}
+    <sup style="color:white;background-color:#ff5511;border-radius:50%;">{{ session["user"]["notifications"] }}</sup>
+    {% endif %}
+    </a>
+    {% endif %}
+    <a href="/dashboard">Dashboard</a>
+</div>

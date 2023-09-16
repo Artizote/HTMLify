@@ -1,0 +1,25 @@
+# byte compilet files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environment-specific files
+.env
+.env.*
+*.log
+
+# Virtual environment directory
+venv/
+env/
+.venv/
+
+# Database folder
+instance/
+
+# Database file
+*.db
+
+# Media files
+media/
+

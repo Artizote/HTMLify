@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notifications</title>
+{% include "stylesheet.html" %}
+</head>
+<body>
+  <h1>Notifications</h1>
+  {% include "search-bar.html" %}
+  {% include "nav-bar.html" %}
+  <div class="notification-container">
+    {% if notifications|length == 0 %}
+    <h1>There is no notifications for you, check back after some time :)</h1>
+    {% endif %}
+    {% for notification in notifications[::-1] %}
+    <div class="notification">
+      <!--
+      <img src="profile-image.jpg" alt="User">
+      -->
+      <div class="notification-content {% if not notification.viewed %} opened {% endif %}">
+        <a href="/notifications/{{ notification.id }}">
+          <p>{{ notification.content|safe }}</p>
+          <sub>{{ notification.send_time }}</sub>
+        </a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</body>
+</html>

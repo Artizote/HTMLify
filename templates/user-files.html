@@ -1,0 +1,4 @@
+<!-- user-files.html -->
+{% for file in files %}
+{{ loop.index }}<a href=" {{ file.path }}">{{ file.name }}</a> {{ file.size }}<br>
+{% endfor %}

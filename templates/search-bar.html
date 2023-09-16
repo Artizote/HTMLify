@@ -1,0 +1,19 @@
+<div class="search-form">
+    <form action="/search" method="GET">
+        <input type="text" name="q" value="{{ q }}" placeholder="Search"/>
+        <input type="submit" value="Search" />
+        {% if request.url.split("/")[3].split("?")[0] == "search" %}
+        <br>Search for:
+        <input type="checkbox" name="file-type" id="text-type" value="text" />
+        <label for="text-type">Text</label>
+        <input type="checkbox" name="file-type" id="image-type" value="image" />
+        <label for="image-type">Image</label>
+        <input type="checkbox" name="file-type" id="audio-type" value="audio" />
+        <label for="audio-type">Audio</label>
+        <input type="checkbox" name="file-type" id="video-type" value="video" />
+        <label for="video-type">Video</label>
+        <input type="checkbox" name="file-type" id="document-type" value="document" />
+        <label for="document-type">Document</label>
+        {% endif %}
+    </form>
+</div>

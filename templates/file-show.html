@@ -1,0 +1,74 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ file.name }}</title>
+    {% include "stylesheet.html" %}
+    <link rel="stylesheet" href="/pygments.css">
+    <style>
+    </style>
+</head>
+<body>
+	<h1>HTMLify</h1>
+	{% include "search-bar.html" %}
+	{% include "nav-bar.html" %}
+    <div class="file-container">
+        <div class="file-header">
+            <div class="file-title">{{ file.name }}</div>
+            <div class="file-info">
+                Views: {{ file.views }} <!-- imlement sooon | Stars: 50 -->| Author: {{ file.owner }}
+            </div>
+        </div>
+        
+        <div class="file-content">{{ file.content | safe }}</div>
+        
+        <div class="link-copy-box">
+            <h3>Share this file:</h3>
+            <input type="text" id="fileLink" value="{{ request.url }}" readonly>
+        <button onclick="copyLink()">Copy</button>
+        </div>
+        <h3>Comments</h3>
+        
+        {% for comment in file.comments %}
+        <div class="comment-card">
+        <div class="comment-header">
+        <span class="comment-author"><img src="/media/dp/{{ comment.author }}.jpg"><a href="/{{ comment.author }}">{{ comment.author }}</a></span>
+        <span class="comment-time">{{ comment.time.strftime("%Y-%m-%d %H:%M") }}</span>
+        </div>
+        <hr>
+        <div class="comment-content">
+        <!--<p>-->
+        {{ comment.content | safe }}
+        <!--</p>-->
+        </div>
+        <!--
+        <div class="comment-actions">
+        <a href="#">Reply</a>
+        <a href="#">Like</a>
+        </div>
+        -->
+        </div>
+        {% endfor %}
+        
+        <div class="comment-section">
+            <form action="/action/comment" method="POST">
+            <input name="file-id" type="hidden" value="{{ file.id }}" />
+            <textarea name="content" placeholder="Leave a comment...
+use <b>, <i>, <u> etc to format comment
+use '@' for mention users." maxlength="1024" required></textarea>
+			<input type="hidden" name="token" value="{{ token }}">
+            <button>Comment</button>
+            </form>
+        </div>
+    </div>
+
+<script>
+function copyLink() {
+            var fileLinkInput = document.getElementById("fileLink");
+            fileLinkInput.select();
+            document.execCommand("copy");
+            alert("Link copied to clipboard!");
+}
+</script>
+</body>
+</html>

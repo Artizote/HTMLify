@@ -1,0 +1,24 @@
+<!-- search-result.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>HTMLify Search - {{ q }}</title>
+    {% include "stylesheet.html" %}
+    <style>
+    </style>
+</head>
+<body>
+<h1>HTMLify</h1>
+{% include "nav-bar.html" %}
+{% include "search-bar.html" %}
+
+{% for result in results %}
+    <div class="search-result">
+        <span>{{ result["name"] }}</span> | <span>Owner: {{ result["owner"] }}</span> | Views: {{ result["views"] }} | Comments: {{ result["comments"] | string }} | <a href="{{ result["path"] }}">Open</a>{% if session.get("user") and result["owner"] == session["user"]["username"] %}| <a href="/edit?filepath={{ result["path"][result.owner|length + 1:] }}">Edit</a>{% endif %}<br>
+        <hr>
+        <p>{{ result["snippet"] | safe }}</p>
+    </div>
+{% endfor %}
+<!-- impliment pagination -->
+</body>
+</html>

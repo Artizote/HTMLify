@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>File is locked</title>
+    {% include "stylesheet.html" %}
+</head>
+<body>
+    <h1>HTMLify your dreams</h1>
+	{% include "search-bar.html" %}
+	{% include "nav-bar.html" %}
+	<h1>Locked file</h1>
+	<center>
+	<form action="{{ request.url }}" method="POST">
+	<table>
+	<tr><td>Enter Password:</td><td><input type="password" name="password" required /></td></tr>
+	<tr><td></td><td><input type="submit" value="Unlock"></td></tr>
+	</table>
+	</form>
+	</center>
+</body>
+</html>
