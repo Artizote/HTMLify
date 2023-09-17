@@ -19,9 +19,7 @@
                 Views: {{ file.views }} <!-- imlement sooon | Stars: 50 -->| Author: {{ file.owner }}
             </div>
         </div>
-        
-        <div class="file-content">{{ file.content | safe }}</div>
-        
+        <div class="file-content">{{ file.highlighted() | safe }}</div>
         <div class="link-copy-box">
             <h3>Share this file:</h3>
             <input type="text" id="fileLink" value="{{ request.url }}" readonly>

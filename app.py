@@ -88,6 +88,12 @@ class files(db.Model):
             size //= 1024
         return str(size) + " " + units[degre] + "B"
     
+    def highlighted(file):
+        try:
+            l = lexers.get_lexer_for_filename(file.name)
+        except:
+            l = lexers.get_lexer_for_filename("file.txt")
+        return highlight(file.content, l, formatters.HtmlFormatter())
 
 class comments(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -112,15 +118,17 @@ class Token(db.Model):
         page = request.url
         ip = request.remote_addr
         token = Token(value = t, page=page, ip=ip)
-        db.session.add(token)
-        db.session.commit()
+        with db.session.begin_nested():
+            db.session.add(token)
+            db.session.commit()
         return t
     
     @classmethod
     def verify(Token,token):
         if token := Token.query.filter_by(value=token).first():
-            db.session.delete(token)
-            db.session.commit()
+            with db.session.begin_nested():
+                db.session.delete(token)
+                db.session.commit()
             return True
             if token.page == request.url:
                 db.session.delete(token)
@@ -355,11 +363,6 @@ def _userfiles(username, path):
             Response(file.content, mimetype='text/js')
         return file.content, 200, {"Content-type": "text/plain charset=utf-8"}
     
-    try:
-        l = lexers.get_lexer_for_filename(file.name)
-    except:
-        l = lexers.get_lexer_for_filename("file.txt")
-    file.content = highlight(file.content, l, formatters.HtmlFormatter())
     
     return render_template("file-show.html", file=file, token=Token.generate())
 
@@ -565,7 +568,7 @@ def _action_registration():
     if not all([c in valid_charset for c in username]):
         return redirect("/registration?error=Username is not valid")
     
-    if len(username) < 3:
+    if len(username) < 4:
         return redirect("/registration?error=Username must have 4 letters")
     
     user = users(username = username, email=email, password=password, quata=1048576)
@@ -603,7 +606,7 @@ def _action_upload():
         file = files(name=name, ext=ext, type=type, path=filepath, owner=session["user"]["username"])
         t = "tempfile" + randstr(4)
         _file.save(t)
-        with open(t, "rb") as f:
+        with open(t, "r") as f:
             file.content = f.read()
             file.size = len(f.read())
         remove(t)
