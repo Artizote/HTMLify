@@ -345,7 +345,7 @@ def _userfiles(username, path):
         file.visibility = "h"
     db.session.commit()
         
-    if file.type in {"image", "audio", "video", "document"}:
+    if file.type in {"image", "audio", "video", "document", "unknown"}:
         if file.mode == "r":
             return send_from_directory("media", file.content[7:])
         return send_from_directrory("media", file.content[7:]) # to be replaced with showcase file 
@@ -393,7 +393,7 @@ def _raw_file(path):
         file.visibility = "h"
     db.session.commit()
     
-    if file.type in {"image", "audio", "video", "document"}:
+    if file.type in {"image", "audio", "video", "document", "unknown"}:
         return send_from_directory("media", file.content[7:])
     return file.content, 200, {"Content-type": "text/plain charset=utf-8"}
 
@@ -453,7 +453,7 @@ def _edit_file():
     path = request.args.get("filepath", "")
     fullpath = session["user"]["username"] + "/" + path
     if file := files.query.filter_by(path=fullpath).first():
-        if file.type in {"image", "video", "audio"}:
+        if file.type in {"image", "video", "audio", "unknown"}:
             return render_template("media-edit.html", path=file.path, filetype=file.type, current_mode=file.mode, current_visibility=file.visibility, password=file.password)
         content = file.content
         return render_template("edit.html", path=path, filecontent=content, filetype=file.ext, current_mode=file.mode, current_visibility=file.visibility, password=file.password)
@@ -597,7 +597,7 @@ def _action_upload():
         
     filepath = session["user"]["username"] + "/" + name
     
-    if type == "text" or type == "unknown":
+    if type == "text":
         if files.by_path(session["user"]["username"]+"/"+name):
             rs = randstr(10)
             name = name[:-len(name.split("/")[-1])] + rs + "." + ext
@@ -606,9 +606,14 @@ def _action_upload():
         file = files(name=name, ext=ext, type=type, path=filepath, owner=session["user"]["username"])
         t = "tempfile" + randstr(4)
         _file.save(t)
-        with open(t, "r") as f:
-            file.content = f.read()
-            file.size = len(f.read())
+        try:
+            with open(t, "r") as f:
+                file.content = f.read()
+                file.size = len(file.content)
+        except:
+            with open(t, "rb") as f:
+                file.content = f.read()
+                file.size = len(file.content)
         remove(t)
         db.session.add(file)
         db.session.commit()
@@ -676,7 +681,7 @@ def _action_delete():
     if file is None: return redirect("/dashboard")
     if session["user"]["username"] == file.owner:
         try:
-            remove(file.path)
+            remove(file.content[1:])
         except:
             pass
         db.session.delete(file)
