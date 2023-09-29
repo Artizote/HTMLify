@@ -191,8 +191,8 @@ def filetype(ext):
              "mpe", "mpv", "mpg", "mpeg", "m2v",
              "amv", "asf", "viv", "mkv", "webm"}
     if ext in videos : return v
-    texts = {'abap', 'adb', 'adoc', 'asm', 'bat',
-            'cbl', 'cljs', 'cmd', 'coffee', 'cpp',
+    texts = {'abap', 'adb', 'adoc', 'asm', 'bat', 'bf',
+            'cbl', 'cljs', 'cmd', 'cobra', 'coffee', 'cpp',
             'cpy', 'cs', 'css', 'dart', 'dmd',
             'dockerfile', 'drt', 'elm', 'exs', 'f90',
             'fs', 'gem', 'gemspec', 'go', 'gql',
@@ -208,8 +208,8 @@ def filetype(ext):
             'shrc', 'sjs', 'sql', 'ss', 'suite',
             'sv', 'swift', 'tb', 'tex', 'tk',
             'ts', 'var', 'vbs', 'vhd', 'vpack',
-            'vpkg', 'wasm', 'wat', 'xml', 'xsd',
-            'yaml', 'yml'
+            'vpkg', 'wasm', 'wat', 'ws', 'xml', 'xsd',
+            'yaml', 'yml',
     }
     if ext in texts : return t
     documents = {"pdf"}
@@ -367,7 +367,7 @@ def _userfiles(username, path):
     if file.type in {"image", "audio", "video", "document", "unknown"}:
         if file.mode == "r":
             return send_from_directory("media", file.content[7:])
-        return send_from_directory("media", file.content[7:]) # to be replaced with showcase file 
+        return render_template("file-show.html", file=file, token=Token.generate())
     
     if file.ext in {"html", "htm"}:
         if file.mode == "r":

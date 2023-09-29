@@ -19,7 +19,13 @@
                 Views: {{ file.views }} <!-- imlement sooon | Stars: 50 -->| Author: {{ file.owner }}
             </div>
         </div>
-        <div class="file-content">{{ file.highlighted() | safe }}</div>
+        <div class="file-content">{% if file.type == "text" %}{{ file.highlighted() | safe }}</div>
+        {% elif file.type == "image" %}<img src="/raw/{{ file.path }}" height="100%"/></div>
+        {% elif file.type == "video" %}<video width="100%" height="auto" controls><source src="/raw/{{ file.path }}"></video></div>
+        {% elif file.type == "document" %}<iframe src="/raw/{{ file.path }}" width="100%"></iframe>
+        <a href="/raw/{{ file.path }}" class="download-button" download>Download Document<span class="file-size">({{ file.sizef() }})</span></a></div>
+        {% else %}<a href="/raw/{{ file.path }}" class="download-button" download>Download File<span class="file-size">({{ file.sizef() }})</span></a></div>
+        {% endif %}
         <div class="link-copy-box">
             <h3>Share this file:</h3>
             <input type="text" id="fileLink" value="{{ request.url }}" readonly>
