@@ -34,7 +34,7 @@
         <h3>Comments</h3>
         
         {% for comment in file.comments %}
-        <div class="comment-card">
+        <div class="comment-card" id="comment-{{ comment.id }}">
         <div class="comment-header">
         <span class="comment-author"><img src="/media/dp/{{ comment.author }}.jpg"><a href="/{{ comment.author }}">{{ comment.author }}</a></span>
         <span class="comment-time">{{ comment.time.strftime("%Y-%m-%d %H:%M") }}</span>

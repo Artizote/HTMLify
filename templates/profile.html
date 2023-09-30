@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ user.username }} | HTMOLify profile</title>
+    {% include "stylesheet.html" %}
+</head>
+<body>
+    <h1>{{ user.username }} - HTMLify profile</h1>
+    {% include "search-bar.html" %}
+    {% include "nav-bar.html" %}
+    <main class="profile-container">
+        <section class="profile-header">
+            <img src="/media/dp/{{ user.username }}.jpg" alt="{{ user.username }}'s Profile Picture" class="profile-picture">
+            <div class="profile-info">
+                <h1 class="profile-name">{{ user.username }}</h1>
+                <p class="total-files">{{ user.file_count() }} Files</p>
+                <p class="total-views">{{ user.view_count() }} Views</p>
+            </div>
+        </section>
+        {% for comment in latest_comments %}
+            <span class="comment-activity">{{ user.username }} commented something <a href="{{ comment["filepath"] }}#comment-{{ comment["id"] }}">@{{ comment["filepath"] }}</a><br/></span>
+        {% endfor %}
+        <section>
+            <h2>Latest files of {{ user.username }}</h2>
+            {% for file in user.files %}
+            <div class="search-result">
+            {{ loop.index }}. <span>{{ file.name }}</span> | <span>Owner: {{ file.owner }}</span> | Views: {{ file.views }} | Comments: {{ file.comments | length }} | <a href="{{ file.path }}">Open</a>{% if session.get("user") and file.owner == session["user"]["username"] %}| <a href="/edit?filepath={{ file.path[file.owner|length + 1:] }}">Edit</a>{% endif %} {{ file.sizef() }}<br>
+            <hr>
+            {% if file.type == "text" %}
+            <p>{{ file.content[:file.content|length%128] }}</p>
+            {% endif %}
+            </div>
+            {% endfor %}
+        </section>
+    </main>
+
+</body>
+</html>

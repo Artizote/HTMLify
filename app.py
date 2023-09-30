@@ -46,6 +46,12 @@ class users(db.Model):
     def get_user(users, username):
         return users.query.filter_by(username=username).first()
     
+    def file_count(user):
+        return files.query.filter_by(owner=user.username).count()
+    
+    def view_count(user):
+        return sum([file.views for file in files.query.filter_by(owner=user.username).all()])
+    
     #def notify(user, content, href):
 #        n = Notification(user=user.username, content=content, href=content)
 #        db.session.add(n)
@@ -325,10 +331,16 @@ def _dashboard():
 @app.route("/<username>")
 def _usersites(username):
     username = username.lower()
-    if not users.query.filter_by(username=username).first():
-        return "NO USER FOUND WIT NAME" + username, 404
-    _files = files.query.filter_by(owner=username).all()
-    return render_template("user-files.html", files=_files)
+    user = users.get_user(username)
+    if not user:
+        return "<center><h1>NO USER FOUND WIT NAME" + username + "</h1></center>", 404
+    latest_comments = []
+    for comment in comments.query.filter_by(author=username).order_by(comments.id.desc()).limit(8).all():
+        latest_comments.append({
+            "id": comment.id,
+            "filepath": files.query.filter_by(id=comment.file).first().path
+        })
+    return render_template("profile.html", user=user, latest_comments=latest_comments)
 
 @app.route("/<username>/<path:path>", methods=["GET", "POST"])
 def _userfiles(username, path):
@@ -472,7 +484,7 @@ def _edit_file():
     path = request.args.get("filepath", "")
     fullpath = session["user"]["username"] + "/" + path
     if file := files.query.filter_by(path=fullpath).first():
-        if file.type in {"image", "video", "audio", "unknown"}:
+        if file.type in {"image", "video", "audio", "document", "unknown"}:
             return render_template("media-edit.html", path=file.path, filetype=file.type, current_mode=file.mode, current_visibility=file.visibility, password=file.password)
         content = file.content
         return render_template("edit.html", path=path, filecontent=content, filetype=file.ext, current_mode=file.mode, current_visibility=file.visibility, password=file.password)
@@ -719,10 +731,10 @@ def _action_edit_media():
     file = files.by_path(oldpath)
     if not file: return redirect("/dashboard")
     
-    if files.by_path(filepath):
+    if files.by_path(filepath) and not files.by_path(filepath) is file:
         filepath = filepath[:-len(filepath.split("/")[-1])] + randstr(10) + "." + file.ext
     file.path = filepath
-    
+    file.name = filepath.split("/")[-1]
     file.mode = mode
     file.visibility = visibility
     db.session.commit()
