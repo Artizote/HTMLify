@@ -6,7 +6,7 @@ from flask_migrate import *
 from random import randint
 from hashlib import md5
 from os import remove, system, path
-from datetime import datetime
+from datetime import datetime, timedelta
 from re import sub, search, findall, compile
 from requests import get
 from pygments import highlight, lexers, formatters
@@ -18,6 +18,7 @@ app = Flask(__name__)
 
 app.secret_key = SECRET_KEY
 
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=28)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
 
 db = SQLAlchemy(app)
@@ -131,15 +132,29 @@ class Token(db.Model):
     
     @classmethod
     def verify(Token,token):
+        Token.revoke()
         if token := Token.query.filter_by(value=token).first():
-            with db.session.begin_nested():
-                db.session.delete(token)
-                db.session.commit()
+            Token.revoke(token.value)
             return True
             if token.page == request.url:
                 db.session.delete(token)
                 db.session.commit()
                 return True
+        return False
+     
+    @classmethod
+    def revoke(Token, token=None):
+        if t := Token.query.filter_by(value=token).first():
+            db.session.delete(t)
+            db.session.commit()
+            return True
+        token_count = Token.query.count()
+        if  token_count > SESSION_TOKENS_LIMIT:
+            tokens = Token.query.limit(token_count - SESSION_TOKENS_LIMIT).all()
+            for token in tokens:
+                db.session.delete(token)
+            db.session.commit()
+            return True
         return False
 
 
@@ -174,7 +189,7 @@ reserved_root_paths = {
     "file-upload", "delete", "raw",
     "registration", "action", "parse",
     "render", "archive", "trending",
-    "api"
+    "api", "pygments.css", "sitemap",
     }
 
 
@@ -197,7 +212,7 @@ def filetype(ext):
              "mpe", "mpv", "mpg", "mpeg", "m2v",
              "amv", "asf", "viv", "mkv", "webm"}
     if ext in videos : return v
-    texts = {'abap', 'adb', 'adoc', 'asm', 'bat', 'bf',
+    texts = {'abap', 'adb', 'adoc', 'asm', "b", 'bat', 'bf',
             'cbl', 'cljs', 'cmd', 'cobra', 'coffee', 'cpp',
             'cpy', 'cs', 'css', 'dart', 'dmd',
             'dockerfile', 'drt', 'elm', 'exs', 'f90',
@@ -213,7 +228,7 @@ def filetype(ext):
             'resource', 'robot', 'rs', 'scala', 'sh',
             'shrc', 'sjs', 'sql', 'ss', 'suite',
             'sv', 'swift', 'tb', 'tex', 'tk',
-            'ts', 'var', 'vbs', 'vhd', 'vpack',
+            'ts', "txt", 'var', 'vbs', 'vhd', 'vpack',
             'vpkg', 'wasm', 'wat', 'ws', 'xml', 'xsd',
             'yaml', 'yml',
     }
@@ -248,7 +263,7 @@ def github_fetch(user, repo, branch, file):
     return content
     
 def pastebin_fetch(id):
-    return get("https://pastebin.com/raw/" + id[-8:]).text
+    return get("https://pastebin.com/raw/" + id.replace("/", "")[-8:]).text
     
     """
     sample url: 
@@ -269,9 +284,6 @@ def pastebin_fetch(id):
     
 def file_search(q, filetypes={"text"}) -> list:
     _files = files.query.all()
-    #for filetype in filetypes:
-    #    _files = _files.filter_by(type=filetype)
-    #_files = _files.all()
     qs = q.split(" ")
     results = []
     for file in _files:
@@ -336,10 +348,13 @@ def _usersites(username):
         return "<center><h1>NO USER FOUND WIT NAME" + username + "</h1></center>", 404
     latest_comments = []
     for comment in comments.query.filter_by(author=username).order_by(comments.id.desc()).limit(8).all():
-        latest_comments.append({
-            "id": comment.id,
-            "filepath": files.query.filter_by(id=comment.file).first().path
-        })
+        try:
+            latest_comments.append({
+                "id": comment.id,
+                "filepath": files.query.filter_by(id=comment.file).first().path
+            })
+        except:
+            pass
     return render_template("profile.html", user=user, latest_comments=latest_comments)
 
 @app.route("/<username>/<path:path>", methods=["GET", "POST"])
@@ -469,6 +484,8 @@ def _dp(username):
 
 @app.route("/edit", methods=["GET", "POST"])
 def _edit_file():
+    if not session.get("user"): return render_template("login.html")
+    
     if request.method == "POST":
         path = request.args.get("filepath", "")
         if request.form.get("github"):
@@ -479,17 +496,16 @@ def _edit_file():
             content = pastebin_fetch(request.form["pasteid"])
             return render_template("edit.html", path=path, filecontent=content, filetype=None, current_mode="r", current_visibility="p")
         
-        
-    if not session.get("user"): return render_template("login.html")
+    
     path = request.args.get("filepath", "")
     fullpath = session["user"]["username"] + "/" + path
     if file := files.query.filter_by(path=fullpath).first():
         if file.type in {"image", "video", "audio", "document", "unknown"}:
-            return render_template("media-edit.html", path=file.path, filetype=file.type, current_mode=file.mode, current_visibility=file.visibility, password=file.password)
+            return render_template("media-edit.html",title=file.name, path=file.path, filetype=file.type, current_mode=file.mode, current_visibility=file.visibility, password=file.password)
         content = file.content
-        return render_template("edit.html", path=path, filecontent=content, filetype=file.ext, current_mode=file.mode, current_visibility=file.visibility, password=file.password)
-    return render_template("edit.html", path=path, filetype=None, current_mode="r", current_visibility="p", password="")
-#with app.app_context(): users.get_user("abh").notify("Testing notification", "/login")
+        return render_template("edit.html",title=file.name, path=path, filecontent=content, filetype=file.ext, current_mode=file.mode, current_visibility=file.visibility, password=file.password)
+    return render_template("edit.html",title="",  path=path, filetype=None, current_mode="r", current_visibility="p", password="")
+
 @app.route("/file-upload")
 def _file_upload():
     if not session.get("user"): return rnder_template("login.html")
@@ -566,6 +582,7 @@ def _action_login():
         return redirect("/login?error=No user found")
     user = users.query.filter_by(username = username).first()
     if password != user.password:
+        Notification.notify(username, "Failed login attempt at " + str(datetime.now()), "/notifications")
         return redirect("/login?error=Wrong Password")
     notifications = Notification.query.filter_by(user=user.username).filter_by(viewed=0).count()
     session["user"] = {"username": user.username, "id": user.id, "email": user.email, "quata": user.quata, "notifications": notifications}
@@ -669,6 +686,7 @@ def _action_upload():
 def _action_edit():
     if not session.get("user"): return redirect("/")
     filepath = request.form.get("path")    
+    filetitle = request.form.get("title", filepath.split("/")[-1])
     filecontent = request.form.get("filecontent")
     mode = request.form.get("mode", "r")
     visibility = request.form.get("visibility", "p")
@@ -682,7 +700,7 @@ def _action_edit():
     file = files.by_path(path)
     
     if file:
-        #file = files.query.filter_by(path=filepath).first()
+        file.name = filetitle
         file.content = filecontent
         file.size = len(filecontent)
         file.mode = mode
@@ -691,7 +709,7 @@ def _action_edit():
         db.session.commit()
         return redirect("/edit?filepath=" + filepath)
     
-    name = filepath.split("/")[-1]
+    name = filetitle
     owner = session["user"]["username"]
     path = session["user"]["username"] + "/" + filepath
     ext = filepath.split(".")[-1]
@@ -768,18 +786,20 @@ def _action_comment():
     
     content = sub(r'@([\w/\.-]+)', r'<a href="/\1">@\1</a>', content)
     
+    comment = comments(file=file_id, author=session["user"]["username"], content=content)
+    
     mp = compile(r"@([\w\.-]+)")
     mentions = set(findall(mp, content))
     for mention in mentions:
-        Notification.notify(mention, "<b>" +session["user"]["username"] + "</b> mentioned you in the comment", request.headers['Referer'])
+        Notification.notify(mention, "<b>" +session["user"]["username"] + "</b> mentioned you in the comment", request.headers['Referer'] + "#comment-" + str(comment.id))
     
-    comment = comments(file=file_id, author=session["user"]["username"], content=content)
+    file = files.query.filter_by(id=file_id).first()
     
     db.session.add(comment)
     db.session.commit()
-    
+    if file.owner != session["user"]["username"]:
+        Notification.notify(file.owner, "<b>" + session["user"]["username"] + "</b> comment something on " + file.name, "/"+file.path + "#comment-" + str(comment.id))
     return redirect(request.headers.get('Referer', "/"))
-
 
 if __name__ == "__main__":
     app.run(debug=True)

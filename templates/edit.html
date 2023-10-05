@@ -5,14 +5,19 @@
   	{% include "stylesheet.html" %}
   	<link rel="stylesheet" src="/pygments.css" />
     <style>
-
+    
     </style>
 </head>
 <body>
     <div class="edit-form">
         <h1>Editing - {{ path }}</h1>
         <form action="/action/edit" method="POST">
-            <input type="text" name="path" value="{{ path }}" placeholder="Filename" /><br>
+            <input type="text" name="path" value="{{ path }}" placeholder="File path" />
+            {% if path %}
+            Title:
+            <input type="text" name="title" value="{{ title }}" placeholder="File title" /><br>
+            {% endif %}
+            <br>
             Mode:
             {% if filetype == "html" or filetype == "htm" %}
             <input type="radio" name="mode" value="p" {% if current_mode == "p" %}checked{% endif %}/> Parse
@@ -30,6 +35,7 @@
             <textarea name="filecontent" placeholder="file content" rows="10">{{ filecontent }}</textarea><br>
         </form>
         <details class="more-edit-menu"><summary>More</summary>
+        <!--
         <form id="gff" class="github-fetch-form" action="/edit" method="POST">
         Fetch from GitHub:<br>
         https://GitHub.com/
@@ -39,7 +45,7 @@
         <input type="text" name="file" value="README.md" required/>
         <input type="submit" name="github" value="fetch"/>
         </form>
-        
+        -->
         <form action="/edit" method="POST">
         Fetch from PasteBin:
         PasteId: <input type="text" name="pasteid" />
