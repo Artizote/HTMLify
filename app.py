@@ -10,6 +10,7 @@ from datetime import datetime, timedelta
 from re import sub, search, findall, compile
 from requests import get
 from pygments import highlight, lexers, formatters
+from pathlib import Path
 from config import *
 
 
@@ -92,12 +93,13 @@ class files(db.Model):
         degre = 0
         while size // 1024 > 0:
             degre += 1
-            size //= 1024
+            size /= 1024
+        size = round(size, 2)
         return str(size) + " " + units[degre] + "B"
     
     def highlighted(file):
         try:
-            l = lexers.get_lexer_for_filename(file.name)
+            l = lexers.get_lexer_for_filename(file.path.split("/")[-1])
         except:
             l = lexers.get_lexer_for_filename("file.txt")
         return highlight(file.content, l, formatters.HtmlFormatter())
@@ -255,6 +257,7 @@ def login_req(route):
     return w
 
 def github_fetch(user, repo, branch, file):
+    # uninmplimented function
     return "functnality not available yet"
     #doing fetching with git clone command
     system("git clone https://github.com/" + user + "/" + repo + ".git media")
@@ -264,23 +267,6 @@ def github_fetch(user, repo, branch, file):
     
 def pastebin_fetch(id):
     return get("https://pastebin.com/raw/" + id.replace("/", "")[-8:]).text
-    
-    """
-    sample url: 
-    https://api.github.com/repos/amanbabuhemant/mater
-    download url:
-    https://raw.githubusercontent.com/amanbabuhemant/mater/main/mater.py
-    
-    """
-    file = file.replace("//", "/")
-    if file[0] == "/": file = file[1:]
-    
-    url = "https://raw.githubusercontent.com/" + user + "/" + repo + "/" + branch + "/" + file
-    r = get(url)
-    
-    if r.ok:
-        return r.content
-    return None
     
 def file_search(q, filetypes={"text"}) -> list:
     _files = files.query.all()
@@ -297,8 +283,12 @@ def file_search(q, filetypes={"text"}) -> list:
         result["mode"] = file.mode
         result["comments"] = str(len(file.comments))
         file.content = str(file.content)
-        result["weight"] = sum(file.content.count(w) for w in qs)
-        result["weight"] += sum(file.name.count(w) for w in qs) * 2
+        result["weight"] = 0
+        if file.type == "text":
+            result["weight"] = sum(file.content.lower().count(w) for w in qs)
+        result["weight"] += sum(file.path.lower().count(w) for w in qs) * 2
+        result["weight"] += sum(file.name.lower().count(w) for w in qs) * 2
+        
         if result["weight"] == 0: continue
         fa = -1
         for w in qs:
@@ -323,14 +313,84 @@ def escape_html(code) -> str:
         code = code.replace(e, entitys[e])
     return code
 
+def git_clone(user, repo, dir="", mode='r', visibility='p', overwrite=True):
+
+    random_dir = randstr(10)
+    clone = not system("git clone " + repo + " " + random_dir)
+    if not clone:
+        return None
+    
+    repopath = str(Path.cwd())+"/"+random_dir+"/"
+        
+    filterd = []
+    paths = [Path(repopath)]
+    for path in paths:
+        for item in path.glob("*"):
+            if item.is_dir():
+                if str(item)[len(repopath):][0] == ".":
+                    continue            
+                paths.append(item)
+            if item.is_file():
+                if item.name[0] == ".":
+                    continue
+                filterd.append(str(item))
+    
+    for fullpath in filterd:
+        path = fullpath[len(repopath):]
+        try:
+            content = Path(fullpath).read_text()
+        except:
+            filecontent = Path(fullpath).read_bytes()
+            filename = randstr(10)+"."+path.split("/")[-1].split(".")[-1]
+            with open("media/"+filename, 'wb+') as f:
+                f.write(filecontent)
+            content = "/media/"+filename
+        
+        ext = path.split("/")[-1].split(".")[-1].replace("/", "")
+        
+        filemode = mode
+        if mode == 'p':
+            if not ext in {"html", "htm"}:
+                filemode = 'r'
+        
+        if overwrite:
+            if file := files.by_path(user+"/"+dir+("/"if dir else "")+path):
+                file.content = content
+                file.mode = filemode
+                file.visibility = visibility
+                db.session.commit()
+                continue
+        
+        file = files(
+            path = user + "/" + dir +("/"if dir else "")+path,
+            owner = user,
+            name = path.split("/")[-1],
+            ext = ext,
+            type = filetype(ext),
+            content = content,
+            size = len(content),
+            mode = filemode,
+            visibility = visibility
+        )
+        
+        db.session.add(file)
+        db.session.commit()
+    system("rm "+random_dir)
+    return True
+
 @app.route('/pygments.css')
 def serve_pygments_css():
     return Response(formatters.HtmlFormatter().get_style_defs(), mimetype='text/css')
 
-@app.route("/")
+@app.route("/", methods=["GET", "POST"])
 def _home():
     _files = files.query.all()[::-1]
-    return render_template("home.html", files=_files)
+    if request.method == "POST":
+        session["filter-file-modes"]=request.form.getlist("file-modes")
+    filterd_modes = session.setdefault("filter-file-modes", ["p", "s"])
+    print(filterd_modes)
+    filterd_files = filter(lambda file:file.mode in filterd_modes, _files)
+    return render_template("home.html", files=filterd_files)
 
 @app.route("/dashboard")
 def _dashboard():
@@ -367,7 +427,7 @@ def _userfiles(username, path):
     
     if file.visibility == "h":
         if not session.get("user"):
-            return "This file is hidden, please login if you are owner of this file.", 403
+            return "This file is hidden, please <a href=\"/login\">login</a> if you are owner of this file.", 403
         elif file.owner != session["user"]["username"]:
             return "This file is hidden.", 403
     
@@ -383,7 +443,7 @@ def _userfiles(username, path):
             if password != file.password:
                 flash("Incorrect Password")
                 return render_template("locked-file.html")
-            session["passwords"][file.id] = password
+            session["passwords"][str(file.id)] = password
     
     
     file.views += 1
@@ -402,11 +462,11 @@ def _userfiles(username, path):
         elif file.mode == "p":
             return file.content
     
-    if file.mode == "r":
+    if file.mode == 'r':
         if file.ext == "css":
-            Response(file.content, mimetype='text/css')
+            return Response(file.content, mimetype='text/css')
         if file.ext == "js":
-            Response(file.content, mimetype='text/js')
+            return Response(file.content, mimetype='text/js')
         return file.content, 200, {"Content-type": "text/plain charset=utf-8"}
     
     
@@ -441,6 +501,10 @@ def _raw_file(path):
     
     if file.type in {"image", "audio", "video", "document", "unknown"}:
         return send_from_directory("media", file.content[7:])
+    if file.ext == "css":
+        return Response(file.content, mimetype='text/css')
+    if file.ext == "js":
+        return Response(file.content, mimetype='text/js')        
     return file.content, 200, {"Content-type": "text/plain charset=utf-8"}
 
 @app.route("/pastebin/<id>")
@@ -568,6 +632,11 @@ def _notifications_redirect(id):
     
     return redirect(n.href)
     
+@app.route("/git")
+def _git_clone():
+    if not session.get("user"):
+        return redirect("/login")
+    return render_template("git-clone.html")
 
 @app.route("/action/login", methods=["POST"])
 def _action_login():
@@ -586,6 +655,7 @@ def _action_login():
         return redirect("/login?error=Wrong Password")
     notifications = Notification.query.filter_by(user=user.username).filter_by(viewed=0).count()
     session["user"] = {"username": user.username, "id": user.id, "email": user.email, "quata": user.quata, "notifications": notifications}
+    session.permanent = True
     return redirect("/dashboard")
 
 
@@ -634,53 +704,75 @@ def _action_logout():
 @app.route("/action/upload", methods=["POST"])
 def _action_upload():
     if not session.get("user"): return redirect("/")
-    _file = request.files["file"]
-    name = request.form.get("filename", _file.filename)
+    _files = request.files.getlist("files")
+    dir = request.form.get("dir", "")
+    if dir and dir[-1] != "/":dir+="/"
     
-    if name == "":
-        name = _file.filename
-    ext = name.split(".")[-1]
-    
-    type = filetype(ext)
+    file_uploaded = 0
+    left_over = []
+    for _file in _files:
+        if file_uploaded >= MAX_FILE_UPLOAD_LIMIT:
+            left_over.append(_file.filename)
+            continue
         
-    filepath = session["user"]["username"] + "/" + name
-    
-    if type == "text":
+        file_uploaded += 1
+        name = ""
+        if len(_files) == 1:
+            name = request.form.get("filename", _file.filename)
+        
+        if name == "":
+            name = _file.filename
+        ext = name.split(".")[-1].replace("/", "")
+        
+        type = filetype(ext)
+            
+        filepath = session["user"]["username"] + "/" + dir + name
+        
+        if type == "text":
+            if files.by_path(session["user"]["username"]+"/"+ dir +name):
+                rs = randstr(10)
+                name = name[:-len(name.split("/")[-1])] + rs + "." + ext
+                filepath = session["user"]["username"] + "/" + dir + name
+            
+            file = files(name=name, ext=ext, type=type, path=filepath, owner=session["user"]["username"])
+            t = "tempfile" + randstr(4)
+            _file.save(t)
+            try:
+                with open(t, "r") as f:
+                    file.content = f.read()
+                    file.size = len(file.content)
+            except:
+                with open(t, "rb") as f:
+                    file.content = f.read()
+                    file.size = len(file.content)
+            remove(t)
+            db.session.add(file)
+            db.session.commit()
+            continue
+            
+        rs = randstr(10)
+        sourcepath = "/media/" + rs + "." + ext.replace("/", "")
         if files.by_path(session["user"]["username"]+"/"+name):
             rs = randstr(10)
             name = name[:-len(name.split("/")[-1])] + rs + "." + ext
-            filepath = session["user"]["username"] + "/" + name
+            filepath = session["user"]["username"] + "/" + dir + name
         
-        file = files(name=name, ext=ext, type=type, path=filepath, owner=session["user"]["username"])
-        t = "tempfile" + randstr(4)
-        _file.save(t)
-        try:
-            with open(t, "r") as f:
-                file.content = f.read()
-                file.size = len(file.content)
-        except:
-            with open(t, "rb") as f:
-                file.content = f.read()
-                file.size = len(file.content)
-        remove(t)
+        _file.save(sourcepath[1:])
+        with open(sourcepath[1:], 'rb') as f:
+            filesize = sum(len(line) for line in f.readlines())
+        
+        file = files(name=name, ext=ext, type=type, path=filepath, content=sourcepath, size=filesize, owner=session["user"]["username"])
         db.session.add(file)
         db.session.commit()
-        return redirect("/file-upload")
-
-
-    rs = randstr(10)
-    sourcepath = "/media/" + rs + "." + ext
-    if files.by_path(session["user"]["username"]+"/"+name):
-        rs = randstr(10)
-        name = name[:-len(name.split("/")[-1])] + rs + "." + ext
-        filepath = session["user"]["username"] + "/" + name
-        
-    file = files(name=name, ext=ext, type=type, path=filepath, content=sourcepath, owner=session["user"]["username"])
-    db.session.add(file)
-    db.session.commit()
-    _file.save(sourcepath[1:])
     
-    return redirect("/file-upload")
+    if left_over:
+        return redirect(("/file-upload?msg=only "+
+        str(MAX_FILE_UPLOAD_LIMIT) + " files can be upladed at a time " +
+        "you can reupload remain files again.<br>" + 
+        "these file are not uploaded, please reupload them:<br>"+
+        ("<br>".join(left_over)) + "&dir="+dir))
+
+    return redirect("/file-upload?dir="+dir)
 
 @app.route("/action/edit", methods=["POST"])
 def _action_edit():
@@ -743,8 +835,10 @@ def _action_edit_media():
     oldpath = session["user"]["username"] + "/" + request.form.get("oldname")
     filepath = session["user"]["username"] + "/" + request.form.get("filename")
     filepath = filepath.replace("//", "/")
+    filetitle = request.form.get("title", filepath.split("/")[-1])
     mode = request.form.get("mode", "r")
     visibility = request.form.get("visibility", "p")
+    password = request.form.get("password")
     
     file = files.by_path(oldpath)
     if not file: return redirect("/dashboard")
@@ -752,9 +846,10 @@ def _action_edit_media():
     if files.by_path(filepath) and not files.by_path(filepath) is file:
         filepath = filepath[:-len(filepath.split("/")[-1])] + randstr(10) + "." + file.ext
     file.path = filepath
-    file.name = filepath.split("/")[-1]
+    file.name = filetitle
     file.mode = mode
     file.visibility = visibility
+    file.password = password
     db.session.commit()
     
     return redirect("/edit?filepath=" + filepath[len(file.owner)+1:])
@@ -800,6 +895,22 @@ def _action_comment():
     if file.owner != session["user"]["username"]:
         Notification.notify(file.owner, "<b>" + session["user"]["username"] + "</b> comment something on " + file.name, "/"+file.path + "#comment-" + str(comment.id))
     return redirect(request.headers.get('Referer', "/"))
+
+@app.route("/action/git-clone", methods=["POST"])
+def _action_git_clone():
+    if not session.get("user"):
+        return redirect("/")
+    user = session["user"]["username"]
+    repo = request.form.get("repo")
+    mode = request.form.get("mode", 'r')
+    visibility = request.form.get("visibility", 'p')
+    dirc = request.form.get("directory", '')
+    if not repo:
+        return redirect("/dashboard")
+    gitclone = git_clone(user, repo, dirc, mode, visibility)
+    if not gitclone:
+        return redirect("/git?msg=Check you input fields")
+    return redirect("/dashboard")
 
 if __name__ == "__main__":
     app.run(debug=True)

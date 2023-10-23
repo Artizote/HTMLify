@@ -11,11 +11,18 @@
     {% include "search-bar.html" %}
     {% include "nav-bar.html" %}
     <form class="upload-form" action="/action/upload" method="POST" enctype="multipart/form-data">
+        {% if request.args.get("msg") %}
+        <div class="error-msg">
+        {% for line in request.args.get("msg").split("<br>") %}
+        {{ line }}<br>
+        {% endfor %}
+        </div>
+        {% endif %}
         <label for="fileInput">Choose a file to upload:</label>
-        <input type="file" id="fileInput" name="file" required>
+        <input type="file" id="fileInput" name="files" multiple required>
 
-        <label for="fileNameInput">File Name:</label>
-        <input type="text" id="fileNameInput" name="filename">
+        <label for="dir">File Name:</label>
+        <input type="text" id="dir" name="dir" value="{% if request.args.get("msg") %}{{ request.args.get("dir") }}{% endif %}">
 
         <input type="submit" value="Upload">
     </form>

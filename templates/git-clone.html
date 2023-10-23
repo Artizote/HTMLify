@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Git Clone</title>
+    {% include 'stylesheet.html' %}
+    <style>
+    
+    </style>
+</head>
+<body>
+    <h1>HTMLify</h1>
+    {% include 'search-bar.html' %}
+    {% include 'nav-bar.html' %}
+    <form class="git-clone" action="/action/git-clone" method="post">
+        {% if request.args.get("msg") %}
+            <div class="error-msg">
+            {{ request.args.get("msg") }}
+            </div>
+        {% endif %}
+        git clone <input type="text" id="repo" name="repo" placeholder="http://yourgit.host/path-to-your/repo.git" required><br><br>
+        <label for="directory">Directory (where to clone the repo):</label>
+        {{ session["user"]["username"] }}/<input type="text" id="directory" name="directory" placeholder="my-repo" required><br><br>
+        Display Mode: 
+        <select id="mode" name="mode">
+            <option value='s'>Show</option>
+            <option value='p'>Parse</option>
+            <option value='r'>Raw</option>
+        </select>
+        Visibility: 
+        <select id="visibility" name="visibility">
+            <option value='p'>Public</option>
+            <option value='h'>Hidden</option>
+        </select>
+        <br><br>
+        <input type="submit" value="Clone Repository">
+        <br><br>
+        Note: this git clone will ingnore hidden files and directories<br>
+        and ovewrite existing files.
+    </form>
+</body>
+</html>
+
+
+
+
+
+
+

@@ -19,15 +19,19 @@
             {% endif %}
             <br>
             Mode:
-            {% if filetype == "html" or filetype == "htm" %}
-            <input type="radio" name="mode" value="p" {% if current_mode == "p" %}checked{% endif %}/> Parse
-            {% endif %}
-            <input type="radio" name="mode" value="r" {% if current_mode == "r" %}checked{% endif %}/> Raw
-            <input type="radio" name="mode" value="s" {% if current_mode == "s" %}checked{% endif %}/> Show
+            <select name="mode">
+                {% if filetype == "html" or filetype == "htm" %}
+                <option value="p" {% if current_mode == "p" %}selected{% endif %}>Parse</option>
+                {% endif %}
+                <option value="r" {% if current_mode == "r" %}selected{% endif %}>Raw</option>
+                <option value="s" {% if current_mode == "s" %}selected{% endif %}>Show</option>
+            </select>
             | Visibility:
-            <input type="radio" name="visibility" value="p" {% if current_visibility == "p" %}checked{% endif %}/> Public
-            <input type="radio" name="visibility" value="h" {% if current_visibility == "h" %}checked{% endif %}/> Hide
-            <input type="radio" name="visibility" value="o" {% if current_visibility == "o" %}checked{% endif %}/> Once<br>
+            <select name="visibility">
+            <option value="p" {% if current_visibility == "p" %}selected{% endif %}/> Public
+            <option value="h" {% if current_visibility == "h" %}selected{% endif %}/> Hide
+            <option value="o" {% if current_visibility == "o" %}selected{% endif %}/> Once
+            </select><br><br>
             Password: <input type="text" name="password" value="{{ password }}"><br>
 			<input type="submit" value="Save" />
 			<a href="/{{ session["user"]["username"] }}/{{ path }}">View</a>
@@ -35,17 +39,6 @@
             <textarea name="filecontent" placeholder="file content" rows="10">{{ filecontent }}</textarea><br>
         </form>
         <details class="more-edit-menu"><summary>More</summary>
-        <!--
-        <form id="gff" class="github-fetch-form" action="/edit" method="POST">
-        Fetch from GitHub:<br>
-        https://GitHub.com/
-        <input type="text" name="user" placeholder="User" required/>/
-        <input type="text" name="repo" placeholder="Repo"required/>/blob/
-        <input type="text" name="branch" value="main"required/>/
-        <input type="text" name="file" value="README.md" required/>
-        <input type="submit" name="github" value="fetch"/>
-        </form>
-        -->
         <form action="/edit" method="POST">
         Fetch from PasteBin:
         PasteId: <input type="text" name="pasteid" />

@@ -24,12 +24,12 @@
         {% endfor %}
         <section>
             <h2>Latest files of {{ user.username }}</h2>
-            {% for file in user.files %}
+            {% for file in user.files[::-1] %}
             <div class="search-result">
             {{ loop.index }}. <span>{{ file.name }}</span> | <span>Owner: {{ file.owner }}</span> | Views: {{ file.views }} | Comments: {{ file.comments | length }} | <a href="{{ file.path }}">Open</a>{% if session.get("user") and file.owner == session["user"]["username"] %}| <a href="/edit?filepath={{ file.path[file.owner|length + 1:] }}">Edit</a>{% endif %} {{ file.sizef() }}<br>
             <hr>
             {% if file.type == "text" %}
-            <p>{{ file.content[:file.content|length%128] }}</p>
+            <p>{{ file.content[:128] }}</p>
             {% endif %}
             </div>
             {% endfor %}
