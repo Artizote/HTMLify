@@ -21,8 +21,8 @@
         <label for="fileInput">Choose a file to upload:</label>
         <input type="file" id="fileInput" name="files" multiple required>
 
-        <label for="dir">File Name:</label>
-        <input type="text" id="dir" name="dir" value="{% if request.args.get("msg") %}{{ request.args.get("dir") }}{% endif %}">
+        <label for="dir">Upload in directory:</label>
+        <input type="text" id="dir" name="dir" value="{% if request.args.get("dir") %}{{ request.args.get("dir") }}{% endif %}">
 
         <input type="submit" value="Upload">
     </form>

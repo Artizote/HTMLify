@@ -1,9 +1,8 @@
 #HTMLify
 
 from flask import *
-from flask_sqlalchemy import *
 from flask_migrate import *
-from random import randint
+from random import randint, shuffle
 from hashlib import md5
 from os import remove, system, path
 from datetime import datetime, timedelta
@@ -11,6 +10,8 @@ from re import sub, search, findall, compile
 from requests import get
 from pygments import highlight, lexers, formatters
 from pathlib import Path
+from models import *
+from utils import *
 from config import *
 
 
@@ -22,168 +23,11 @@ app.secret_key = SECRET_KEY
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=28)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
 
-db = SQLAlchemy(app)
+db.init_app(app)
 
 # flask migrate
 
 migrate = Migrate(app, db)
-
-# modals to be efined here
-
-class users(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(64), unique=True)
-    password = db.Column(db.String(64))
-    email = db.Column(db.String(128), unique=True)
-    files = db.relationship("files", backref="users")
-    quata = db.Column(db.Integer, default=0)
-    comments = db.relationship("comments", backref="users")
-    notifications = db.relationship("Notification", backref="users")
-    
-    #stars = db.relationship("files", backref="files")
-    
-    # --------- to be add, start system ------------- #
-    
-    @classmethod
-    def get_user(users, username):
-        return users.query.filter_by(username=username).first()
-    
-    def file_count(user):
-        return files.query.filter_by(owner=user.username).count()
-    
-    def view_count(user):
-        return sum([file.views for file in files.query.filter_by(owner=user.username).all()])
-    
-    #def notify(user, content, href):
-#        n = Notification(user=user.username, content=content, href=content)
-#        db.session.add(n)
-#        db.session.commit()
-
-class files(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(128))
-    path = db.Column(db.String(1024), unique=True)
-    content = db.Column(db.String())
-    ext = db.Column(db.String(8))
-    type = db.Column(db.String())
-    owner = db.Column(db.String(64), db.ForeignKey("users.username"))
-    size = db.Column(db.Integer, default=0)
-    views = db.Column(db.Integer, default=0)
-    mode = db.Column(db.String(1), default="r")
-    # mode - showmode of the file  r | p | s
-    # r - raw mode, show as plain text
-    # p - parse mode, for html documents only
-    # s - show mode, enable syntex highlighting
-    visibility = db.Column(db.String(1), default="p")
-    # p - public, show file to all users
-    # h - hidden, hide file from other users
-    # o - once, file can be only seen once then visiblity will chnage to h
-    comments = db.relationship("comments", backref="files")
-    password = db.Column(db.String(64), default="")
-    #stared = db.Column("")
-    # --------- to be add, start system ------------- #
-    
-    @classmethod
-    def by_path(files, path):
-        return files.query.filter_by(path=path).first()
-    
-    def sizef(file):
-        size = file.size
-        units = ["", "K", "M", "G"]
-        degre = 0
-        while size // 1024 > 0:
-            degre += 1
-            size /= 1024
-        size = round(size, 2)
-        return str(size) + " " + units[degre] + "B"
-    
-    def highlighted(file):
-        try:
-            l = lexers.get_lexer_for_filename(file.path.split("/")[-1])
-        except:
-            l = lexers.get_lexer_for_filename("file.txt")
-        return highlight(file.content, l, formatters.HtmlFormatter())
-
-class comments(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    file = db.Column(db.Integer, db.ForeignKey("files.id"))
-    author = db.Column(db.String(64), db.ForeignKey("users.username"))
-    content = db.Column(db.String())
-    time = db.Column(db.DateTime, default=datetime.utcnow)
-    # ------ to be imliment ---------#
-    #  likes
-    #  replies
-
-class Token(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    value = db.Column(db.String(32))
-    ip = db.Column(db.String(), nullable=True)
-    page = db.Column(db.String())
-    
-    
-    @classmethod
-    def generate(Token):
-        t = randstr(32)
-        page = request.url
-        ip = request.remote_addr
-        token = Token(value = t, page=page, ip=ip)
-        with db.session.begin_nested():
-            db.session.add(token)
-            db.session.commit()
-        return t
-    
-    @classmethod
-    def verify(Token,token):
-        Token.revoke()
-        if token := Token.query.filter_by(value=token).first():
-            Token.revoke(token.value)
-            return True
-            if token.page == request.url:
-                db.session.delete(token)
-                db.session.commit()
-                return True
-        return False
-     
-    @classmethod
-    def revoke(Token, token=None):
-        if t := Token.query.filter_by(value=token).first():
-            db.session.delete(t)
-            db.session.commit()
-            return True
-        token_count = Token.query.count()
-        if  token_count > SESSION_TOKENS_LIMIT:
-            tokens = Token.query.limit(token_count - SESSION_TOKENS_LIMIT).all()
-            for token in tokens:
-                db.session.delete(token)
-            db.session.commit()
-            return True
-        return False
-
-
-class Notification(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user = db.Column(db.String(64), db.ForeignKey("users.username"))
-    content = db.Column(db.String())
-    href = db.Column(db.String())
-    viewed = db.Column(db.Integer, default=0)
-    # 0 -> not viewd
-    # 1 -> viewd
-    send_time = db.Column(db.DateTime,  default=datetime.utcnow)
-    view_time = db.Column(db.DateTime, nullable=True)
-    
-    
-    @classmethod
-    def notify(ns, user, message, href):
-        if not users.get_user(user): return None
-        n = ns(user=user, content=message, href=href)
-        db.session.add(n)
-        db.session.commit()
-    
-    @classmethod
-    def by_id(ns, id):
-        return ns.query.filter_by(id=id).first()
-    
-
 
 
 reserved_root_paths = {
@@ -191,192 +35,11 @@ reserved_root_paths = {
     "file-upload", "delete", "raw",
     "registration", "action", "parse",
     "render", "archive", "trending",
-    "api", "pygments.css", "sitemap",
+    "api", "pygments.css", "map",
     }
 
 
 
-def filetype(ext):
-    a = "audio"
-    d = "document"
-    i = "image"
-    t = "text"
-    v = "video"
-    e = "application"
-    images = {"png", "jpg", "jpeg", "gif", "tif",
-             "tiff", "bmp", "eps", "raw", "cr2", 
-             "nef", "orf", "sr2", "webp"}
-    if ext in images : return i
-    audios = {"3gp", "amr", "m4a", "m4b", "m4p", "mp3",
-             "off", "oga", "ogg", "wav"}
-    if ext in audios : return a
-    videos = {"mp4", "m4v", "mpg", "mp2", "mpeg",
-             "mpe", "mpv", "mpg", "mpeg", "m2v",
-             "amv", "asf", "viv", "mkv", "webm"}
-    if ext in videos : return v
-    texts = {'abap', 'adb', 'adoc', 'asm', "b", 'bat', 'bf',
-            'cbl', 'cljs', 'cmd', 'cobra', 'coffee', 'cpp',
-            'cpy', 'cs', 'css', 'dart', 'dmd',
-            'dockerfile', 'drt', 'elm', 'exs', 'f90',
-            'fs', 'gem', 'gemspec', 'go', 'gql',
-            'graphqls', 'groovy', 'gsp', 'h', 'hrl',
-            'hs', 'html', 'ijl', 'init', 'ipynb',
-            'java', 'jl', 'js', 'json', 'jsonld',
-            'jsonschema', 'kt', 'kts', 'lisp', 'lua',
-            'm', 'md', 'mlx', 'mm', 'mof',
-            'php', 'phtml', 'pks', 'pl', 'pp',
-            'proto', 'ps1', 'ps1xml', 'psd1', 'psm1',
-            'purs', 'py', 'r', 'rb', 're',
-            'resource', 'robot', 'rs', 'scala', 'sh',
-            'shrc', 'sjs', 'sql', 'ss', 'suite',
-            'sv', 'swift', 'tb', 'tex', 'tk',
-            'ts', "txt", 'var', 'vbs', 'vhd', 'vpack',
-            'vpkg', 'wasm', 'wat', 'ws', 'xml', 'xsd',
-            'yaml', 'yml',
-    }
-    if ext in texts : return t
-    documents = {"pdf"}
-    if ext in documents : return d
-    return "unknown"
-
-    
-
-def randstr(n):
-    s = ""
-    chars = "qwertyuiopasdfghjklzxcvbnm1234567890"
-    for _ in range(n):
-        s += chars[randint(0, 35)]
-    return s
-
-def login_req(route):
-    """login required decorator"""
-    def w(*args):
-        if not session.get("user"):
-            return render_template("login.html", error="Log in require")
-        return route(*args)    
-    return w
-
-def github_fetch(user, repo, branch, file):
-    # uninmplimented function
-    return "functnality not available yet"
-    #doing fetching with git clone command
-    system("git clone https://github.com/" + user + "/" + repo + ".git media")
-    with open("media/" + repo + "/" + file, 'r') as f:
-        content = f.read()
-    return content
-    
-def pastebin_fetch(id):
-    return get("https://pastebin.com/raw/" + id.replace("/", "")[-8:]).text
-    
-def file_search(q, filetypes={"text"}) -> list:
-    _files = files.query.all()
-    qs = q.split(" ")
-    results = []
-    for file in _files:
-        if file.visibility == "h": continue
-        result = {}
-        result["id"] = file.id
-        result["name"] = file.name
-        result["owner"] = file.owner
-        result["views"] = file.views
-        result["path"] = file.path
-        result["mode"] = file.mode
-        result["comments"] = str(len(file.comments))
-        file.content = str(file.content)
-        result["weight"] = 0
-        if file.type == "text":
-            result["weight"] = sum(file.content.lower().count(w) for w in qs)
-        result["weight"] += sum(file.path.lower().count(w) for w in qs) * 2
-        result["weight"] += sum(file.name.lower().count(w) for w in qs) * 2
-        
-        if result["weight"] == 0: continue
-        fa = -1
-        for w in qs:
-            fa = file.content.find(w)
-            if fa != -1 : break
-        fc = file.content[abs(fa-100): fa +100]
-        fc = fc.replace("<", "&lt;").replace(">", "&gt;").lower()
-        for w in qs:
-            fc = fc.replace(w, "<span class=\"search-found\">"+w+"</span>")
-        result["snippet"] = fc
-        results.append(result)
-    results = list(sorted(results, key=lambda r : r["weight"]))[::-1]
-    return results
-
-def escape_html(code) -> str:
-    entitys = {
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;"
-    }
-    for e in entitys.keys():
-        code = code.replace(e, entitys[e])
-    return code
-
-def git_clone(user, repo, dir="", mode='r', visibility='p', overwrite=True):
-
-    random_dir = randstr(10)
-    clone = not system("git clone " + repo + " " + random_dir)
-    if not clone:
-        return None
-    
-    repopath = str(Path.cwd())+"/"+random_dir+"/"
-        
-    filterd = []
-    paths = [Path(repopath)]
-    for path in paths:
-        for item in path.glob("*"):
-            if item.is_dir():
-                if str(item)[len(repopath):][0] == ".":
-                    continue            
-                paths.append(item)
-            if item.is_file():
-                if item.name[0] == ".":
-                    continue
-                filterd.append(str(item))
-    
-    for fullpath in filterd:
-        path = fullpath[len(repopath):]
-        try:
-            content = Path(fullpath).read_text()
-        except:
-            filecontent = Path(fullpath).read_bytes()
-            filename = randstr(10)+"."+path.split("/")[-1].split(".")[-1]
-            with open("media/"+filename, 'wb+') as f:
-                f.write(filecontent)
-            content = "/media/"+filename
-        
-        ext = path.split("/")[-1].split(".")[-1].replace("/", "")
-        
-        filemode = mode
-        if mode == 'p':
-            if not ext in {"html", "htm"}:
-                filemode = 'r'
-        
-        if overwrite:
-            if file := files.by_path(user+"/"+dir+("/"if dir else "")+path):
-                file.content = content
-                file.mode = filemode
-                file.visibility = visibility
-                db.session.commit()
-                continue
-        
-        file = files(
-            path = user + "/" + dir +("/"if dir else "")+path,
-            owner = user,
-            name = path.split("/")[-1],
-            ext = ext,
-            type = filetype(ext),
-            content = content,
-            size = len(content),
-            mode = filemode,
-            visibility = visibility
-        )
-        
-        db.session.add(file)
-        db.session.commit()
-    system("rm "+random_dir)
-    return True
 
 @app.route('/pygments.css')
 def serve_pygments_css():
@@ -388,17 +51,27 @@ def _home():
     if request.method == "POST":
         session["filter-file-modes"]=request.form.getlist("file-modes")
     filterd_modes = session.setdefault("filter-file-modes", ["p", "s"])
-    print(filterd_modes)
-    filterd_files = filter(lambda file:file.mode in filterd_modes, _files)
-    return render_template("home.html", files=filterd_files)
+    filterd_files = list(filter(lambda file:file.mode in filterd_modes, _files))
+    shuffle(filterd_files)
+    return render_template("home.html", files=filterd_files[:MAX_FILES_ON_HOME])
 
 @app.route("/dashboard")
 def _dashboard():
     if not session.get("user"): return redirect("/login")
     user = session["user"]["username"]
     _files = files.query.filter_by(owner=session["user"]["username"]).all()
-    filepaths = [file.path[len(file.owner)+1:] for file in _files]
-    return render_template("dashboard.html", filepaths=filepaths, user=user)
+    filepaths = map(lambda f:f.path, _files)
+    pwd = user+"/"+request.args.get("dir", "")
+    current_paths = []
+    for filepath in filepaths:
+        if filepath.startswith(pwd):
+            current_path = filepath[len(pwd):]
+            if "/" in current_path:
+                current_path = current_path[:current_path.find("/", current_path.find("/"))+1]
+            if current_path in current_paths:
+                continue
+            current_paths.append(current_path)
+    return render_template("dashboard.html", filepaths=current_paths, user=user, dir=request.args.get("dir", ""))
 
 @app.route("/<username>")
 def _usersites(username):
@@ -515,11 +188,10 @@ def _pastebin_data(id):
 
 @app.route("/search")
 def _search_page():
-    q = request.args.get("q", "").lower()#.split(" ")
+    q = request.args.get("q", "").lower()
     page = request.args.get("p", 1)
     types = set(request.args.getlist("file-type"))
     
-    #if not q: return redirect("/")
     q = q.replace("  ", " ")
     q = q.strip()
     
@@ -588,6 +260,16 @@ def _confirm_delete():
 def _api_page():
     return "This is API endpoint root"
 
+@app.route("/api/embed")
+def _api_embed():
+    id = request.args.get("id")
+    if not id:
+        return ""
+    file = files.query.filter_by(id=id).first()
+    if not file or file.type != "text" or file.visibility != "p":
+        return ""
+    return "<style>"+formatters.HtmlFormatter().get_style_defs()+"</style>"+file.highlighted()
+
 @app.route("/api/search")
 def _api_search():
     q = request.args.get("q", "")
@@ -600,6 +282,22 @@ def _api_file():
     file = files.query.filter_by(id=id).first()
     if not file: return ""
     return file.content
+
+@app.route("/map/")
+def _map():
+    return "<a href='xml'>xml sitemap</a>"
+
+@app.route("/map/xml")
+def _map_xml():
+    site = request.scheme + "://" + request.host
+    xml = """<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n"""
+    for user in users.query.all():
+        xml += "<url>\n    <loc>" + site +"/"+ user.username + "</loc>\n</url>\n"
+    for file in files.query.all():
+        xml += "<url>\n    <loc>" + site +"/"+ file.path + "</loc>\n</url>\n"
+    xml += "</urlset>"
+    return xml
 
 @app.route("/login")
 def _login_page():
@@ -864,8 +562,8 @@ def _action_comment():
     if not Token.verify(token): return redirect(request.headers.get('Referer', "/"))
     if set(content) == {" "}: return redirect(request.headers.get('Referer', "/"))
     
-    content = escape_html(content)
-    
+    content = escape_html(content).replace("\n", "<br>")
+
     valid_tags = {"b", "u", "i", "s", "sub", "sup",
                   "B", "U", "I", "S", "SUB", "SUP"}
     
@@ -894,7 +592,7 @@ def _action_comment():
     db.session.commit()
     if file.owner != session["user"]["username"]:
         Notification.notify(file.owner, "<b>" + session["user"]["username"] + "</b> comment something on " + file.name, "/"+file.path + "#comment-" + str(comment.id))
-    return redirect(request.headers.get('Referer', "/"))
+    return redirect(request.headers.get('Referer', "/")+"#comment-"+str(comment.id))
 
 @app.route("/action/git-clone", methods=["POST"])
 def _action_git_clone():

@@ -19,7 +19,7 @@
         {% endif %}
         git clone <input type="text" id="repo" name="repo" placeholder="http://yourgit.host/path-to-your/repo.git" required><br><br>
         <label for="directory">Directory (where to clone the repo):</label>
-        {{ session["user"]["username"] }}/<input type="text" id="directory" name="directory" placeholder="my-repo" required><br><br>
+        {{ session["user"]["username"] }}/<input type="text" id="directory" name="directory" placeholder="my-repo" value="{{ request.args.get("dir", "") if request.args.get("dir", " ")[-1] != "/" else request.args.get("dir", "")[:-1] }}"><br><br>
         Display Mode: 
         <select id="mode" name="mode">
             <option value='s'>Show</option>
