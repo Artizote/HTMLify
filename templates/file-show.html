@@ -14,24 +14,28 @@
 	{% include "nav-bar.html" %}
     <div class="file-container">
         <div class="file-header">
-            <div class="file-title">{{ file.name }}</div>
+            <div class="file-title" style="overflow:auto;">{{ file.name }}</div>
             <div class="file-info">
-                Views: {{ file.views }} <!-- imlement sooon | Stars: 50 -->| Author: {{ file.owner }}
+                Views: {{ file.views }} <!-- imlement sooon | Stars: 50 -->| Author: <a href="/{{ file.owner }}" style="text-decoration: none;color: black;">{{ file.owner }}</a>
             </div>
         </div>
         <div class="file-content">{% if file.type == "text" %}{{ file.highlighted() | safe }}</div>
         {% elif file.type == "image" %}<img src="/raw/{{ file.path }}" style="height:auto;width:100%;"></div>
         {% elif file.type == "video" %}<video width="100%" style="height:auto;width:100%;" controls><source src="/raw/{{ file.path }}"></video></div>
-        {% elif file.type == "document" %}<iframe src="/raw/{{ file.path }}" width="100%"></iframe>
+        {% elif file.type == "document" %}<iframe src="/raw/{{ file.path }}" width="100%"></iframe></div>
         {% else %}<a href="/raw/{{ file.path }}" class="download-button" download>Download File<span class="file-size">({{ file.sizef() }})</span></a></div>
         {% endif %}
         <div class="link-copy-box">
             <h3>Share this file:</h3>
             <input type="text" id="fileLink" value="{{ request.url }}" readonly>
-            <button onclick="copyLink()">Copy</button><br><br>
+            <button onclick="copycontent('fileLink')">Copy</button><br><br>
         <a href="/raw/{{ file.path }}"><button>View Raw</button></a>
-        <a href="/raw/{{ file.path }}" download>Download File<span class="file-size">({{ file.sizef() }})</span></a>
-        <button id="embedcode" onclick="embedcode()">Embed Code</button>
+        <a href="/raw/{{ file.path }}" download><button>Download File<span class="file-size">({{ file.sizef() }})</span></button></a>
+        <button id="embedcodebutton" onclick="embedcode()">Embed Code</button>        
+        <form method="POST" action="/edit" style="display:inline-block;">
+            <input type="hidden" name="clone" value="{{ file.id }}"/>
+            <button>Clone</button>
+        </form>
         </div>
         <h3>Comments</h3>
         
@@ -45,19 +49,17 @@
         <div class="comment-content">
         {{ comment.content | safe }}
         </div>
-        <!--
         <div class="comment-actions">
-        <a href="#">Reply</a>
-        <a href="#">Like</a>
+            <a href="#comment-text-field" onclick="add_mention('{{ comment.author }}')">Reply(Mention)</a>
+        <!--<a href="#">Like</a>-->
         </div>
-        -->
         </div>
         {% endfor %}
         
         <div class="comment-section">
             <form action="/action/comment" method="POST">
             <input name="file-id" type="hidden" value="{{ file.id }}" />
-            <textarea name="content" placeholder="Leave a comment...
+            <textarea id="comment-text-field" name="content" placeholder="Leave a comment...
 use <b>, <i>, <u> etc to format comment
 use '@' for mention users." maxlength="1024" required></textarea>
 			<input type="hidden" name="token" value="{{ token }}">
@@ -67,15 +69,20 @@ use '@' for mention users." maxlength="1024" required></textarea>
     </div>
 
 <script>
-function copyLink() {
-    var fileLinkInput = document.getElementById("fileLink");
+function copycontent(id) {
+    var fileLinkInput = document.getElementById(id);
     fileLinkInput.select();
     document.execCommand("copy");
-    alert("Link copied to clipboard!");
+    alert("Copied to clipboard!");
 }
 
 function embedcode() {
-    document.getElementById("embedcode").outerHTML = `<input type="text" id="fileLink" value="<iframe src='{{ request.scheme }}://{{ request.host }}/api/embed?id={{ file.id }}'>" readonly></iframe>`;
+    document.getElementById("embedcodebutton").outerHTML = `<input type="text" id="embedcode" value="<iframe src='{{ request.scheme }}://{{ request.host }}/api/embed?id={{ file.id }}'></iframe>" readonly><button onclick="copycontent('embedcode')">Copy</button>`;
+}
+
+function add_mention(username){
+    var comment_field = document.getElementById("comment-text-field");
+    comment_field.value = "@"+username + " " + comment_field.value;
 }
 </script>
 </body>

@@ -6,6 +6,7 @@ from shutil import rmtree
 from pathlib import Path
 
 def filetype(ext):
+    ext = ext.strip().lower()
     a = "audio"
     d = "document"
     i = "image"
@@ -130,7 +131,7 @@ def git_clone(user, repo, dir="", mode='r', visibility='p', overwrite=True):
         for item in path.glob("*"):
             if item.is_dir():
                 if str(item)[len(repopath):][0] == ".":
-                    continue            
+                    continue
                 paths.append(item)
             if item.is_file():
                 if item.name[0] == ".":
@@ -148,7 +149,7 @@ def git_clone(user, repo, dir="", mode='r', visibility='p', overwrite=True):
                 f.write(filecontent)
             content = "/media/"+filename
 
-        ext = path.split("/")[-1].split(".")[-1].replace("/", "")
+        ext = path.split("/")[-1].split(".")[-1].replace("/", "").lower()
 
         filemode = mode
         if mode == 'p':

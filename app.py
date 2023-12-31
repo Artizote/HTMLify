@@ -36,6 +36,7 @@ reserved_root_paths = {
     "registration", "action", "parse",
     "render", "archive", "trending",
     "api", "pygments.css", "map",
+    "src",
     }
 
 
@@ -97,13 +98,11 @@ def _userfiles(username, path):
     file = files.by_path(fullpath)
     if not file: return "404", 404
     
-    
     if file.visibility == "h":
         if not session.get("user"):
             return "This file is hidden, please <a href=\"/login\">login</a> if you are owner of this file.", 403
         elif file.owner != session["user"]["username"]:
             return "This file is hidden.", 403
-    
     
     if file.password:
         if "passwords" not in session: session["passwords"] = {}
@@ -117,7 +116,6 @@ def _userfiles(username, path):
                 flash("Incorrect Password")
                 return render_template("locked-file.html")
             session["passwords"][str(file.id)] = password
-    
     
     file.views += 1
     if file.visibility == "o":
@@ -141,7 +139,6 @@ def _userfiles(username, path):
         if file.ext == "js":
             return Response(file.content, mimetype='text/js')
         return file.content, 200, {"Content-type": "text/plain charset=utf-8"}
-    
     
     return render_template("file-show.html", file=file, token=Token.generate())
 
@@ -180,14 +177,51 @@ def _raw_file(path):
         return Response(file.content, mimetype='text/js')        
     return file.content, 200, {"Content-type": "text/plain charset=utf-8"}
 
+@app.route("/src/<path:path>")
+def _src_file(path):
+    file = files.by_path(path)
+    
+    if not file:
+        return "File not found", 404
+    
+    if file.visibility == "h":
+        if not session.get("user") or session["user"]["username"] != file.owner:
+            return "File is hidden by User, login if you are owner", 403
+    
+    if file.password:
+        if "passwords" not in session: session["passwords"] = {}
+        if request.method == "GET":
+            password = session["passwords"].get(str(file.id), "")
+            if password != file.password:
+                return render_template("locked-file.html")
+        if request.method == "POST":
+            password = request.form["password"]
+            if password != file.password:
+                flash("Incorrect Password")
+                return render_template("locked-file.html")
+            session["passwords"][file.id] = password
+
+
+    if file.visibility == "o":
+        file.visibility == "h"
+    file.views += 1
+    db.session.commit()
+    
+    return render_template("file-show.html", file=file, token=Token.generate())
+
+
 @app.route("/pastebin/<id>")
 def _pastebin_data(id):
     c = pastebin_fetch(id)
     if c: return c, {"Content-type": "text/plain charset=utf-8"}
     return "", 404
 
-@app.route("/search")
+@app.route("/search", methods=["GET", "POST"])
 def _search_page():
+    if request.method == "POST":
+        session["filter-file-modes"]=request.form.getlist("file-modes")
+    filterd_modes = session.setdefault("filter-file-modes", ["p", "s"])
+
     q = request.args.get("q", "").lower()
     page = request.args.get("p", 1)
     types = set(request.args.getlist("file-type"))
@@ -200,6 +234,8 @@ def _search_page():
     
     if not q: return render_template("search-result.html", results=[])
     results = file_search(q, types)
+
+    results = list(filter(lambda file:file["mode"] in filterd_modes, results))
     return render_template("search-result.html", results=results, page=page, q=q)
 
 @app.route("/media/dp/<username>.jpg")
@@ -231,6 +267,10 @@ def _edit_file():
         if request.form.get("pastebin"):
             content = pastebin_fetch(request.form["pasteid"])
             return render_template("edit.html", path=path, filecontent=content, filetype=None, current_mode="r", current_visibility="p")
+        if request.form.get("clone"):
+            file = files.query.filter_by(id=int(request.form.get("clone"))).first()
+            if file and (not file.visibility != "h" or file.owner == session["user"]["username"]):
+                return render_template("edit.html", path=file.path[file.path.find("/"):], filecontent=file.content, filetype=file.type, current_mode="s", current_visibility="p")
         
     
     path = request.args.get("filepath", "")
@@ -297,7 +337,7 @@ def _map_xml():
     for file in files.query.all():
         xml += "<url>\n    <loc>" + site +"/"+ file.path + "</loc>\n</url>\n"
     xml += "</urlset>"
-    return xml
+    return Response(xml, mimetype="text/xml")
 
 @app.route("/login")
 def _login_page():
@@ -420,7 +460,7 @@ def _action_upload():
         
         if name == "":
             name = _file.filename
-        ext = name.split(".")[-1].replace("/", "")
+        ext = name.split(".")[-1].replace("/", "").lower()
         
         type = filetype(ext)
             
@@ -502,7 +542,7 @@ def _action_edit():
     name = filetitle
     owner = session["user"]["username"]
     path = session["user"]["username"] + "/" + filepath
-    ext = filepath.split(".")[-1]
+    ext = filepath.split(".")[-1].lower()
     type = filetype(ext)
     content = filecontent
     size = len(content)
@@ -518,13 +558,23 @@ def _action_delete():
     id = request.form["id"]
     file = files.query.filter_by(id=id).first()
     if file is None: return redirect("/dashboard")
-    if session["user"]["username"] == file.owner:
-        try:
-            remove(file.content[1:])
-        except:
-            pass
-        db.session.delete(file)
-        db.session.commit()
+    if session["user"]["username"] != file.owner:
+        return redirect("/dashboard")
+    if file.type != "text":
+        same_media_files = files.query.filter_by(content=file.content).all()
+        if len(same_media_files) > 1:
+            #if all(same_file.type == "text" for same_file in same_media_files):
+            #    try:
+            #        remove(file.content[1:])
+            #    except:
+                    pass
+        else:
+             try:
+                 remove(file.content[1:])
+             except:
+                 pass
+    db.session.delete(file)
+    db.session.commit()
     return redirect("/dashboard")
             
 @app.route("/action/edit-media", methods=["POST"])

@@ -8,8 +8,7 @@
     <h1>HTMLify your dreams</h1>
 	{% include "search-bar.html" %}
 	{% include "nav-bar.html" %}
-    <h1>Latest Files created on HTMLify</h1>
-    <form class="filter-form" action="#" method="POST">
+    <form class="filter-form" action="" method="POST">
     <div class="filter-label">Filter Options:</div>
     <label class="filter-option">
     <input type="checkbox" name="file-modes" value="p" {% if 'p' in session["filter-file-modes"] %}checked{% endif %}> Parse
@@ -24,7 +23,7 @@
     </form>
     {% for file in files %}
     <div class="search-result">
-    {{ loop.index }}. <span>{{ file.name }}</span> | <span>Owner: <a href="/{{ file.owner }}">{{ file.owner }}</a></span> | Views: {{ file.views }} | Comments: {{ file.comments | length }} | <a href="{{ file.path }}">Open</a>{% if session.get("user") and file.owner == session["user"]["username"] %}| <a href="/edit?filepath={{ file.path[file.owner|length + 1:] }}">Edit</a>{% endif %} {{ file.sizef() }}<br>
+        <img style="width: 12px; height: 12px;" src="/media/dp/{{ file.owner }}.jpg"> <span>{{ file.name }}</span> | <span>Owner: <a href="/{{ file.owner }}">{{ file.owner }}</a></span> | Views: {{ file.views }} | Comments: {{ file.comments | length }} | <a href="{{ file.path }}">Open</a>/ <a href="/src/{{ file.path }}">Source</a>{% if session.get("user") and file.owner == session["user"]["username"] %}| <a href="/edit?filepath={{ file.path[file.owner|length + 1:] }}">Edit</a>{% endif %} {{ file.sizef() }}<br>
     <hr>
     {% if file.type == "text" %}
     <p>{{ file.content[:128] }}</p>
