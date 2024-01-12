@@ -633,13 +633,13 @@ def _action_comment():
     
     mp = compile(r"@([\w\.-]+)")
     mentions = set(findall(mp, content))
-    for mention in mentions:
-        Notification.notify(mention, "<b>" +session["user"]["username"] + "</b> mentioned you in the comment", request.headers['Referer'] + "#comment-" + str(comment.id))
     
     file = files.query.filter_by(id=file_id).first()
     
     db.session.add(comment)
     db.session.commit()
+    for mention in mentions:
+        Notification.notify(mention, "<b>" +session["user"]["username"] + "</b> mentioned you in the comment", request.headers['Referer'] + "#comment-" + str(comment.id))
     if file.owner != session["user"]["username"]:
         Notification.notify(file.owner, "<b>" + session["user"]["username"] + "</b> comment something on " + file.name, "/"+file.path + "#comment-" + str(comment.id))
     return redirect(request.headers.get('Referer', "/")+"#comment-"+str(comment.id))

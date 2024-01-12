@@ -119,7 +119,7 @@ def escape_html(code) -> str:
 def git_clone(user, repo, dir="", mode='r', visibility='p', overwrite=True):
 
     random_dir = randstr(10)
-    clone = not system("git clone " + repo + " " + random_dir)
+    clone = not system(GIT_COMMAND_PATH + " clone " + repo + " " + random_dir)
     if not clone:
         return None
     

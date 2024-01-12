@@ -36,7 +36,7 @@
 			<input type="submit" value="Save" />
 			<a href="/{{ session["user"]["username"] }}/{{ path }}">View</a>
 			<a href="/dashboard">Back</a>
-            <textarea name="filecontent" placeholder="file content" rows="10">{{ filecontent }}</textarea><br>
+            <textarea name="filecontent" placeholder="file content" rows="30">{{ filecontent }}</textarea><br>
         </form>
         <details class="more-edit-menu"><summary>More</summary>
         <form action="/edit" method="POST">
