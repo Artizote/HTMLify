@@ -93,6 +93,38 @@ class files(db.Model):
             l = lexers.get_lexer_for_filename("file.txt")
         return highlight(file.content, l, formatters.HtmlFormatter())
 
+    def get_sub_directories(path: str) -> list[str]:
+        if path and path[-1] != "/":
+            path += "/"
+        tree = files.query.filter(files.path.startswith(path)).all()
+        sd = []
+        for item in tree:
+            if item.path.find("/", len(path)) == -1:
+                continue
+            directory = item.path[:item.path.find("/", len(path))]
+            if directory not in sd:
+                sd.append(directory)
+        sd.remove(path)
+        return sd
+
+    def get_tree(path: str) -> list[str]:
+        if path and path[-1] != "/":
+            path += "/"
+            tree = list(map(lambda i:i.path, files.query.filter(files.path.startswith(path)).all()))
+        return tree
+
+    def get_directory_tree(path: str) -> list[str]:
+        if path and path[-1] != "/":
+            path += "/"
+        tree = files.query.filter(files.path.startswith(path)).all()
+        dtree = []
+        for item in tree:
+            directory = item.path[:item.path.rfind("/")]
+            if directory not in dtree:
+                dtree.append(directory)
+        return dtree
+
+
 class comments(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     file = db.Column(db.Integer, db.ForeignKey("files.id"))

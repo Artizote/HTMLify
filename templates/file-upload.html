@@ -11,8 +11,15 @@
     {% include "search-bar.html" %}
     {% include "nav-bar.html" %}
     <form class="upload-form" action="/action/upload" method="POST" enctype="multipart/form-data">
-        {% if request.args.get("msg") %}
+        {% if request.args.get("error-msg") %}
         <div class="error-msg">
+        {% for line in request.args.get("error-msg").split("<br>") %}
+        {{ line }}<br>
+        {% endfor %}
+        </div>
+        {% endif %}
+        {% if request.args.get("msg") %}
+        <div class="error-msg" style="color:green;border-color:green;background-color:lightgreen;">
         {% for line in request.args.get("msg").split("<br>") %}
         {{ line }}<br>
         {% endfor %}
@@ -22,8 +29,12 @@
         <input type="file" id="fileInput" name="files" multiple required>
 
         <label for="dir">Upload in directory:</label>
-        <input type="text" id="dir" name="dir" value="{% if request.args.get("dir") %}{{ request.args.get("dir") }}{% endif %}">
-
+        <input list="directories" type="text" id="dir" name="dir" value="{% if request.args.get("dir") %}{{ request.args.get("dir") }}{% endif %}">
+        <datalist id="directories">
+        {% for directory in directories %} 
+            <option value="{{ directory[session["user"]["username"]|length:] }}">{{ directory[session["user"]["username"]|length:] }}</option>
+        {% endfor %}
+        </datalist>
         <input type="submit" value="Upload">
     </form>
 </body>

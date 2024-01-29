@@ -19,6 +19,11 @@
     <label class="filter-option">
     <input type="checkbox" name="file-modes" value="r" {% if 'r' in session["filter-file-modes"] %}checked{% endif %}> Raw
     </label>
+    <select name="filter-order">
+        <option value="r" {% if session.get("filter-file-order", "r") == "r"%}selected{% endif %}>Random</option>
+        <option value="n" {% if session.get("filter-file-order", "r") == "n"%}selected{% endif %}>Newest</option>
+        <option value="o" {% if session.get("filter-file-order", "r") == "o"%}selected{% endif %}>Oldest</option>
+    </select>
     <button class="filter-button" type="submit">Filter</button>
     </form>
     {% for file in files %}

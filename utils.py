@@ -4,6 +4,7 @@ from models import users, files, db
 from os import remove, system, path
 from shutil import rmtree
 from pathlib import Path
+from config import GIT_COMMAND_PATH
 
 def filetype(ext):
     ext = ext.strip().lower()
@@ -15,7 +16,7 @@ def filetype(ext):
     e = "application"
     images = {"png", "jpg", "jpeg", "gif", "tif",
              "tiff", "bmp", "eps", "raw", "cr2",
-             "nef", "orf", "sr2", "webp"}
+             "nef", "orf", "sr2", "svg", "webp"}
     if ext in images : return i
     audios = {"3gp", "amr", "m4a", "m4b", "m4p", "mp3",
              "off", "oga", "ogg", "wav"}
@@ -24,7 +25,7 @@ def filetype(ext):
              "mpe", "mpv", "mpg", "mpeg", "m2v",
              "amv", "asf", "viv", "mkv", "webm"}
     if ext in videos : return v
-    texts = {'abap', 'adb', 'adoc', 'asm', "b", 'bat', 'bf',
+    texts = {'abap', 'adb', 'adoc', 'asm', "b", 'bat', 'bf', "c",
             'cbl', 'cljs', 'cmd', 'cobra', 'coffee', 'cpp',
             'cpy', 'cs', 'css', 'dart', 'dmd',
             'dockerfile', 'drt', 'elm', 'exs', 'f90',

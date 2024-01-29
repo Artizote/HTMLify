@@ -51,9 +51,16 @@ def _home():
     _files = files.query.all()[::-1]
     if request.method == "POST":
         session["filter-file-modes"]=request.form.getlist("file-modes")
+        session["filter-file-order"]=request.form.get("filter-order", "r")
     filterd_modes = session.setdefault("filter-file-modes", ["p", "s"])
+    filterd_order = session.setdefault("filter-file-order", "r")
     filterd_files = list(filter(lambda file:file.mode in filterd_modes, _files))
-    shuffle(filterd_files)
+    if filterd_order == "r":
+        shuffle(filterd_files)
+    elif filterd_order == "n":
+        pass
+    elif filterd_order == "o":
+        filterd_files = filterd_files[::-1]
     return render_template("home.html", files=filterd_files[:MAX_FILES_ON_HOME])
 
 @app.route("/dashboard")
@@ -79,7 +86,7 @@ def _usersites(username):
     username = username.lower()
     user = users.get_user(username)
     if not user:
-        return "<center><h1>NO USER FOUND WIT NAME" + username + "</h1></center>", 404
+        return "<center><h1>NO USER FOUND WIT NAME " + username + "</h1></center>", 404
     latest_comments = []
     for comment in comments.query.filter_by(author=username).order_by(comments.id.desc()).limit(8).all():
         try:
@@ -285,7 +292,7 @@ def _edit_file():
 @app.route("/file-upload")
 def _file_upload():
     if not session.get("user"): return rnder_template("login.html")
-    return render_template("file-upload.html")
+    return render_template("file-upload.html", directories=files.get_directory_tree(session["user"]["username"]))
 
 @app.route("/delete", methods=["POST"])
 def _confirm_delete():
@@ -502,15 +509,18 @@ def _action_upload():
         file = files(name=name, ext=ext, type=type, path=filepath, content=sourcepath, size=filesize, owner=session["user"]["username"])
         db.session.add(file)
         db.session.commit()
-    
-    if left_over:
-        return redirect(("/file-upload?msg=only "+
-        str(MAX_FILE_UPLOAD_LIMIT) + " files can be upladed at a time " +
-        "you can reupload remain files again.<br>" + 
-        "these file are not uploaded, please reupload them:<br>"+
-        ("<br>".join(left_over)) + "&dir="+dir))
 
-    return redirect("/file-upload?dir="+dir)
+    error_msg = ""
+    if left_over:
+        error_msg = ("only "+
+        str(MAX_FILE_UPLOAD_LIMIT) + " files can be upladed at a time " +
+        "you can reupload remain files again.<br>" +
+        "these file are not uploaded, please reupload them:<br>"+
+        ("<br>".join(left_over)) + "&dir="+dir)
+
+    return redirect(("/file-upload?dir="+dir+
+                    "&msg="+str(file_uploaded)+
+                    " Files uploaded&error-msg="+error_msg))
 
 @app.route("/action/edit", methods=["POST"])
 def _action_edit():
