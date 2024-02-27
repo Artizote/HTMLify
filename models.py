@@ -55,7 +55,7 @@ class files(db.Model):
     content = db.Column(db.String())
     ext = db.Column(db.String(8))
     type = db.Column(db.String())
-    owner = db.Column(db.String(64), db.ForeignKey("users.username"))
+    owner = db.Column(db.String(64), db.ForeignKey("users.username"), nullable=True)
     size = db.Column(db.Integer, default=0)
     views = db.Column(db.Integer, default=0)
     mode = db.Column(db.String(1), default="r")
@@ -68,7 +68,9 @@ class files(db.Model):
     # h - hidden, hide file from other users
     # o - once, file can be only seen once then visiblity will chnage to h
     comments = db.relationship("comments", backref="files")
+    revisions = db.relationship("Revision", backref="files")
     password = db.Column(db.String(64), default="")
+    as_guest = db.Column(db.Boolean, default=False)
     #stared = db.Column("")
     # --------- to be add, start system ------------- #
     
@@ -140,8 +142,7 @@ class Token(db.Model):
     value = db.Column(db.String(32))
     ip = db.Column(db.String(), nullable=True)
     page = db.Column(db.String())
-    
-    
+
     @classmethod
     def generate(Token):
         t = randstr(32)
@@ -152,7 +153,7 @@ class Token(db.Model):
             db.session.add(token)
             db.session.commit()
         return t
-    
+
     @classmethod
     def verify(Token,token):
         Token.revoke()
@@ -164,7 +165,7 @@ class Token(db.Model):
                 db.session.commit()
                 return True
         return False
-     
+
     @classmethod
     def revoke(Token, token=None):
         if t := Token.query.filter_by(value=token).first():
@@ -191,16 +192,47 @@ class Notification(db.Model):
     # 1 -> viewd
     send_time = db.Column(db.DateTime,  default=datetime.utcnow)
     view_time = db.Column(db.DateTime, nullable=True)
-    
-    
+
     @classmethod
     def notify(ns, user, message, href):
         if not users.get_user(user): return None
         n = ns(user=user, content=message, href=href)
         db.session.add(n)
         db.session.commit()
-    
+
     @classmethod
     def by_id(ns, id):
         return ns.query.filter_by(id=id).first()
+
+class Revision(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    file = db.Column(db.Integer, db.ForeignKey("files.id"))
+    content = db.Column(db.String())
+    time = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def next(self):
+        rs = Revisions.query.filter_by(file=self.file).order(Revision.time).all()
+        for r in rs:
+            if r.time > self.time:
+                return r
+
+    def prev(self):
+        rs = Revisions.query.filter_by(file=self.file).order(Revision.time).all()
+        for r in rs[::-1]:
+            if r.time < self.time:
+                return r
+
+    @classmethod
+    def make_for(rv, file: int | files):
+        if isinstance(file, int):
+            file = files.query.filter_by(id=file).first()
+        if not file or file.type != "text":
+            return None
+        r = rv(
+            file = file.id,
+            content = file.content,
+        )
+        db.session.add(r)
+        db.commit()
+
 

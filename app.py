@@ -36,7 +36,7 @@ reserved_root_paths = {
     "registration", "action", "parse",
     "render", "archive", "trending",
     "api", "pygments.css", "map",
-    "src",
+    "src", "guest",
     }
 
 
@@ -287,7 +287,7 @@ def _edit_file():
             return render_template("media-edit.html",title=file.name, path=file.path, filetype=file.type, current_mode=file.mode, current_visibility=file.visibility, password=file.password)
         content = file.content
         return render_template("edit.html",title=file.name, path=path, filecontent=content, filetype=file.ext, current_mode=file.mode, current_visibility=file.visibility, password=file.password)
-    return render_template("edit.html",title="",  path=path, filetype=None, current_mode="r", current_visibility="p", password="")
+    return render_template("edit.html",title="",  path=path, filetype=None, current_mode="r", current_visibility="p", password="", extentions=get_extentions("text"))
 
 @app.route("/file-upload")
 def _file_upload():
@@ -524,14 +524,44 @@ def _action_upload():
 
 @app.route("/action/edit", methods=["POST"])
 def _action_edit():
-    if not session.get("user"): return redirect("/")
-    filepath = request.form.get("path")    
-    filetitle = request.form.get("title", filepath.split("/")[-1])
+    if not session.get("user") and not request.form.get("asguest"): return redirect("/")
+    as_guest = request.form.get("asguest")
+    file_extention = request.form.get("fileextension", ".txt")  # avaialable when as_guest
+    filepath = request.form.get("path")
+    if not as_guest:
+        filetitle = request.form.get("title", filepath.split("/")[-1])
+    else:
+        filetitle = request.form.get("title")
     filecontent = request.form.get("filecontent")
     mode = request.form.get("mode", "r")
     visibility = request.form.get("visibility", "p")
     password = request.form.get("password", "")
     
+    if as_guest:
+        path  = "guest/" + randstr(10) +"."+ file_extention
+        while files.by_path(path):
+            path = "guest/" + randstr(10) +"."+ file_extention
+        if not filetitle:
+            filetitle = path.split("/")[-1]
+        session["last-selected-extention"] = file_extention
+        print(filetitle)
+        file = files(
+            path=path,
+            name=filetitle,
+            ext=file_extention.replace(".", ""),
+            content=filecontent,
+            mode=mode,
+            visibility=visibility,
+            type="text",
+            password=password,
+            as_guest = True,
+            owner = None,
+        )
+        db.session.add(file)
+        db.session.commit()
+        return redirect("/"+path)
+
+
     if filepath == "": filepath = randstr(10)
     if filepath[0] == "/":
         filepath = filepath[1:]

@@ -1,50 +1,124 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Editing - {{ path }}</title>
-  	{% include "stylesheet.html" %}
-  	<link rel="stylesheet" src="/pygments.css" />
-    <style>
-    
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Editing - {{ path }}</title>
+{% include "stylesheet.html" %}
+{% include "extras.html" %}
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        /*margin: 0;*/
+        /*padding: 0;*/
+        background-color: #f0f0f0;
+    }
+    .container {
+        max-width: 800px;
+        margin: 50px auto;
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    h2 {
+        margin-bottom: 20px;
+    }
+    label {
+        display: block;
+        margin-bottom: 5px;
+    }
+    .edit-form input[type="text"],
+    select,
+    textarea {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-sizing: border-box;
+    }
+    .button-container {
+        text-align: center;
+    }
+    .edit-form button {
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+    button:hover {
+        background-color: #0056b3;
+    }
+</style>
 </head>
 <body>
-    <div class="edit-form">
-        <h1>Editing - {{ path }}</h1>
-        <form action="/action/edit" method="POST">
-            <input type="text" name="path" value="{{ path }}" placeholder="File path" />
-            {% if path %}
-            Title:
-            <input type="text" name="title" value="{{ title }}" placeholder="File title" /><br>
-            {% endif %}
-            <br>
-            Mode:
-            <select name="mode">
-                {% if filetype == "html" or filetype == "htm" %}
-                <option value="p" {% if current_mode == "p" %}selected{% endif %}>Parse</option>
-                {% endif %}
-                <option value="r" {% if current_mode == "r" %}selected{% endif %}>Raw</option>
-                <option value="s" {% if current_mode == "s" %}selected{% endif %}>Show</option>
-            </select>
-            | Visibility:
-            <select name="visibility">
-            <option value="p" {% if current_visibility == "p" %}selected{% endif %}/> Public
-            <option value="h" {% if current_visibility == "h" %}selected{% endif %}/> Hide
-            <option value="o" {% if current_visibility == "o" %}selected{% endif %}/> Once
-            </select><br><br>
-            Password: <input type="text" name="password" value="{{ password }}"><br>
-			<input type="submit" value="Save" />
-			<a href="/{{ session["user"]["username"] }}/{{ path }}">View</a>
-			<a href="/dashboard">Back</a>
-            <textarea name="filecontent" placeholder="file content" rows="30">{{ filecontent }}</textarea><br>
-        </form>
-        <details class="more-edit-menu"><summary>More</summary>
-        <form action="/edit" method="POST">
-        Fetch from PasteBin:
-        PasteId: <input type="text" name="pasteid" />
-        <input type="submit" name="pastebin" value="Fetch" />
-        </form>
-        </details>
+<h1>HTMLify your dreams</h1>
+{% include "search-bar.html" %}
+{% include "nav-bar.html" %}
+<div class="container">
+    <h2>Editing - {{ path }}</h2>
+<form class="edit-form" action="/action/edit" method="POST">
+    <label for="filepath">File Path:</label>
+    <input type="text" id="filepath" name="path" value="{{ path }}" placeholder="File path">
+    <label for="filename">File Name:</label>
+    <input type="text" id="filename" name="title" value="{{ title }}">
+    <label for="password">Password:</label>
+    <input type="password" id="password" name="password" value="{{ password }}">
+    <label for="filemode">File Mode:</label>
+    <select id="filemode" name="mode">
+        <option value="p" {% if current_mode == "p"%}selected{% endif %}>Parse</option>
+        
+        <option value="s" {% if current_mode == "s"%}selected{% endif %}>Show</option>
+        <option value="r" {% if current_mode == "r"%}selected{% endif %}>Raw</option>
+    </select>
+    <label for="visibility">File Visibility:</label>
+    <select id="visibility" name="visibility">
+        <option value="p" {% if current_visibility == "p"%}selected{% endif %}>Public</option>
+        <option value="h" {% if current_visibility == "h"%}selected{% endif %}>Hidden</option>
+        <option value="o" {% if current_visibility == "o"%}selected{% endif %}>Once</option>
+    </select>
+    {% if not path %}
+    <input type="checkbox" id="asGuest" name="asguest" onchange="toggleFilePath()">
+    <label for="asGuest">As Guest</label>
+    <div id="fileExtensionContainer" style="display: none;">
+        <label for="fileExtension">File Extension:</label>
+        <select id="fileExtension" name="fileextension">
+        {% if extentions %}
+        {% for ext in extentions %}
+        <option value="{{ ext }}" {% if session.get("last-selected-extention") == ext %}selected{% endif %}>.{{ ext }}</option>
+        {% endfor %}
+        {% endif %}
+        </select>
     </div>
+    {% endif %}
+    <textarea id="filecontent" name="filecontent" rows="30">{{ filecontent }}</textarea>
+    <div class="button-container">
+        <button>Save</button>
+        <a href="/{{ session["user"]["username"]+"/"+path }}">View</a>
+        <a href="/dashboard">Back</a>
+        <!--<button id="revisions">Revisions</button>-->
+    </div>
+</form>
+</div>
+
+<script>
+    function toggleFilePath() {
+        var asGuestCheckbox = document.getElementById("asGuest");
+        var filePathInput = document.getElementById("filepath");
+        var fileExtensionContainer = document.getElementById("fileExtensionContainer");
+
+        if (asGuestCheckbox.checked) {
+            filePathInput.disabled = true;
+            fileExtensionContainer.style.display = "block";
+        } else {
+            filePathInput.disabled = false;
+            fileExtensionContainer.style.display = "none";
+        }
+    }
+</script>
 </body>
 </html>
