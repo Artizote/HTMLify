@@ -15,6 +15,8 @@ def randstr(n):
         s += chars[randint(0, 35)]
     return s
 
+def api_key():
+    return randstr(32)
 
 
 db = SQLAlchemy()
@@ -28,6 +30,7 @@ class users(db.Model):
     quata = db.Column(db.Integer, default=0)
     comments = db.relationship("comments", backref="users")
     notifications = db.relationship("Notification", backref="users")
+    api_key = db.Column(db.String(32), default=api_key)
     
     #stars = db.relationship("files", backref="files")
     
@@ -125,6 +128,33 @@ class files(db.Model):
             if directory not in dtree:
                 dtree.append(directory)
         return dtree
+
+    @classmethod
+    def create_as_guest(files, username, filecontent, password="", ext="txt", visibility="p", mode="s"):
+
+        if not users.query.filter_by(username=username):
+            return
+
+        path = randstr(10)
+        while files.by_path("guest/"+path+"."+ext):
+            path = randstr(10)
+
+        file = files(
+            path = "guest"+path+"."+ext,
+            owner = username,
+            title = title,
+            password = password,
+            ext = ext,
+            type = "text",
+            content = filecontent,
+            visibility = visibility,
+            mode = mode,
+        )
+        db.session.add(file)
+        db.session.commit()
+
+        return file.path
+
 
 
 class comments(db.Model):

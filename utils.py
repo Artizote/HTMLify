@@ -96,7 +96,7 @@ def pastebin_fetch(id):
     return get("https://pastebin.com/raw/" + id.replace("/", "")[-8:]).text
     
 def file_search(q, filetypes={"text"}) -> list:
-    _files = files.query.all()
+    _files = files.query.filter_by(as_guest=False).all()
     qs = q.split(" ")
     results = []
     for file in _files:

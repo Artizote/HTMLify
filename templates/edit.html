@@ -70,7 +70,7 @@
     <input type="password" id="password" name="password" value="{{ password }}">
     <label for="filemode">File Mode:</label>
     <select id="filemode" name="mode">
-        <option value="p" {% if current_mode == "p"%}selected{% endif %}>Parse</option>
+        <option value="p" {% if current_mode == "p" or not "user" in session %}selected{% endif %}>Parse</option>
         
         <option value="s" {% if current_mode == "s"%}selected{% endif %}>Show</option>
         <option value="r" {% if current_mode == "r"%}selected{% endif %}>Raw</option>
@@ -82,7 +82,7 @@
         <option value="o" {% if current_visibility == "o"%}selected{% endif %}>Once</option>
     </select>
     {% if not path %}
-    <input type="checkbox" id="asGuest" name="asguest" onchange="toggleFilePath()">
+    <input type="checkbox" id="asGuest" name="asguest" onchange="toggleFilePath()" {% if not "user" in session %}checked{% endif %}>
     <label for="asGuest">As Guest</label>
     <div id="fileExtensionContainer" style="display: none;">
         <label for="fileExtension">File Extension:</label>
@@ -98,7 +98,9 @@
     <textarea id="filecontent" name="filecontent" rows="30">{{ filecontent }}</textarea>
     <div class="button-container">
         <button>Save</button>
+        {% if "user" in session.keys() %}
         <a href="/{{ session["user"]["username"]+"/"+path }}">View</a>
+        {% endif %}
         <a href="/dashboard">Back</a>
         <!--<button id="revisions">Revisions</button>-->
     </div>
@@ -119,6 +121,9 @@
             fileExtensionContainer.style.display = "none";
         }
     }
+    {% if not "user" in session %}
+    toggleFilePath();
+    {% endif %}
 </script>
 </body>
 </html>

@@ -16,7 +16,7 @@
         <div class="file-header">
             <div class="file-title" style="overflow:auto;">{{ file.name }}</div>
             <div class="file-info">
-                Views: {{ file.views }} <!-- imlement sooon | Stars: 50 -->| Author: <a href="/{{ file.owner }}" style="text-decoration: none;color: black;">{{ file.owner }}</a>
+                Views: {{ file.views }} <!-- imlement sooon | Stars: 50 -->| Author: {% if not file.as_guest %}<a href="/{{ file.owner }}" style="text-decoration: none;color: black;">{{ file.owner }}</a>{% else %}Unknown{%endif%}
             </div>
         </div>
         <div class="file-content">{% if file.type == "text" %}{{ file.highlighted() | safe }}</div>

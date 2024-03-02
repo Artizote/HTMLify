@@ -48,7 +48,7 @@ def serve_pygments_css():
 
 @app.route("/", methods=["GET", "POST"])
 def _home():
-    _files = files.query.all()[::-1]
+    _files = files.query.filter_by(as_guest=False).all()[::-1]
     if request.method == "POST":
         session["filter-file-modes"]=request.form.getlist("file-modes")
         session["filter-file-order"]=request.form.get("filter-order", "r")
@@ -264,7 +264,6 @@ def _dp(username):
 @app.route("/edit", methods=["GET", "POST"])
 def _edit_file():
     if not session.get("user"): return render_template("login.html")
-    
     if request.method == "POST":
         path = request.args.get("filepath", "")
         if request.form.get("github"):
@@ -278,16 +277,21 @@ def _edit_file():
             file = files.query.filter_by(id=int(request.form.get("clone"))).first()
             if file and (not file.visibility != "h" or file.owner == session["user"]["username"]):
                 return render_template("edit.html", path=file.path[file.path.find("/"):], filecontent=file.content, filetype=file.type, current_mode="s", current_visibility="p")
-        
-    
+
+
     path = request.args.get("filepath", "")
-    fullpath = session["user"]["username"] + "/" + path
+    if "user" in session.keys():
+        fullpath = session["user"]["username"] + "/" + path
+    else:
+        fullpath = ""
     if file := files.query.filter_by(path=fullpath).first():
         if file.type in {"image", "video", "audio", "document", "unknown"}:
             return render_template("media-edit.html",title=file.name, path=file.path, filetype=file.type, current_mode=file.mode, current_visibility=file.visibility, password=file.password)
         content = file.content
         return render_template("edit.html",title=file.name, path=path, filecontent=content, filetype=file.ext, current_mode=file.mode, current_visibility=file.visibility, password=file.password)
-    return render_template("edit.html",title="",  path=path, filetype=None, current_mode="r", current_visibility="p", password="", extentions=get_extentions("text"))
+    # token for guest users
+    session["edit-token"] = Token.generate()
+    return render_template("edit.html",title="",  path=path, filetype=None, current_mode="s", current_visibility="p", password="", extentions=get_extentions("text"))
 
 @app.route("/file-upload")
 def _file_upload():
@@ -305,7 +309,14 @@ def _confirm_delete():
 
 @app.route("/api/")
 def _api_page():
-    return "This is API endpoint root"
+    html =  "<h1>This is API endpoint root</h1>"
+    if "user" in session:
+        user = users.get_user(session["user"]["username"])
+        html += "You API KEY is: " + user.api_key + "<br>"
+    else:
+        html += "You are not login, login to get your API KEY"
+    html += ""
+    return html
 
 @app.route("/api/embed")
 def _api_embed():
@@ -329,6 +340,56 @@ def _api_file():
     file = files.query.filter_by(id=id).first()
     if not file: return ""
     return file.content
+
+@app.route("/api/paste", methods=["POST"])
+def _api_paste():
+    api_key = request.form.get("api-key")
+    username = request.form.get("username")
+    filecontent = request.form.get("content")
+    filetitle = request.form.get("title")
+    file_extention = request.form.get("ext", "txt")
+    as_guest = request.form.get("as_guest", "false")
+    password = request.form.get("password", "")
+    mode = request.form.get("mode", "s")
+    visibility = request.form.get("visibility", "p")
+    if as_guest == "false":
+        as_guest = False
+    else:
+        as_guest = True
+    if not any([api_key, filecontent, username]):
+        return "", 403
+    user= users.query.filter_by(username=username).first()
+    if not user:
+        return "", 403
+    if user.api_key != api_key:
+        return "", 403
+    if as_guest:
+        path  = "guest/" + randstr(10) +"."+ file_extention
+        while files.by_path(path):
+            path = "guest/" + randstr(10) +"."+ file_extention
+        if not filetitle:
+            filetitle = path.split("/")[-1]
+        session["last-selected-extention"] = file_extention
+        file = files(
+            path=path,
+            name=filetitle,
+            ext=file_extention.replace(".", ""),
+            content=filecontent,
+            mode=mode,
+            visibility=visibility,
+            type="text",
+            password=password,
+            as_guest = True,
+            owner = user.username,
+        )
+        db.session.add(file)
+        db.session.commit()
+        return str({
+            "url":request.scheme+"://"+request.host+"/"+path,
+            "id": file.id,
+        })
+    # if not as guest making normal file
+
 
 @app.route("/map/")
 def _map():
@@ -524,7 +585,7 @@ def _action_upload():
 
 @app.route("/action/edit", methods=["POST"])
 def _action_edit():
-    if not session.get("user") and not request.form.get("asguest"): return redirect("/")
+    if not session.get("user"): return redirect("/")
     as_guest = request.form.get("asguest")
     file_extention = request.form.get("fileextension", ".txt")  # avaialable when as_guest
     filepath = request.form.get("path")
@@ -537,14 +598,13 @@ def _action_edit():
     visibility = request.form.get("visibility", "p")
     password = request.form.get("password", "")
     
-    if as_guest:
+    if as_guest and Token.verify(session.get("edit-token")):
         path  = "guest/" + randstr(10) +"."+ file_extention
         while files.by_path(path):
             path = "guest/" + randstr(10) +"."+ file_extention
         if not filetitle:
             filetitle = path.split("/")[-1]
         session["last-selected-extention"] = file_extention
-        print(filetitle)
         file = files(
             path=path,
             name=filetitle,
@@ -555,7 +615,7 @@ def _action_edit():
             type="text",
             password=password,
             as_guest = True,
-            owner = None,
+            owner = session["user"]["username"],
         )
         db.session.add(file)
         db.session.commit()
