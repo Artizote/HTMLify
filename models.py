@@ -155,6 +155,12 @@ class files(db.Model):
 
         return file.path
 
+    def shortlink(self):
+        return ShortLink.create("/"+self.path)
+
+    def last_revision(self):
+        return Revision.query.filter_by(file=self.id).order_by(Revision.time.desc()).first()
+
 
 
 class comments(db.Model):
@@ -240,15 +246,19 @@ class Revision(db.Model):
     content = db.Column(db.String())
     time = db.Column(db.DateTime, default=datetime.utcnow)
 
+    @classmethod
+    def get(R, id):
+        return R.query.filter_by(id=id).first()
+
     def next(self):
-        rs = Revisions.query.filter_by(file=self.file).order(Revision.time).all()
+        rs = Revision.query.filter_by(file=self.file).order_by(Revision.time).all()
         for r in rs:
             if r.time > self.time:
                 return r
 
     def prev(self):
-        rs = Revisions.query.filter_by(file=self.file).order(Revision.time).all()
-        for r in rs[::-1]:
+        rs = Revision.query.filter_by(file=self.file).order_by(Revision.time.desc()).all()
+        for r in rs:
             if r.time < self.time:
                 return r
 
@@ -263,6 +273,37 @@ class Revision(db.Model):
             content = file.content,
         )
         db.session.add(r)
-        db.commit()
+        db.session.commit()
+
+
+class ShortLink(db.Model):
+    id = db.Column(db.Integer, primary_key=True, )
+    href = db.Column(db.String)
+    short = db.Column(db.String, unique=True)
+    visits = db.Column(db.Integer, default=0)
+
+    @classmethod
+    def create(SL, href, new=False):
+        link = SL.query.filter_by(href=href).first()
+        if not new and link:
+            return link.short
+        for l in range(4, 10):
+            short = randstr(l)
+            if not SL.query.filter_by(short=short).first():
+                break
+        link = SL(href=href, short=short)
+        db.session.add(link)
+        db.session.commit()
+        return link.short
+
+    @classmethod
+    def get(SL, id: "id or short"):
+        if isinstance(id, int):
+            return SL.query.filter_by(id=id).first()
+        return SL.query.filter_by(short=id).first()
+
+    def hit(self):
+        self.visits += 1
+        db.session.commit()
 
 

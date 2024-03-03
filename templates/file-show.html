@@ -29,6 +29,7 @@
             <h3>Share this file:</h3>
             <input type="text" id="fileLink" value="{{ request.url }}" readonly>
             <button onclick="copycontent('fileLink')">Copy</button><br><br>
+            <button id="shortlinkbutton" onclick="shortlink()">Short Link</button>
         <a href="/raw/{{ file.path }}"><button>View Raw</button></a>
         <a href="/raw/{{ file.path }}" download><button>Download File<span class="file-size">({{ file.sizef() }})</span></button></a>
         <button id="embedcodebutton" onclick="embedcode()">Embed Code</button>        
@@ -78,6 +79,11 @@ function copycontent(id) {
 
 function embedcode() {
     document.getElementById("embedcodebutton").outerHTML = `<input type="text" id="embedcode" value="<iframe src='{{ request.scheme }}://{{ request.host }}/api/embed?id={{ file.id }}'></iframe>" readonly><button onclick="copycontent('embedcode')">Copy</button>`;
+}
+
+function shortlink(){
+    //document.getElemenetById("shortlinkbutton").outerHTML = ``;
+    document.getElementById("shortlinkbutton").outerHTML = `<input type="text" id="shortlink" value="{{ request.scheme + "://" + request.host + "/r/" + file.shortlink() }}" readonly><button onclick="copycontent('shortlink')">Copy</button>`;
 }
 
 function add_mention(username){

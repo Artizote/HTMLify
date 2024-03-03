@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    <title>Revisions</title>
+    {% include "stylesheet.html" %}
+    <style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+    }
+    label {
+        font-weight: bold;
+    }
+    textarea {
+        width: 100%;
+        height: 200px;
+        resize: none;
+        margin-bottom: 10px;
+    }
+    button {
+        padding: 10px 20px;
+        margin-right: 10px;
+        cursor: pointer;
+    }
+    #restoreBtn {
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+    }
+    #nextBtn, #prevBtn {
+        background-color: #008CBA;
+        color: white;
+        border: none;
+    }
+    </style>
+    </head>
+    <body>
+    <h1>Revisions</h1>
+    {% include 'search-bar.html' %}
+    {% include 'nav-bar.html' %}
+    <div>
+        {% if "msg" in request.args.keys() %}
+            <b><span class="msg">{{ request.args["msg"] }}</span></b><br>
+        {% endif %}
+        <label for="timeLabel">Time:</label>
+        <span id="timeLabel">{{ revision.time }}</span>
+    </div>
+    <div>
+    <label for="contentTextarea">Content:</label>
+    <textarea id="contentTextarea" readonly>{{ revision.content }}</textarea>
+    </div>
+    <div>
+    {% if revision.prev() %}
+    <a href="/revision/{{ revision.prev().id }}"><button id="prevBtn">Previous</button></a>
+    {% endif %}
+    {% if revision.next() %}
+    <a href="/revision/{{ revision.next().id }}"><button id="nextBtn">Next</button></a>
+    {% endif %}
+    </div>
+    <div>
+    <br>
+    <form action="/revision/restore" method="POST">
+        <input type="hidden" name="id" value="{{ revision.id }}"/>
+        <button id="restoreBtn">Restore this version</button>
+    </form>
+    </div>
+    </body>
+</html>

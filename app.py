@@ -36,7 +36,7 @@ reserved_root_paths = {
     "registration", "action", "parse",
     "render", "archive", "trending",
     "api", "pygments.css", "map",
-    "src", "guest",
+    "src", "guest", "r",
     }
 
 
@@ -223,6 +223,44 @@ def _pastebin_data(id):
     if c: return c, {"Content-type": "text/plain charset=utf-8"}
     return "", 404
 
+@app.route("/r/<shortcode>")
+def _short_redirection(shortcode):
+    link = ShortLink.get(shortcode)
+    if link:
+        link.hit()
+        return redirect(link.href, 301)
+    return "<h1>404</h1>", 404
+
+@app.route("/revision/<int:id>")
+def _revision(id):
+    if not "user" in session.keys():
+        return redirect("/login")
+    revision = Revision.get(id)
+    if not revision:
+        return redirect("/dashboard")
+    r_file_owner = files.query.filter_by(id=revision.file).first().owner
+    if r_file_owner != session["user"]["username"]:
+        return redirect("/dashboard")
+    return render_template("revision.html", revision=revision)
+
+@app.route("/revision/restore", methods=["POST"])
+def _restore_revision():
+    if not session.get("user"): return redirect("/login")
+    r_id = int(request.form.get("id", 0))
+    if not r_id:
+
+        print("not id, out")
+        return redirect("/dashboard")
+    revision = Revision.get(r_id)
+    file = files.query.filter_by(id=revision.file).first()
+    if not file or file.owner != session["user"]["username"]:
+        return redirect("/dashboard")
+    Revision.make_for(file)
+    file.content = revision.content
+    db.session.commit()
+    return redirect("/revision/"+str(r_id)+"?msg=Version Restored")
+
+
 @app.route("/search", methods=["GET", "POST"])
 def _search_page():
     if request.method == "POST":
@@ -288,7 +326,11 @@ def _edit_file():
         if file.type in {"image", "video", "audio", "document", "unknown"}:
             return render_template("media-edit.html",title=file.name, path=file.path, filetype=file.type, current_mode=file.mode, current_visibility=file.visibility, password=file.password)
         content = file.content
-        return render_template("edit.html",title=file.name, path=path, filecontent=content, filetype=file.ext, current_mode=file.mode, current_visibility=file.visibility, password=file.password)
+        if last_revision := file.last_revision():
+            last_revision_id = last_revision.id
+        else:
+            last_revision_id = 0
+        return render_template("edit.html",title=file.name, path=path, filecontent=content, filetype=file.ext, current_mode=file.mode, current_visibility=file.visibility, password=file.password, last_revision_id=last_revision_id)
     # token for guest users
     session["edit-token"] = Token.generate()
     return render_template("edit.html",title="",  path=path, filetype=None, current_mode="s", current_visibility="p", password="", extentions=get_extentions("text"))
@@ -332,7 +374,7 @@ def _api_embed():
 def _api_search():
     q = request.args.get("q", "")
     if not q: return ""
-    return file_search(q, filetypes=["text"]), 200, {"Content-type": "text/plain charset=utf-8"}
+    return file_search(q, filetypes=["text"]), 200, {"Content-type": "text/json charset=utf-8"}
 
 @app.route("/api/file")
 def _api_file():
@@ -388,8 +430,8 @@ def _api_paste():
             "url":request.scheme+"://"+request.host+"/"+path,
             "id": file.id,
         })
-    # if not as guest making normal file
-
+    # TODO if not as guest making normal file
+    return str({"error": "functnality not implimented yeat"}), 505
 
 @app.route("/map/")
 def _map():
@@ -630,6 +672,7 @@ def _action_edit():
     file = files.by_path(path)
     
     if file:
+        Revision.make_for(file)
         file.name = filetitle
         file.content = filecontent
         file.size = len(filecontent)

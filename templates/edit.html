@@ -102,6 +102,9 @@
         <a href="/{{ session["user"]["username"]+"/"+path }}">View</a>
         {% endif %}
         <a href="/dashboard">Back</a>
+        {% if last_revision_id %}
+        <a href="/revision/{{last_revision_id}}">Revisions</a>
+        {% endif %}
         <!--<button id="revisions">Revisions</button>-->
     </div>
 </form>
