@@ -1,0 +1,41 @@
+<style>
+{{ highlight_style | safe }}
+.footer {
+    width: 100%;
+    background-color: #f0f0f0;
+    color: #333;
+    padding: 10px;
+    text-align: center;
+}
+.footer a {
+    color: #333;
+    text-decoration: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    background-color: #008bff;
+}
+.footer a:hover {
+    background-color: #0056b3;
+}
+</style>
+{{ file.highlighted() | safe }}
+<div class="footer">
+    Hosted on HTMLify, 
+    <a href="{{request.scheme}}://{{request.host}}/{{file.path}}">Raw</a> 
+    <a href="#" onclick="copy()">Copy</a> 
+    {% if file.mode == "p" %}<a href="{{request.scheme}}://{{request.host}}/{{file.path}}">View Live</a>{% endif %}
+    <a href="{{request.scheme}}://{{request.host}}/{{file.path}}" download>Download</a>
+</div>
+<script>
+function copy(){
+    alert("working");
+    let code = `{{ file.content.replace("`", "\\`").replace("/", "\/") | safe }}`;
+    let i = document.createElement("input");
+    document.body.appendChild(i);
+    i.setAttribute("value", code);
+    i.select();
+    document.execCommand("copy");
+    document.body.removeChild(i);
+    alert("Code copied!!");
+}
+</script>

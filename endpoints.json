@@ -1,0 +1,93 @@
+{
+"endpoints": [
+{
+"name": "Search API",
+"route": "/api/search",
+"method": "GET",
+"responce": "json",
+"args": [
+    {
+        "arg": "q",
+        "desc": "Query sting"
+    }
+],
+"sample-output": "{\"result-count\": 1, \"results\": [{ \"comments\": \"0\", \"id\": 3486, \"mode\": \"r\", \"name\": \"filename.ext\", \"owner\": \"username\", \"path\": \"username/filename.ext\", \"snippet\": \"Snippet of file content maching the query string\", \"views\": 32, \"weight\": 4 } ]}"
+},
+{
+"name": "Embed API",
+"route": "/api/embed",
+"method": "GET",
+"responce": "iframe",
+"args": [
+    {
+        "arg": "id",
+        "desc": "File ID"
+    }
+],
+"sample-output": ""
+},
+{
+"name": "File API",
+"route": "/api/file",
+"method": "GET",
+"responce": "json",
+"args": [
+    {
+        "arg": "id",
+        "desc": "File ID"
+    }
+],
+"sample-output": "{\"type\": \"text\", \"title\": \"File's name or title\", \"url\": \"Files's url\", \"content\": \"File content if the file is a text file\", \"owner\": \"username\"}"
+},
+{
+"name": "File Creation API",
+"route": "/api/paste",
+"method": "POST",
+"responce": "json",
+"args": [
+    {
+        "arg": "api-key",
+        "desc": "Your API key"
+    },{
+        "arg": "username",
+        "desc": "Your Username"
+    },{
+        "arg": "content",
+        "desc": "File Content"
+    },{
+        "arg": "title",
+        "desc": "File title"
+    },{
+        "arg": "ext",
+        "desc": "OPTIONAL, file extention, txt by default"
+    },{
+        "arg": "as-guest",
+        "desc": "true | flase, OPTIONAL, by default: flase"
+    },{
+        "arg": "password",
+        "desc": "OPTIONAL, file password"
+    },{
+        "arg": "mode",
+        "desc": "OPTIONAL, | s | p | r |, file mode"
+    },{
+        "arg": "visibility",
+        "desc": "OPTIONAL, | p | o |, file visibility, default p"
+    }
+],
+"sample-output": "{\"url\":\"file-url\", \"id\":125}"
+},
+{
+"name": "File Deletation API",
+"route": "/api/delete",
+"method": "POST",
+"responce": "json",
+"args": [
+    {
+        "arg": "id",
+        "desc": "File ID"
+    }
+],
+"sample-output": "{\"succes\":\"file deleted\"}"
+}
+]
+}

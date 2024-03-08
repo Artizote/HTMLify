@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>API Endpoints Reference</title>
+        {% include 'stylesheet.html' %}
+        <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+
+        h1, h2, h3 {
+            color: #333;
+        }
+
+        .endpoint {
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .endpoint h3 {
+            margin-top: 0;
+        }
+
+        .endpoint p {
+            margin-bottom: 10px;
+        }
+
+        .endpoint ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .endpoint ul li {
+            margin-bottom: 5px;
+        }
+
+        pre {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            overflow-x: auto;
+        }
+        td {
+            text-align: left;
+        }
+        </style>
+    </head>
+    <body>
+        <h1>HTMLify - API Reference</h1>
+        {% include 'search-bar.html' %}
+        {% include 'nav-bar.html' %}
+    <h2>Your API Key</h2>
+
+    <button onclick="toggleApiKey()" id="toggle-button">Show API Key</button>
+    <div id="api-key" style="display:none;">
+        <p>Your API key: <code>{{ api_key | safe }}</code></p>
+    </div>
+
+    <h2>Endpoints</h2>
+    {% for endpoint in endpoints %}
+    <div class="endpoint">
+        <h3>{{ endpoint["name"] }}</h3>
+        <p><strong>Endpoint:</strong> {{ endpoint["route"] }}</p>
+        <p><strong>Method:</strong> {{ endpoint["method"] }}</p>
+
+        <h4>Arguments:</h4>
+        <table>
+            {% for arg in endpoint["args"] %}
+            <tr>
+                <td>{{ arg["arg"] }}</td>
+                <td>{{ arg["desc"] }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        {% if endpoint["sample-output"] %}
+        <h4>Sample responce:</h4>
+        <pre>
+    <code>
+{{endpoint["sample-output"]}}</code>
+        </pre>
+        {% endif %}
+    </div>
+    {% endfor %}
+
+
+<script>
+function toggleApiKey() {
+    var apiKeyDiv = document.getElementById("api-key");
+    var toggleButton = document.getElementById("toggle-button");
+    if (apiKeyDiv.style.display === "none") {
+        apiKeyDiv.style.display = "block";
+        toggleButton.innerHTML = "Hide API key";
+    } else {
+        apiKeyDiv.style.display = "none";
+        toggleButton.innerHTML = "Show API key";
+    }
+}
+</script>
+
+</body>
+</html>

@@ -10,6 +10,7 @@ from re import sub, search, findall, compile
 from requests import get
 from pygments import highlight, lexers, formatters
 from pathlib import Path
+import json
 from models import *
 from utils import *
 from config import *
@@ -351,14 +352,12 @@ def _confirm_delete():
 
 @app.route("/api/")
 def _api_page():
-    html =  "<h1>This is API endpoint root</h1>"
-    if "user" in session:
-        user = users.get_user(session["user"]["username"])
-        html += "You API KEY is: " + user.api_key + "<br>"
+    if  session.get("user"):
+        api_key = users.get_user(session["user"]["username"]).api_key
     else:
-        html += "You are not login, login to get your API KEY"
-    html += ""
-    return html
+        api_key = "Please <a href=\"/login\">Login</a> to get your API Key"
+    endpoints = json.load(open("endpoints.json"))["endpoints"]
+    return render_template("api-root.html", endpoints=endpoints, api_key=api_key)
 
 @app.route("/api/embed")
 def _api_embed():
@@ -367,30 +366,44 @@ def _api_embed():
         return ""
     file = files.query.filter_by(id=id).first()
     if not file or file.type != "text" or file.visibility != "p":
-        return ""
-    return "<style>"+formatters.HtmlFormatter().get_style_defs()+"</style>"+file.highlighted()
+        return "", 404
+    return render_template("embed.html", highlight_style=formatters.HtmlFormatter().get_style_defs(), file=file)
 
 @app.route("/api/search")
 def _api_search():
     q = request.args.get("q", "")
     if not q: return ""
-    return file_search(q, filetypes=["text"]), 200, {"Content-type": "text/json charset=utf-8"}
+    results = file_search(q, filetypes=["text"])
+    response = {
+        "result-count": len(results),
+        "results": results
+    }
+    return  json.dumps(response),200, {"Content-type": "text/json charset=utf-8"}
 
 @app.route("/api/file")
 def _api_file():
     id = int(request.args.get("id", 0))
     file = files.query.filter_by(id=id).first()
-    if not file: return ""
-    return file.content
+    if not file:
+        return json.dumps({"error":"file not found"}), 404, {"Content-type": "text/json charset=utf-8"}
+    responce = {
+        "type": file.type,
+        "title": file.name,
+        "url": request.scheme + "://" + request.host + "/" + file.path,
+        "content": file.content if file.type == "text" else None,
+        "owner": file.owner if not file.as_guest else None,
+    }
+    return json.dumps(responce), 200, {"Content-type": "text/json charset=utf-8"}
 
 @app.route("/api/paste", methods=["POST"])
+@app.route("/api/create", methods=["POST"])
 def _api_paste():
     api_key = request.form.get("api-key")
     username = request.form.get("username")
     filecontent = request.form.get("content")
     filetitle = request.form.get("title")
     file_extention = request.form.get("ext", "txt")
-    as_guest = request.form.get("as_guest", "false")
+    as_guest = request.form.get("as-guest", "false")
     password = request.form.get("password", "")
     mode = request.form.get("mode", "s")
     visibility = request.form.get("visibility", "p")
@@ -431,7 +444,28 @@ def _api_paste():
             "id": file.id,
         })
     # TODO if not as guest making normal file
-    return str({"error": "functnality not implimented yeat"}), 505
+    return json.dumps({"error": "functnality not implimented yet"}), 505, {"Content-type": "text/json charset=utf-8"}
+
+@app.route("/api/delete", methods=["POST"])
+def _api_delete():
+    api_key = request.form.get("api_key")
+    username = request.form.get("username", "")
+    id = int(request.form.get("id", 0))
+    user = users.get_user(username)
+    if not any([api_key, user]):
+        return "", 403
+    if user.api_key != api_key:
+        return ""
+    file = file.query.filter_by(id=id).first()
+    if not file:
+        return json.dumps({"error":"file not found"}), 404, {"Content-type": "text/json encoding=utf-8"}
+    if file.owner != user.username:
+        return json.dumps({"error":"not the owner of file"}), 404, {"Content-type": "text/json encoding=utf-8"}
+    db.session.delete(file)
+    db.session.commit()
+    return json.dumps({"succes":"file deleted"}), 200, {"Content-type": "text/json encoding=utf-8"}
+
+
 
 @app.route("/map/")
 def _map():
