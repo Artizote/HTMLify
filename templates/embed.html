@@ -19,12 +19,21 @@
 }
 </style>
 {{ file.highlighted() | safe }}
+{% if request.args.get("footer", "true") == "true" %}
 <div class="footer">
     Hosted on HTMLify, 
+    {% if request.args.get("raw-button", "true") == "true" %}
     <a href="{{request.scheme}}://{{request.host}}/{{file.path}}">Raw</a> 
+    {% endif %}
+    {% if request.form.get("copy-button", "true") == "true" %}
     <a href="#" onclick="copy()">Copy</a> 
+    {% endif %}
+    {% if request.args.get("live-button", "true") == "true" %}
     {% if file.mode == "p" %}<a href="{{request.scheme}}://{{request.host}}/{{file.path}}">View Live</a>{% endif %}
+    {% endif %}
+    {% if request.args.get("download-button", "true") == "true" %}
     <a href="{{request.scheme}}://{{request.host}}/{{file.path}}" download>Download</a>
+    {% endif %}
 </div>
 <script>
 function copy(){
@@ -39,3 +48,4 @@ function copy(){
     alert("Code copied!!");
 }
 </script>
+{% endif %}

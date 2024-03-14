@@ -22,6 +22,43 @@
     {
         "arg": "id",
         "desc": "File ID"
+    },
+    {
+        "arg": "footer",
+        "desc": "OPTIONAL, true | flase, by default true, show/hide snippet footer"
+    },
+    {
+        "arg": "raw-button",
+        "desc": "OPTIONAL, true | flase, by default true, show/hide snippet footer"
+    },
+    {
+        "arg": "live=button",
+        "desc": "OPTIONAL, true | flase, by default true, show/hide snippet footer"
+    },
+    {
+        "arg": "download-button",
+        "desc": "OPTIONAL, true | flase, by default true, show/hide snippet footer"
+    },
+    {
+        "arg": "copy-button",
+        "desc": "OPTIONAL, true | flase, by default true, show/hide snippet footer"
+    }v
+    {
+        "arg": "id",
+        "desc": "File ID"
+        "desc": "OPTIONAL, true | flase, by default true, show/hide snippet footer"
+    }v
+    {
+        "arg": "id",
+        "desc": "File ID"
+    }v
+    {
+        "arg": "id",
+        "desc": "File ID"
+    }v
+    {
+        "arg": "id",
+        "desc": "File ID"
     }
 ],
 "sample-output": ""
@@ -85,6 +122,14 @@
     {
         "arg": "id",
         "desc": "File ID"
+    },
+    {
+        "arg": "api-key",
+        "desc": "Your api key"
+    },
+    {
+        "arg": "username",
+        "desc": "Your username"
     }
 ],
 "sample-output": "{\"succes\":\"file deleted\"}"

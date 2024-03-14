@@ -1,11 +1,90 @@
-<!--conferm-delete.html-->
-<h1>Do you really want to delete the file {{ file.name }} at {{ file.path }}?</h1>
-{% if file.type in imagefiletypes %}
-<img src="{{ file.path }}">
-{% else %}
-<textarea style="height:80%;width:90%;margin:auto;"readonly>{% if file.type == "text" %}{{ file.content }}{% else %}{{ file.name }}{% endif %}</textarea><br>
-<form action="/action/delete" method="POST">
-<input type="hidden" name="id" value="{{ file.id }}">
-<input type="submit" value="Delete" /><a href="/dashboard">Back</a>
-</form>
-{% endif %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>File Delete Confirmation</title>
+{% include "stylesheet.html" %}
+        <style>
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f2f2f2;
+}
+.container {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+h2 {
+    color: #333;
+    margin-bottom: 20px;
+}
+.file-preview {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 20px;
+}
+.file-preview img {
+    max-width: 100%;
+    height: auto;
+}
+.file-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+.confirm-button {
+    background-color: #dc3545;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+.confirm-button:hover {
+    background-color: #c82333;
+}
+.back-button {
+    background-color: #3545dc;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+.confirm-button:hover {
+    background-color: #2333a5;
+}
+ 
+        </style>
+    </head>
+    <body>
+        <h1>HTMLify</h1>
+        {% include "search-bar.html" %}
+        {% include "nav-bar.html" %}
+        <div class="container">
+            <h2>Do you really want to dlete this file ?</h2>
+            <div class="file-title">{{ file.name }}</div>
+            <form action="/action/delete" method="POST">
+            <div class="file-preview">
+                {% if file.ext in imagefiletype %}
+                <img src="/raw/{{ file.path }}">
+                {% endif %}
+                <textarea style="width:100%;min-height:200px;" readonly>{% if file.type == "text"%}{{ file.content }}{% else %}{{ file.name }}{% endif %}</textarea>
+            </div>
+            <input type="hidden" name="id" value="{{ file.id }}">
+            <input type="hidden" name="token" value="{{ token }}">
+            <button class="confirm-button" value="Deete">Confirm Delete</button> <a href="/dashboard" class="back-button">Back</a>
+            </form>
+        </div>
+    </body>
+</html>

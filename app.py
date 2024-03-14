@@ -347,8 +347,8 @@ def _confirm_delete():
     #fullpath = session["user"]["username"] + "/" + path
     file = files.query.filter_by(path=fullpath).first()
     if not file: return redirect("/dashboard")
-    imagefiletypes = ["png", "jpg", "jpeg"]
-    return render_template("conferm-delete.html", file=file, imagefietypes=imagefiletypes)
+    imagefiletypes = get_extentions("image")
+    return render_template("conferm-delete.html", file=file, imagefietypes=imagefiletypes, token=Token.generate())
 
 @app.route("/api/")
 def _api_page():
@@ -448,7 +448,7 @@ def _api_paste():
 
 @app.route("/api/delete", methods=["POST"])
 def _api_delete():
-    api_key = request.form.get("api_key")
+    api_key = request.form.get("api-key")
     username = request.form.get("username", "")
     id = int(request.form.get("id", 0))
     user = users.get_user(username)
@@ -456,7 +456,7 @@ def _api_delete():
         return "", 403
     if user.api_key != api_key:
         return ""
-    file = file.query.filter_by(id=id).first()
+    file = files.query.filter_by(id=id).first()
     if not file:
         return json.dumps({"error":"file not found"}), 404, {"Content-type": "text/json encoding=utf-8"}
     if file.owner != user.username:
@@ -734,6 +734,8 @@ def _action_delete():
     if not session.get("user"): return redirect("/")
     id = request.form["id"]
     file = files.query.filter_by(id=id).first()
+    if not Token.verify(request.form.get("token", "")):
+        return redirect("/")
     if file is None: return redirect("/dashboard")
     if session["user"]["username"] != file.owner:
         return redirect("/dashboard")

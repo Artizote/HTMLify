@@ -67,7 +67,7 @@
     <label for="filename">File Name:</label>
     <input type="text" id="filename" name="title" value="{{ title }}">
     <label for="password">Password:</label>
-    <input type="password" id="password" name="password" value="{{ password }}">
+    <input type="password" id="password" name="password" value="{{ password }}" placeholder="Optional, fille if you want to protect your file" style="min-width:50%">
     <label for="filemode">File Mode:</label>
     <select id="filemode" name="mode">
         <option value="p" {% if current_mode == "p" or not "user" in session %}selected{% endif %}>Parse</option>
