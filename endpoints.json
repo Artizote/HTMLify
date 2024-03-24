@@ -29,36 +29,19 @@
     },
     {
         "arg": "raw-button",
-        "desc": "OPTIONAL, true | flase, by default true, show/hide snippet footer"
+        "desc": "OPTIONAL, true | flase, by default true, show/hide snippet Raw Button"
     },
     {
         "arg": "live=button",
-        "desc": "OPTIONAL, true | flase, by default true, show/hide snippet footer"
+        "desc": "OPTIONAL, true | flase, by default true, show/hide snippet Live Button"
     },
     {
         "arg": "download-button",
-        "desc": "OPTIONAL, true | flase, by default true, show/hide snippet footer"
+        "desc": "OPTIONAL, true | flase, by default true, show/hide snippet Download Button"
     },
     {
         "arg": "copy-button",
-        "desc": "OPTIONAL, true | flase, by default true, show/hide snippet footer"
-    }v
-    {
-        "arg": "id",
-        "desc": "File ID"
-        "desc": "OPTIONAL, true | flase, by default true, show/hide snippet footer"
-    }v
-    {
-        "arg": "id",
-        "desc": "File ID"
-    }v
-    {
-        "arg": "id",
-        "desc": "File ID"
-    }v
-    {
-        "arg": "id",
-        "desc": "File ID"
+        "desc": "OPTIONAL, true | flase, by default true, show/hide snippet Copy Button"
     }
 ],
 "sample-output": ""
@@ -112,6 +95,31 @@
     }
 ],
 "sample-output": "{\"url\":\"file-url\", \"id\":125}"
+},
+{
+"name": "File Edit API",
+"route": "/api/edit",
+"method": "POST",
+"responce": "json",
+"args": [
+    {
+        "arg": "id",
+        "desc": "File ID"
+    },
+    {
+        "arg": "username",
+        "desc": "Your Username"
+    },
+    {
+        "arg": "api-key",
+        "desc": "Your API Key"
+    },
+    {
+        "arg": "content",
+        "desc": "New Content for the file"
+    }
+],
+"sample-output": "{\"succes\":\"8 bytes written\"}"
 },
 {
 "name": "File Deletation API",

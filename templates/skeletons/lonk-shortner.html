@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Link Shortner</title>
+</head>
+<body>
+    <form action="" method="POST">
+        <input type="text" name="url" value="{% if url %}{{ url }}{% endif %}">
+        <input type="submit">
+    </form>
+    {% if shorted %}
+    <input type="text" value="{{ request.scheme }}://{{ request.host }}/r/{{ shorted }}">
+    {% endif%}
+</body>
+</html>

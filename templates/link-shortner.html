@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Link Shortener</title>
+    {% include "stylesheet.html" %}
+    {% include "extras.html" %}
+<style>
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f5f5f5;
+}
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin-top: 50px;
+}
+h1 {
+    text-align: center;
+    color: #333;
+}
+#shortenForm > input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+#shortenForm input[type="submit"] {
+    width: 100%;
+    padding: 10px;
+    background-color: #007bff;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    border-radius: 4px;
+}
+input[type="submit"]:hover {
+    background-color: #0056b3;
+}
+.short-link {
+    text-align: center;
+    margin-top: 20px;
+}
+.short-link input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #007bff;
+    border-radius: 4px;
+    font-size: 18px;
+    text-align: center;
+}
+</style>
+</head>
+<body>
+    <h1>HTMLify</h1>
+    {% include "search-bar.html" %}
+    {% include "nav-bar.html" %}
+<div class="container">
+<h1>Link Shortener</h1>
+<form id="shortenForm" action="" method="POST">
+    <input type="text" id="originalUrl" placeholder="Enter your long URL here" value="{% if url %}{{ url }}{% endif %}" name="url" required>
+    <input type="submit" value="Shorten URL">
+</form>
+{% if shorted %}
+<div class="short-link" id="shortLinkArea">
+<h3>Shortened URL:</h3>
+<input type="text" id="shortUrl" value="{{ request.scheme }}://{{ request.host }}/r/{{ shorted }}" readonly>
+</div>
+{% endif %}
+</div>
+
+</body>
+</html>

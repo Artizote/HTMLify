@@ -224,6 +224,20 @@ def _pastebin_data(id):
     if c: return c, {"Content-type": "text/plain charset=utf-8"}
     return "", 404
 
+@app.route("/r", methods=["GET", "POST"])
+def _link_shortner():
+    print("in link shorten")
+    shorted = url = None
+    if request.method == "POST":
+        url = request.form.get("url")
+        if not url:
+            print("no url")
+            flash("Please Enter URL")
+            return render_template("link-shortner.html")
+        shorted = ShortLink.create(url)
+    print(shorted, url)
+    return render_template("link-shortner.html", shorted=shorted, url=url)
+
 @app.route("/r/<shortcode>")
 def _short_redirection(shortcode):
     link = ShortLink.get(shortcode)
@@ -448,7 +462,7 @@ def _api_paste():
 
 @app.route("/api/delete", methods=["POST"])
 def _api_delete():
-    api_key = request.form.get("api-key")
+    api_key = request.form.get("api-key", "")
     username = request.form.get("username", "")
     id = int(request.form.get("id", 0))
     user = users.get_user(username)
@@ -465,7 +479,29 @@ def _api_delete():
     db.session.commit()
     return json.dumps({"succes":"file deleted"}), 200, {"Content-type": "text/json encoding=utf-8"}
 
+@app.route("/api/edit", methods=["POST"])
+def _api_edit():
+    username = request.form.get("username", "")
+    api_key = request.form.get("api-key", "")
+    id = int(request.form.get("id", "0"))
+    new_content = request.form.get("content", "")
 
+    if not all([username, api_key, id, new_content]):
+        return json.dumps({"error":"Required arguments not provided"}), 200, {"Content-type": "text/json encoding=utf-8"}
+
+    user = users.get_user(username)
+    if not user or user.api_key != api_key:
+        return json.dumps({"error":"Invelid Credidentals"}), 200, {"Content-type": "text/json encoding=utf-8"}
+
+    file = files.query.filter_by(id=id).first()
+
+    if not file or file.owner != user.username:
+        return json.dumps({"error":"File Not Found"}), 200, {"Content-type": "text/json encoding=utf-8"}
+
+    file.content = new_content
+    db.session.commit()
+
+    return json.dumps({"success": str(len(new_content))+" bytes written"}), 200, {"Content-type": "text/json encoding=utf-8"}
 
 @app.route("/map/")
 def _map():
