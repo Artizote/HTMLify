@@ -28,7 +28,7 @@ VIDEO_FILE_EXTENTIONS = [
 ]
 
 TEXT_FILE_EXTENTIONS = [
-    'abap', 'adb', 'adoc', 'asm', "b", 'bat', 'bf', "c",
+    'abap', 'adb', 'adoc', 'asm', "b", 'bat', "befunge", 'bf', "c",
     'cbl', 'cljs', 'cmd', 'cobra', 'coffee', 'cpp',
     'cpy', 'cs', 'css', 'dart', 'dmd',
     'dockerfile', 'drt', 'elm', 'exs', 'f90',

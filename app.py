@@ -10,9 +10,11 @@ from re import sub, search, findall, compile
 from requests import get
 from pygments import highlight, lexers, formatters
 from pathlib import Path
+from threading import Thread
 import json
 from models import *
 from utils import *
+from search_engine import *
 from config import *
 
 
@@ -97,7 +99,7 @@ def _usersites(username):
             })
         except:
             pass
-    return render_template("profile.html", user=user, latest_comments=latest_comments)
+    return render_template("profile.html", user=user, latest_comments=latest_comments, q="user@:"+user.username+" ")
 
 @app.route("/<username>/<path:path>", methods=["GET", "POST"])
 def _userfiles(username, path):
@@ -293,7 +295,16 @@ def _search_page():
         types = {"text", "image", "audio", "video", "document", "unknown"}
     
     if not q: return render_template("search-result.html", results=[])
-    results = file_search(q, types)
+    filterd_user = None
+    if q.startswith("user:@"):
+        filterd_user = q.split()[0].split("@")[-1]
+        q = q.replace("user:@"+filterd_user+" ", "")
+    #results = file_search(q, types)
+    results = query(q)
+
+    if filterd_user:
+        results = list(filter(lambda r: r["owner"] == filterd_user, results))
+        q = "user:@" + filterd_user + " "+q
 
     results = list(filter(lambda file:file["mode"] in filterd_modes, results))
     return render_template("search-result.html", results=results, page=page, q=q)
@@ -876,4 +887,5 @@ def _action_git_clone():
     return redirect("/dashboard")
 
 if __name__ == "__main__":
+    Thread(target=search_indexing_daemon, args=(TermFrequency, app, files), daemon=True).start()
     app.run(debug=True)
