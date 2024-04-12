@@ -2,6 +2,12 @@ from peewee import *
 from models import files
 from re import findall
 from time import sleep
+from hashlib import sha1
+
+def hash(s):
+    if isinstance(s,str):
+       return sha1(s.encode()).hexdigest()
+    return sha1(s).hexdigest()
 
 search_index_database = SqliteDatabase("instance/search.db")
 
@@ -30,13 +36,22 @@ class TermFrequency(Model):
         if not file:
             return False
 
+        if not ContentHashes.is_changed(id):
+            return True
+
         text = (
             file.content if file.type == "text" else "" +
             file.name +
             file.path[file.path.find("/")].replace("/", " ") +
             "".join([comment.content for comment in file.comments])
-        )
-        words = findall(r"\b\w+\b", text)
+        ).lower()
+
+        # Removing removed words
+        for term in TermFrequency.select().where(TermFrequency.file == id):
+            if not term.term in text[:1024*1024]:
+                term.delete_instance()
+
+        words = findall(r"\b\w+\b", text[:1024*1024])
         for word in words:
             tf = TermFrequency.select().where(
                 TermFrequency.term == word).where(
@@ -62,6 +77,48 @@ class TermFrequency(Model):
         if not file:
             return 0
         return file.views
+
+class ContentHashes(Model):
+    class Meta:
+        database = search_index_database
+
+    id = AutoField()
+    hash = CharField()
+
+    @classmethod
+    def is_changed(CH, file):
+        if isinstance(file, int):
+            file = files.query.filter_by(id=file).first()
+        if not file: return None
+
+        OCH = CH.get_or_none(file.id)
+        if not OCH:
+            CH.feed(file)
+            return True
+        return OCH.hash != hash(file.content)
+
+    @classmethod
+    def feed(CH, file):
+        if isinstance(file, int):
+            file = files.query.filter_by(id=file).first()
+        if not file: return None
+
+        OCH = CH.get_or_none(file.id)
+
+        if not OCH:
+            CH.create(
+                id =file.id,
+                hash = hash(file.content)
+            )
+            return True
+
+        content_hash = hash(file.content)
+
+        if content_hash != OCH.hash:
+            OCH.hash = content_hash
+            OCH.save()
+
+
 
 
 def query(term: str) -> list[dict]:
@@ -144,4 +201,4 @@ def search_indexing_daemon(TermFrequency, app, files):
             for id in range(1, file_count.id+1):
                 TermFrequency.feed(id)
 
-search_index_database.create_tables([TermFrequency])
+search_index_database.create_tables([TermFrequency, ContentHashes])

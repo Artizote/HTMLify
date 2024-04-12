@@ -99,7 +99,7 @@ def _usersites(username):
             })
         except:
             pass
-    return render_template("profile.html", user=user, latest_comments=latest_comments, q="user@:"+user.username+" ")
+    return render_template("profile.html", user=user, latest_comments=latest_comments, q="user:@"+user.username+" ")
 
 @app.route("/<username>/<path:path>", methods=["GET", "POST"])
 def _userfiles(username, path):
