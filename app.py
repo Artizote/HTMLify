@@ -1,7 +1,6 @@
 #HTMLify
 
 from flask import *
-from flask_migrate import *
 from random import randint, shuffle
 from hashlib import md5
 from os import remove, system, path
@@ -28,9 +27,7 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
 
 db.init_app(app)
 
-# flask migrate
 
-migrate = Migrate(app, db)
 
 
 reserved_root_paths = {
@@ -230,22 +227,23 @@ def _pastebin_data(id):
 def _link_shortner():
     print("in link shorten")
     shorted = url = None
+    hits = None
     if request.method == "POST":
         url = request.form.get("url")
         if not url:
-            print("no url")
             flash("Please Enter URL")
             return render_template("link-shortner.html")
         shorted = ShortLink.create(url)
+        hits = ShortLink.query.filter_by(href=url).first().visits
     print(shorted, url)
-    return render_template("link-shortner.html", shorted=shorted, url=url)
+    return render_template("link-shortner.html", shorted=shorted, hits=hits, url=url)
 
 @app.route("/r/<shortcode>")
 def _short_redirection(shortcode):
     link = ShortLink.get(shortcode)
     if link:
         link.hit()
-        return redirect(link.href, 301)
+        return redirect(link.href, 302)
     return "<h1>404</h1>", 404
 
 @app.route("/revision/<int:id>")
@@ -513,6 +511,30 @@ def _api_edit():
     db.session.commit()
 
     return json.dumps({"success": str(len(new_content))+" bytes written"}), 200, {"Content-type": "text/json encoding=utf-8"}
+
+@app.route("/api/shortlink")
+def _api_shortlink():
+    shortlink = None
+    if id := request.args.get("id"):
+        shortlink = ShortLink.query.filter_by(id=id).first()
+        if not shortlink:
+            return json.dumps({"error":"ShorLink Not Found"}), 200, {"Content-type": "text/json encoding=utf-8"}
+    if url := request.args.get("url"):
+        shortlink = ShortLink.get(ShortLink.create(url))
+    if shortcode := request.args.get("shortcode"):
+        shortlink = ShortLink.get(shortcode)
+    if not shortlink:
+            return json.dumps({"error":"Invalid Arguments"}), 200, {"Content-type": "text/json encoding=utf-8"}
+    res = {
+        "id": shortlink.id,
+        "href": shortlink.href,
+        "hits": shortlink.visits,
+        "shortcode": shortlink.short,
+        "url": request.scheme + "://" + request.host+ "/r/" + shortlink.short,
+    }
+    return json.dumps(res), 200, {"Content-type": "text/json encoding=utf-8"}
+
+
 
 @app.route("/map/")
 def _map():

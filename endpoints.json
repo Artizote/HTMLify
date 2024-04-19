@@ -141,6 +141,28 @@
     }
 ],
 "sample-output": "{\"succes\":\"file deleted\"}"
+},{
+"name": "ShortLink API",
+"route": "/api/shortlink",
+"method": "GET",
+"responce": "json",
+"args": [
+    {
+        "arg": "id",
+        "desc": "ShortCode by ID"
+    },
+    {
+        "arg": "url",
+        "desc": "ShortCode URL, new shortlink will created if not found"
+    },
+    {
+        "arg": "shortcode",
+        "desc": "Get ShortLink by shortcode"
+    }
+],
+"sample-output": "{\"id\": 2, \"href\": \"/redirection/address\", \"hits\": 4, \"shortcode\": \"abcd\", \"url\": \"http://127.0.0.1:5000/r/abcd\"}"
+
 }
+
 ]
 }

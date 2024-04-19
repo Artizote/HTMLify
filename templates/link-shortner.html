@@ -74,6 +74,8 @@ input[type="submit"]:hover {
 <h3>Shortened URL:</h3>
 <input type="text" id="shortUrl" value="{{ request.scheme }}://{{ request.host }}/r/{{ shorted }}" readonly>
 </div>
+<br>
+<h3>Total hits: {{ hits }}</h3>
 {% endif %}
 </div>
 

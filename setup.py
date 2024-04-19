@@ -6,7 +6,7 @@ try:
     from app import app, db
     with app.app_context():
         db.create_all()
-    i = input("all things set, run the app with \"flask run\", \"python app.py\" or python3 run press enter to exit , r for run the app")
+    i = input("all things set, run the app with \"flask run\", \"python app.py\" or python3 run press enter to exit , r for run the app\n")
     if i == "r":
         system("flask run")
 except:
@@ -18,6 +18,7 @@ except:
     print("packags installed\nmaking required directories")
     system("mkdir media")
     system("mkdir media/dp")
+    system("mkdir instance")
 #    print("genrating a secue key..")
 #    key = ""
 #    for _ in range(256):

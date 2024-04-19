@@ -1,5 +1,6 @@
 from peewee import *
 from models import files
+from config import *
 from re import findall
 from time import sleep
 from hashlib import sha1
@@ -33,7 +34,7 @@ class TermFrequency(Model):
     @staticmethod
     def feed(id): # Run Withing Flask App context
         file = files.query.filter_by(id=id).first()
-        if not file:
+        if not file or file.type != "text" or file.as_guest:
             return False
 
         if not ContentHashes.is_changed(id):
@@ -196,8 +197,10 @@ def file(id):
 def search_indexing_daemon(TermFrequency, app, files):
     with app.app_context():
         while True:
-            sleep(5)
+            sleep(SEARCH_INDEXING_TIME_DELAY)
             file_count = files.query.order_by(files.id.desc()).first()
+            if not file_count:
+                continue
             for id in range(1, file_count.id+1):
                 TermFrequency.feed(id)
 
