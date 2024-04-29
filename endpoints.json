@@ -119,7 +119,7 @@
         "desc": "New Content for the file"
     }
 ],
-"sample-output": "{\"succes\":\"8 bytes written\"}"
+"sample-output": "{\"success\":\"8 bytes written\"}"
 },
 {
 "name": "File Deletation API",
@@ -140,7 +140,7 @@
         "desc": "Your username"
     }
 ],
-"sample-output": "{\"succes\":\"file deleted\"}"
+"sample-output": "{\"success\":\"file deleted\"}"
 },{
 "name": "ShortLink API",
 "route": "/api/shortlink",
@@ -163,6 +163,13 @@
 "sample-output": "{\"id\": 2, \"href\": \"/redirection/address\", \"hits\": 4, \"shortcode\": \"abcd\", \"url\": \"http://127.0.0.1:5000/r/abcd\"}"
 
 }
-
+],
+"status-codes" : [
+    0: "OK",
+    1: "MISSING PARAMETERS",
+    2: "INVALID PARAMETERS",
+    3: "UNAUTORISED OPRATION",
+    4: "INVELID REQUEST METHOD",
+    5: "API RATE LIMIT EXCEED"
 ]
 }

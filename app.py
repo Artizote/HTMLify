@@ -37,6 +37,7 @@ reserved_root_paths = {
     "render", "archive", "trending",
     "api", "pygments.css", "map",
     "src", "guest", "r",
+    "revision", "frames", "robots.txt",
     }
 
 
@@ -79,6 +80,7 @@ def _dashboard():
             if current_path in current_paths:
                 continue
             current_paths.append(current_path)
+    session["user"]["notifications"] = Notification.query.filter_by(user=user).filter_by(viewed=0).count()
     return render_template("dashboard.html", filepaths=current_paths, user=user, dir=request.args.get("dir", ""))
 
 @app.route("/<username>")
@@ -225,7 +227,6 @@ def _pastebin_data(id):
 
 @app.route("/r", methods=["GET", "POST"])
 def _link_shortner():
-    print("in link shorten")
     shorted = url = None
     hits = None
     if request.method == "POST":
@@ -235,7 +236,6 @@ def _link_shortner():
             return render_template("link-shortner.html")
         shorted = ShortLink.create(url)
         hits = ShortLink.query.filter_by(href=url).first().visits
-    print(shorted, url)
     return render_template("link-shortner.html", shorted=shorted, hits=hits, url=url)
 
 @app.route("/r/<shortcode>")
@@ -243,6 +243,11 @@ def _short_redirection(shortcode):
     link = ShortLink.get(shortcode)
     if link:
         link.hit()
+        while link.href.startswith("/r/"):
+            l = ShortLink.query.filter_by(shortcode = link.href[3:])
+            if not l:
+                break
+            link = l
         return redirect(link.href, 302)
     return "<h1>404</h1>", 404
 
@@ -264,7 +269,6 @@ def _restore_revision():
     r_id = int(request.form.get("id", 0))
     if not r_id:
 
-        print("not id, out")
         return redirect("/dashboard")
     revision = Revision.get(r_id)
     file = files.query.filter_by(id=revision.file).first()
@@ -425,22 +429,26 @@ def _api_paste():
     username = request.form.get("username")
     filecontent = request.form.get("content")
     filetitle = request.form.get("title")
+    path = request.form.get("path")
     file_extention = request.form.get("ext", "txt")
-    as_guest = request.form.get("as-guest", "false")
+    as_guest = request.form.get("as-guest", "False")
     password = request.form.get("password", "")
     mode = request.form.get("mode", "s")
     visibility = request.form.get("visibility", "p")
-    if as_guest == "false":
+
+    if as_guest == "False":
         as_guest = False
     else:
         as_guest = True
-    if not any([api_key, filecontent, username]):
-        return "", 403
+
+    if not all([api_key, filecontent, username]):
+        print(api_key, filecontent, username)
+        return json.dumps({"error":"Required arguments not provoded"}), 403
     user= users.query.filter_by(username=username).first()
     if not user:
-        return "", 403
+        return json.dumps({"error":"User not find with given username"}), 403
     if user.api_key != api_key:
-        return "", 403
+        return json.dumps({"error":"API key did not match"}), 403
     if as_guest:
         path  = "guest/" + randstr(10) +"."+ file_extention
         while files.by_path(path):
@@ -453,6 +461,7 @@ def _api_paste():
             name=filetitle,
             ext=file_extention.replace(".", ""),
             content=filecontent,
+            size=len(filecontent),
             mode=mode,
             visibility=visibility,
             type="text",
@@ -462,12 +471,50 @@ def _api_paste():
         )
         db.session.add(file)
         db.session.commit()
-        return str({
+        return json.dumps({
             "url":request.scheme+"://"+request.host+"/"+path,
             "id": file.id,
         })
-    # TODO if not as guest making normal file
-    return json.dumps({"error": "functnality not implimented yet"}), 505, {"Content-type": "text/json charset=utf-8"}
+    else:
+        if not path:
+            return json.dumps({
+                "error": "path is not provided",
+            }), 505, {"Content-type": "text/json charset=utf-8"}
+        if path[0] == "/":
+            path = path[1:]
+        path = username + "/" + path
+        if not filetitle:
+            filetitle = path.split("/")[-1]
+
+        if file := files.query.filter_by(path=path).first():
+            print(file.id)
+            print(file.path)
+            return (json.dumps({"error": "File already exists at spasified path,\
+                    use /api/edit if you want to edit content"}), 400,
+                    {"Content-type": "text/json charset=utf-8"})
+
+
+        file = files(
+            path=path,
+            name=filetitle,
+            ext=file_extention.replace(".", ""),
+            content=filecontent,
+            size=len(filecontent),
+            mode=mode,
+            visibility=visibility,
+            type="text",
+            password=password,
+            owner=user.username,
+        )
+        db.session.add(file)
+        db.session.commit()
+
+        return json.dumps({
+            "url":request.scheme+"://"+request.host+"/"+path,
+            "id": file.id,
+        }), 201, {"Content-type": "text/json charset=utf-8"}
+
+    return json.dumps({"error": "chek your arguments"}), 505, {"Content-type": "text/json charset=utf-8"}
 
 @app.route("/api/delete", methods=["POST"])
 def _api_delete():
@@ -475,7 +522,7 @@ def _api_delete():
     username = request.form.get("username", "")
     id = int(request.form.get("id", 0))
     user = users.get_user(username)
-    if not any([api_key, user]):
+    if not all([api_key, user]):
         return "", 403
     if user.api_key != api_key:
         return ""
@@ -534,7 +581,15 @@ def _api_shortlink():
     }
     return json.dumps(res), 200, {"Content-type": "text/json encoding=utf-8"}
 
-
+@app.route("/robots.txt")
+def _robots_txt():
+    return ("""
+User-agent: *
+Disallow: /r/
+Disallow: /raw/
+Disallow: /pastebin/
+Sitemap: """ + request.scheme + "://" + request.host+ "/map/xml",
+200, {"Content-type": "text/text"})
 
 @app.route("/map/")
 def _map():
@@ -548,7 +603,7 @@ def _map_xml():
     for user in users.query.all():
         xml += "<url>\n    <loc>" + site +"/"+ user.username + "</loc>\n</url>\n"
     for file in files.query.all():
-        xml += "<url>\n    <loc>" + site +"/"+ file.path + "</loc>\n</url>\n"
+        xml += "<url>\n    <loc>" + site +"/"+ escape_html(file.path) + "</loc>\n</url>\n"
     xml += "</urlset>"
     return Response(xml, mimetype="text/xml")
 
@@ -569,6 +624,7 @@ def _notifications_page():
     ns = user.notifications
     notifications = Notification.query.filter_by(user=user.username).filter_by(viewed=0).count()
     session["user"]["notifications"] = notifications
+    Notification.purge(user.username)
     return render_template("notifications.html", notifications = ns)
 
 
@@ -579,6 +635,7 @@ def _notifications_redirect(id):
     if not n: return redirect("/notifications")
     if not n.viewed: session["user"]["notifications"] -= 1
     n.viewed = 1
+    n.view_time = datetime.utcnow()
     db.session.commit()
     
     return redirect(n.href)

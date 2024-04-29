@@ -1,6 +1,6 @@
 from flask import request
 from flask_sqlalchemy import *
-from datetime import datetime
+from datetime import datetime, timedelta
 from pygments import highlight, lexers, formatters
 from random import randint
 #from utils import *
@@ -239,6 +239,15 @@ class Notification(db.Model):
     @classmethod
     def by_id(ns, id):
         return ns.query.filter_by(id=id).first()
+
+    @classmethod
+    def purge(ns, username):
+        expiry_period = timedelta(days=28)
+        for n in ns.query.filter_by(user=username).filter_by(viewed=1).all():
+            if not n.view_time: continue
+            if expiry_period > datetime.utcnow() - n.view_time:
+                db.session.delete(n)
+        db.session.commit()
 
 class Revision(db.Model):
     id = db.Column(db.Integer, primary_key=True)

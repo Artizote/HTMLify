@@ -85,7 +85,7 @@ def randstr(n):
 
 def github_fetch(user, repo, branch, file):
     # uninmplimented function
-    return "functnality not available yet"
+    return NotImplemented
     #doing fetching with git clone command
     system("git clone https://github.com/" + user + "/" + repo + ".git media")
     with open("media/" + repo + "/" + file, 'r') as f:
