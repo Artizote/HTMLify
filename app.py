@@ -327,6 +327,10 @@ def _dp(username):
     with open("media/dp/" + username + ".jpg", "wb") as f: f.write(dp)
     return send_from_directory("media/dp/",  username + ".jpg")
 
+@app.route("/media/svg/<filename>")
+def _svg(filename):
+    return send_from_directory("media/svg", filename)
+
 @app.route("/edit", methods=["GET", "POST"])
 def _edit_file():
     if not session.get("user"): return render_template("login.html")
@@ -377,6 +381,41 @@ def _confirm_delete():
     imagefiletypes = get_extentions("image")
     return render_template("conferm-delete.html", file=file, imagefietypes=imagefiletypes, token=Token.generate())
 
+@app.route("/frames")
+def _frames():
+    return render_template("frames.html")
+
+@app.route("/frames/feed")
+def _frame_feed():
+    _files = list(filter(lambda f:f.ext in {"html", "htm"},
+                    files.query
+                  .filter_by(mode="p")
+                  .filter_by(password="")
+                  .filter_by(as_guest=False)
+                  .order_by(files.views).all()))
+    l = len(_files)
+    shuffle(_files)
+    feed = []
+    server = request.scheme + "://" + request.host
+    for file in _files[:128]:
+        feed.append({
+            "id": file.id,
+            "url": "/" + file.path,
+            "owner": file.owner,
+            "title": file.name,
+            "shortlink": server + "/r/" + file.shortlink(),
+            "viewcount": file.views,
+            "commentcount": len(file.comments),
+        })
+    return json.dumps({"feed": feed, "error": (len(feed)==0)}), 200, {"Content-type": "text/json"}
+
+@app.route("/frames/default")
+def _frames_default():
+    return """<style>*{font-family:font-family: 'Roboto', Arial, sans-serif;}
+</style><center><h1>Welcome to HTMLify Frames</h1>
+<h1>Use Up & Down button to watch Next/Previus Frame</h1>
+<h1>Enjoy</h1></center>"""
+
 @app.route("/api/")
 def _api_page():
     if  session.get("user"):
@@ -400,7 +439,7 @@ def _api_embed():
 def _api_search():
     q = request.args.get("q", "")
     if not q: return ""
-    results = file_search(q, filetypes=["text"])
+    results = query(q)
     response = {
         "result-count": len(results),
         "results": results
@@ -418,6 +457,7 @@ def _api_file():
         "title": file.name,
         "url": request.scheme + "://" + request.host + "/" + file.path,
         "content": file.content if file.type == "text" else None,
+        "size": file.size,
         "owner": file.owner if not file.as_guest else None,
     }
     return json.dumps(responce), 200, {"Content-type": "text/json charset=utf-8"}
@@ -426,7 +466,7 @@ def _api_file():
 @app.route("/api/create", methods=["POST"])
 def _api_paste():
     api_key = request.form.get("api-key")
-    username = request.form.get("username")
+    username = request.form.get("username").lower()
     filecontent = request.form.get("content")
     filetitle = request.form.get("title")
     path = request.form.get("path")
@@ -519,7 +559,7 @@ def _api_paste():
 @app.route("/api/delete", methods=["POST"])
 def _api_delete():
     api_key = request.form.get("api-key", "")
-    username = request.form.get("username", "")
+    username = request.form.get("username", "").lower()
     id = int(request.form.get("id", 0))
     user = users.get_user(username)
     if not all([api_key, user]):
@@ -537,7 +577,7 @@ def _api_delete():
 
 @app.route("/api/edit", methods=["POST"])
 def _api_edit():
-    username = request.form.get("username", "")
+    username = request.form.get("username", "").lower()
     api_key = request.form.get("api-key", "")
     id = int(request.form.get("id", "0"))
     new_content = request.form.get("content", "")
@@ -555,6 +595,7 @@ def _api_edit():
         return json.dumps({"error":"File Not Found"}), 200, {"Content-type": "text/json encoding=utf-8"}
 
     file.content = new_content
+    file.size = len(new_content)
     db.session.commit()
 
     return json.dumps({"success": str(len(new_content))+" bytes written"}), 200, {"Content-type": "text/json encoding=utf-8"}
@@ -878,10 +919,13 @@ def _action_delete():
                  remove(file.content[1:])
              except:
                  pass
+    revisions = Revision.query.filter_by(file=file.id).all()
     db.session.delete(file)
+    for revision in revisions:
+        db.session.delete(revision)
     db.session.commit()
     return redirect("/dashboard")
-            
+
 @app.route("/action/edit-media", methods=["POST"])
 def _action_edit_media():
     if not session["user"]["username"]: return redirect("/")

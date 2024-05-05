@@ -244,7 +244,9 @@ class Notification(db.Model):
     def purge(ns, username):
         expiry_period = timedelta(days=28)
         for n in ns.query.filter_by(user=username).filter_by(viewed=1).all():
-            if not n.view_time: continue
+            if not n.view_time:
+                db.session.delete(n)
+                continue
             if expiry_period > datetime.utcnow() - n.view_time:
                 db.session.delete(n)
         db.session.commit()

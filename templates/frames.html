@@ -1,0 +1,161 @@
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>HTMLify Frames</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    {% include "extras.html" %}
+<style>
+main {
+    width: 100vw;
+    height: 100vh;
+}
+table {
+    width: 100vw;
+    height: 100vh;
+}
+#row1 {
+    width: 90vw;
+}
+#row2 {
+    height: 10vh;
+}
+#col2 {
+    width: 10vw;
+    min-width: 1.5cm;
+}
+#frame {
+    width: 100%;
+    height: 100%;
+}
+img {
+    display: block;
+    margin: auto;
+    margin-bottom: 5px;
+    width: 50px;
+    min-width: 1cm;
+    height: auto;
+}
+#user-dp {
+    border-radius: 50%;
+    margin-bottom: 2em;
+}
+#up-icon {
+    transform: rotate(90deg);
+    margin-top: 2em;
+}
+#down-icon {
+    transform: rotate(-90deg);
+    margin-bottom: 2em;
+}
+#title, #stats {
+    font-family: 'Roboto', Arial, sans-serif;
+}
+#title {
+    margin-top: 2px;
+    font-size: 28px;
+}
+</style>
+</head>
+<body>
+    <main>
+        <table>
+            <tr id="row1">
+                <td id="col1"><iframe src="/frames/default" id="frame" name="frame"></iframe></td>
+                <td id="col2">
+                    <a href="" id="profile-link" target="_blank"><img src="" id="user-dp" alt="user's profile pictue"></a>
+                    <img src="/media/svg/comment-icon.svg" id="comments-icon" onclick="showcomments()" alt="share">
+                    <img src="/media/svg/left-arrow.svg" id="up-icon" onclick="frameup()" alt="up">
+                    <img src="/media/svg/left-arrow.svg" id="down-icon" onclick="framedown()" alt="down">
+                    <img src="/media/svg/share-icon.svg" id="share-icon" onclick="share()" alt="share">
+                </td>
+            </tr>
+            <tr id="row2">
+                <td>
+                    <div id="meta">
+                        <p id="title"></p>
+                        <p id="stats">Views: <span id="view-count"></span> Comments:<span id="comment-count"></span></p>
+                    </div>
+                </td>
+                <td><a href="/"><img src="/media/svg/thin-arrow-left.svg" alt="back button"></a></td>
+            </tr>
+        </table>
+    </main>
+<script>
+const frame = document.getElementById("frame");
+var frames = [];
+var current = 0;
+
+function setframe(){
+    currentframe = frames[current];
+    //alert(currentframe.id);
+    if (currentframe==undefined)
+        currentframe = frames[current+1];
+    frame.setAttribute("src", currentframe.url);
+    document.getElementById("user-dp").setAttribute("src", "/media/dp/"+currentframe.owner+".jpg");
+    document.getElementById("profile-link").setAttribute("href", "/"+currentframe.owner);
+    document.getElementById("title").textContent = currentframe.title;
+    document.getElementById("view-count").innerHTML = currentframe.viewcount;
+    document.getElementById("comment-count").innerHTML = currentframe.commentcount;
+}
+
+function showcomments(){
+    currentframe = frames[current];
+    frame.setAttribute("src", "/src/"+currentframe.url+"#comment-text-field");
+}
+
+function frameup(){
+    if (current > 0){
+        current -= 1;
+        setframe();
+    }
+}
+
+function framedown(){
+    if (current === frames.length - 1)
+        fetchframes();
+    current += 1;
+    setframe();
+}
+
+function fetchframes() {
+    fetch('/frames/feed')
+        .then(response => {
+                if (!response.ok) {
+                throw new Error('Network response was not ok');
+                }
+                return response.json();
+                })
+    .then(data => {
+            if (data.error) {
+            document.write("<h1>Frames are not available</h1>");
+            return;
+            }
+            data.feed.forEach(item => {
+                    frames.push(item);
+                    });
+            })
+    .catch(error => {
+            console.error('Error fetching new content:', error);
+            alert(error.message);
+            fetchframes();
+            });
+}
+
+function share(){
+    let shortlink = frames[current].shortlink;
+    navigator.clipboard.writeText(shortlink)
+      .then(() => {
+                alert("Link copied to clipboard!");
+            })
+      .catch((error) => {
+              alert("Unable to copy text to clipboard:\nPlease mannualy copy link: " + shortlink, error);
+            });
+}
+
+
+fetchframes();
+setTimeout(setframe, 200);
+</script>
+</body>
+</html>
