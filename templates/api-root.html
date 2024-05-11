@@ -93,6 +93,16 @@
     </div>
     {% endfor %}
 
+    <h2>Status Codes</h2>
+    <table>
+        {% for code in status_codes.keys() %}
+        <tr>
+            <td>{{ code }}</td>
+            <td>{{ status_codes[code] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
 
 <script>
 function toggleApiKey() {

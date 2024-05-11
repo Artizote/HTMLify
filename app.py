@@ -422,8 +422,10 @@ def _api_page():
         api_key = users.get_user(session["user"]["username"]).api_key
     else:
         api_key = "Please <a href=\"/login\">Login</a> to get your API Key"
-    endpoints = json.load(open("endpoints.json"))["endpoints"]
-    return render_template("api-root.html", endpoints=endpoints, api_key=api_key)
+    ef = json.load(open("endpoints.json"))
+    endpoints = ef["endpoints"]
+    status_codes = ef["status-codes"]
+    return render_template("api-root.html", endpoints=endpoints, status_codes=status_codes, api_key=api_key)
 
 @app.route("/api/embed")
 def _api_embed():
@@ -621,6 +623,147 @@ def _api_shortlink():
         "url": request.scheme + "://" + request.host+ "/r/" + shortlink.short,
     }
     return json.dumps(res), 200, {"Content-type": "text/json encoding=utf-8"}
+
+@app.route("/api/notifications", methods=["POST"])
+def _api_notifications():
+    username = request.form.get("username", "")
+    api_key= request.form.get("api-key", "")
+    if not all([username, api_key]):
+        res = {
+            "error": True,
+            "message": "Credidentals not provided"
+        }
+        return json.dumps(res), 401
+    user = users.query.filter_by(username=username, api_key=api_key).first()
+    if not user:
+        res = {
+            "error": True,
+            "message": "Invalid Credidentals"
+        }
+        return json.dumps(res), 401
+    if id := int(request.form.get("id", 0)):
+        n = Notification.query.filter_by(id=id).first()
+        if n and n.user == user.username:
+            res = {
+                "error": False,
+                "id": n.id,
+                "user": n.user,
+                "content": n.content,
+                "href": n.href,
+                "seen": bool(n.viewed),
+                "time": n.send_time,
+                "status-code": 0
+            }
+        else:
+            res = {
+                "error": True,
+                "status-code": 6,
+                "message": "Notification not found"
+            }
+        return json.dumps(res), 200
+    if markseen := int(request.form.get("markseen", 0)):
+        n = Notification.query.filter_by(id=markseen).first()
+        if n and n.user == user.username:
+            n.viewd = 1
+            n.view_time = datetime.utcnow()
+            db.session.commit(n)
+            res = {
+                "error": False,
+                "status-code": 0,
+            }
+            return json.dumps(res), 200
+        res = {
+            "error": True,
+        }
+        return json.dumps(res), 400
+
+    ns = Notification.query.filter_by(user=username).all()
+    res = {
+        "error": False,
+        "notification-count": len(ns),
+        "notifications": [],
+        "status-code": 0
+    }
+    for n in ns:
+        res["notifications"].append({
+            "id": n.id,
+            "user": n.user,
+            "content": n.content,
+            "href": n.href,
+            "seen": bool(n.viewed),
+            "time": n.send_time,
+        })
+    Notification.purge(user.username)
+    return json.dumps(res), 200
+
+@app.route("/api/comment", methods=["POST"])
+def _api_comment():
+    user = users.filter_by(username=request.form.get("username", "")).first()
+    if not user or user.api_key != request.form.get("api-key", ""):
+        return json.dumps({
+            "error": True,
+            "message": "Inveluod Credidentals",
+            "status-code": 3
+        }), 401
+    if id := int(request.form.get("id", 0)):
+        comment = comments.filter_by(id=id).first()
+        if not comment:
+            return json.dumps({
+                "error": True,
+                "message": "Comment not found",
+                "status-code": 6
+            }), 401
+        return json.dumps({
+            "error": False,
+            "id": comment.id,
+            "file": comment.file,
+            "author": comment.author,
+            "status-code": 0,
+        }), 200
+    if delete := int(request.form.get("delete", 0)):
+        comment = comments.filter_by(id=delete).first()
+        if comment:
+            if user.username != comment.author:
+                return json.dumps({
+                    "error": True,
+                    "message": "Only author can delete comment",
+                    "status-code": 3
+                }), 401
+            db.session.delete(comment)
+            db.session.commit()
+            return json.dumps({
+                "error": False,
+                "message": "comment deleted",
+                "status-code": 0
+            }), 200
+        return json.dumps({
+            "error": True,
+            "message": "comment not found",
+            "status-code": 6
+        }), 404
+    file = int(request.form.get("file", 0))
+    content = request.form.get("content")
+    if not content:
+        return json.dumps({
+            "error": True,
+            "message": "comment can't be empty",
+            "status-code": 2
+        }), 200
+    comment = comments.comment(file, user.id, content)
+    if not comment:
+        return json.dumps({
+            "error": False,
+            "message": "comment created succsessfuly",
+            "status-code": 0
+        }), 201
+    return json.dumps({
+        "error": False,
+        "message": "comment content is invalid",
+        "status-code": 3
+    }), 400
+
+
+
 
 @app.route("/robots.txt")
 def _robots_txt():
@@ -959,38 +1102,10 @@ def _action_comment():
     token = request.form["token"]
     
     if not Token.verify(token): return redirect(request.headers.get('Referer', "/"))
-    if set(content) == {" "}: return redirect(request.headers.get('Referer', "/"))
-    
-    content = escape_html(content).replace("\n", "<br>")
 
-    valid_tags = {"b", "u", "i", "s", "sub", "sup",
-                  "B", "U", "I", "S", "SUB", "SUP"}
-    
-    for tag in valid_tags:
-        content = content.replace("&lt;" + tag + "&gt;", "<" + tag + ">")
-        content = content.replace("&lt;/" + tag + "&gt;", "</" + tag + ">")
-    
-    for tag in valid_tags:
-        open_tags = content.count("<" + tag + ">")
-        close_tags = content.count("</" + tag + ">")
-        if open_tags > close_tags:
-            content += ("</" + tag + ">") * (open_tags - close_tags)
-    
-    content = sub(r'@([\w/\.-]+)', r'<a href="/\1">@\1</a>', content)
-    
-    comment = comments(file=file_id, author=session["user"]["username"], content=content)
-    
-    mp = compile(r"@([\w\.-]+)")
-    mentions = set(findall(mp, content))
-    
-    file = files.query.filter_by(id=file_id).first()
-    
-    db.session.add(comment)
-    db.session.commit()
-    for mention in mentions:
-        Notification.notify(mention, "<b>" +session["user"]["username"] + "</b> mentioned you in the comment", request.headers['Referer'] + "#comment-" + str(comment.id))
-    if file.owner != session["user"]["username"]:
-        Notification.notify(file.owner, "<b>" + session["user"]["username"] + "</b> comment something on " + file.name, "/"+file.path + "#comment-" + str(comment.id))
+    comment = comments.comment(file_id, users.get_user(session["user"]["username"]).id, content)
+    if not comment:
+        return redirect("/")
     return redirect(request.headers.get('Referer', "/")+"#comment-"+str(comment.id))
 
 @app.route("/action/git-clone", methods=["POST"])

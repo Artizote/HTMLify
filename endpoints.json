@@ -161,15 +161,69 @@
     }
 ],
 "sample-output": "{\"id\": 2, \"href\": \"/redirection/address\", \"hits\": 4, \"shortcode\": \"abcd\", \"url\": \"http://127.0.0.1:5000/r/abcd\"}"
-
+},{
+"name": "Notification API",
+"route": "/api/notification",
+"method": "POST",
+"responce": "json",
+"args": [
+    {
+        "arg": "username",
+        "desc": "Required, your username"
+    },
+    {
+        "arg": "api-key",
+        "desc": "Required, API KEY assosiaed to the username"
+    },
+    {
+        "arg": "id",
+        "desc": "If your want to get single notification details, keep empty if want all"
+    },
+    {
+        "arg": "markseen",
+        "desc": "Use this to mark a notification as seen, "
+    }
+]
+},{
+"name": "Comment API",
+"route": "/api/comment",
+"method": "POST",
+"responce": "json",
+"args": [
+    {
+        "arg": "username",
+        "desc": "Required, your username"
+    },
+    {
+        "arg": "api-key",
+        "desc": "Required, API KEY assosiated with username"
+    },
+    {
+        "arg": "id",
+        "desc": "To get comment info per a perticular command"
+    },
+    {
+        "arg": "delete",
+        "desc": "Provide comment ID to delete comment"
+    },
+    {
+        "arg": "file",
+        "desc": "File id you wan to comment on it"
+    },
+    {
+        "arg": "content",
+        "desc": "Required if file parameter is provided"
+    }
+]
 }
 ],
-"status-codes" : [
-    0: "OK",
-    1: "MISSING PARAMETERS",
-    2: "INVALID PARAMETERS",
-    3: "UNAUTORISED OPRATION",
-    4: "INVELID REQUEST METHOD",
-    5: "API RATE LIMIT EXCEED"
-]
+"status-codes" : {
+    "0": "OK",
+    "1": "MISSING PARAMETERS",
+    "2": "INVALID PARAMETERS",
+    "3": "UNAUTORISED OPRATION",
+    "4": "INVELID REQUEST METHOD",
+    "5": "API RATE LIMIT EXCEED",
+    "6": "Requested content not found"
+}
 }

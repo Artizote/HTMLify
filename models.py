@@ -3,6 +3,7 @@ from flask_sqlalchemy import *
 from datetime import datetime, timedelta
 from pygments import highlight, lexers, formatters
 from random import randint
+from re import compile, sub, match, findall
 #from utils import *
 from config import *
 
@@ -14,6 +15,16 @@ def randstr(n):
     for _ in range(n):
         s += chars[randint(0, 35)]
     return s
+
+def escape_html(code) -> str:
+    entitys = {
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;"
+    }
+    for e in entitys.keys():
+        code = code.replace(e, entitys[e])
+    return code
 
 def api_key():
     return randstr(32)
@@ -173,6 +184,46 @@ class comments(db.Model):
     #  likes
     #  replies
 
+    @classmethod
+    def comment(comments, on, by, content):
+        if not content or set(content) == {" "}: return False
+
+        file = files.query.filter_by(id=on).first()
+        user = users.query.filter_by(id=by).first()
+
+        if not all((file, user)): return False
+
+        content = escape_html(content).replace("\n", "<br>")
+
+        valid_tags = {"b", "u", "i", "s", "sub", "sup", "code"
+                      "B", "U", "I", "S", "SUB", "SUP", "CODE"}
+
+        for tag in valid_tags:
+            content = content.replace("&lt;" + tag + "&gt;", "<" + tag + ">")
+            content = content.replace("&lt;/" + tag + "&gt;", "</" + tag + ">")
+
+        for tag in valid_tags:
+            open_tags = content.count("<" + tag + ">")
+            close_tags = content.count("</" + tag + ">")
+            if open_tags > close_tags:
+                content += ("</" + tag + ">") * (open_tags - close_tags)
+
+        content = sub(r'@([\w/\.-]+)', r'<a href="/\1">@\1</a>', content)
+
+        comment = comments(file=on, author=user.username, content=content)
+
+        mp = compile(r"@([\w\.-]+)")
+        mentions = set(findall(mp, content))
+
+        db.session.add(comment)
+        db.session.commit()
+        for mention in mentions:
+            Notification.notify(mention, "<b>" + user.username + "</b> mentioned you in the comment", "/src/"+file.path + "#comment-" + str(comment.id))
+        if file.owner != user.username:
+            Notification.notify(file.owner, "<b>" + user.username + "</b> comment something on " + file.name, "/src/"+file.path + "#comment-" + str(comment.id))
+        return comment
+
+
 class Token(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     value = db.Column(db.String(32))
@@ -234,6 +285,15 @@ class Notification(db.Model):
         if not users.get_user(user): return None
         n = ns(user=user, content=message, href=href)
         db.session.add(n)
+        db.session.commit()
+
+    @classmethod
+    def notify_all(ns, all_users:list[users] ,message, href):
+        if not all_users:
+            all_users = map(lambda u: u.username, users.query.all())
+        for user in all_users:
+            n = ns(user=user, content=message, href=href)
+            db.session.add(n)
         db.session.commit()
 
     @classmethod
