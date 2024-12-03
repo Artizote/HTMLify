@@ -1,0 +1,13 @@
+# cat Dockerfile
+
+FROM ubuntu:latest
+
+# Install the 'cat' command and other essential tools
+# RUN apt-get update && apt-get install -y coreutils
+
+WORKDIR /home/root/
+
+COPY file .
+
+# Set the default command to bash
+CMD ["cat", "file"]
