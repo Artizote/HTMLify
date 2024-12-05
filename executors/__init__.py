@@ -23,6 +23,14 @@ executors = {
             ".txt",
         ]
     },
+    "java": {
+        "name": "java",
+        "lang": "Java",
+        "filename": "Main.java",
+        "extentions": [
+            ".java",
+        ]
+    },
     "python": {
         "name": "python",
         "lang": "Python",
@@ -31,20 +39,17 @@ executors = {
             ".py",
         ]
     },
+    "node.js": {
+        "name": "node.js",
+        "lang": "Node",
+        "filename": "app.js",
+        "extentions": [
+            ".js",
+        ]
+    },
 }
 
 
-def get_executer(name: str) -> dict | None:
-    if name in executors:
-        return executors[name]
-
-def execution_timer(proc: subprocess.Popen, timeout: int = 60):
-    """Kill the process after given timeout"""
-    termination_time = time() + timeout
-    while time() < termination_time:
-        sleep(0.1)
-    if proc.poll() is not None:
-        proc.terminate()
 
 class CodeExecution(subprocess.Popen):
     def __init__(self, image_tag, timeout=60):
@@ -134,6 +139,23 @@ class CodeExecution(subprocess.Popen):
 
         return (stdout_capture, stderr_capture)
 
+def get_executer(name: str) -> dict | None:
+    if name in executors:
+        return executors[name]
+
+def suggest_executors(filename: str) -> list[str]:
+    suggestions = []
+    ext = "." + filename.split(".")[-1]
+    if "." not in filename:
+        ext = ""
+
+    for executor in executors.values():
+        if ext in executor["extentions"]:
+            suggestions.insert(0, executor)
+        elif "*" in executor["extentions"]:
+            suggestions.append(executor)
+
+    return suggestions
 
 def execute(code: str|bytes, executer: str, timeout: int = 60) -> CodeExecution:
     """Return a CodeExecution (subprocess.Popen like) object"""

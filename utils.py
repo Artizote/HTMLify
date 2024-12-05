@@ -4,6 +4,7 @@ from models import users, files, db
 from os import remove, system, path
 from shutil import rmtree
 from pathlib import Path
+from time import sleep
 from config import GIT_COMMAND_PATH
 
 # Constants 
@@ -206,4 +207,10 @@ def git_clone(user, repo, dir="", mode='r', visibility='p', overwrite=True):
     rmtree(random_dir)
     return True
 
-
+def process_pool_purger(process_pool):
+    """Removes completed process frim `process_pool`"""
+    while True:
+        sleep(60)
+        for p in process_pool:
+            if p["proc"].poll() is not None:
+                process_pool.remove(p)

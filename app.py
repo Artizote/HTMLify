@@ -14,6 +14,7 @@ import json
 from models import *
 from utils import *
 from search_engine import *
+from executors import *
 from config import *
 
 
@@ -38,6 +39,7 @@ reserved_root_paths = {
     "api", "pygments.css", "map",
     "src", "guest", "r",
     "revision", "frames", "robots.txt",
+    "exec", "proc",
     }
 
 
@@ -148,8 +150,13 @@ def _userfiles(username, path):
         if file.ext == "js":
             return Response(file.content, mimetype='text/js')
         return file.content, 200, {"Content-type": "text/plain charset=utf-8"}
-    
-    return render_template("file-show.html", file=file, token=Token.generate())
+
+    _executors = suggest_executors(file.path)
+    for e in executors:
+        if not e in _executors:
+            _executors.append(e)
+
+    return render_template("file-show.html", file=file, executors=_executors, token=Token.generate())
 
 @app.route("/raw/<path:path>")
 def _raw_file(path):
@@ -416,6 +423,52 @@ def _frames_default():
 <h1>Use Up & Down button to watch Next/Previus Frame</h1>
 <h1>Enjoy</h1></center>"""
 
+PROCESS_POOL = []
+@app.get("/proc/<int:pid>")
+def _proc_info(pid):
+    global PROCESS_POOL
+    for p in PROCESS_POOL:
+        if p["pid"] == pid:
+            ce = p["proc"]
+            return jsonify({
+                "pid": ce.pid,
+                "termination-time": ce.termination_time,
+                "runnig": ce.poll() is None,
+            })
+    return jsonify({}), 404
+
+@app.post("/proc/<int:pid>/communicate")
+def _proc_communicate(pid):
+    ce = None
+    for p in PROCESS_POOL:
+        if p["pid"] == pid:
+            process = p
+            ce = p["proc"]
+    if not ce:
+        return jsonify({
+            "error": True,
+            "message": "process not found",
+        }), 404
+    if "api-key" in process:
+        user = users.query.filter_by(username=request.form.get("username", "")).first()
+        if not user or not user.api_key == process["api-key"]:
+            return jsonify({
+                "error": True,
+                "message": "you are not authenticated for this process"
+            }), 403
+
+    input = request.form.get("input")
+
+    out, err = ce.communicate(input, 1)
+
+    return jsonify({
+        "stdout": out,
+        "stderr": err,
+        "runing": ce.poll() is None,
+        "pid": ce.pid,
+        "termination-time": ce.termination_time,
+    })
+
 @app.route("/api/")
 def _api_page():
     if  session.get("user"):
@@ -484,7 +537,6 @@ def _api_paste():
         as_guest = True
 
     if not all([api_key, filecontent, username]):
-        print(api_key, filecontent, username)
         return json.dumps({"error":"Required arguments not provoded"}), 403
     user= users.query.filter_by(username=username).first()
     if not user:
@@ -762,7 +814,48 @@ def _api_comment():
         "status-code": 3
     }), 400
 
+@app.post("/api/exec")
+def _api_exec():
+    code = request.form.get("code")
+    executor = request.form.get("executor")
+    user = users.query.filter_by(username=request.form.get("username", "")).first()
+    api_key = request.form.get("api-key", "")
 
+    if not (code or executor):
+        return jsonify({
+            "error": True,
+            "message": "code and executer is required",
+            "status-code": 1
+        })
+
+    if user and user.api_key != api_key:
+        user = None
+
+    ce = execute(code, executor)
+    if not ce:
+        return jsonify({
+            "error": True,
+            "message": "process can't be start, check available executors",
+            "status-code": 2
+        })
+
+    proc = {
+        "proc": ce,
+        "pid": ce.pid,
+    }
+
+    if api_key:
+        proc["api-key"] = api_key
+
+    global PROCESS_POOL
+    PROCESS_POOL.append(proc)
+
+    return jsonify({
+        "error": False,
+        "message": "process started",
+        "status-code": 0,
+        "pid": ce.pid
+    })
 
 
 @app.route("/robots.txt")
@@ -1126,4 +1219,5 @@ def _action_git_clone():
 
 if __name__ == "__main__":
     Thread(target=search_indexing_daemon, args=(TermFrequency, app, files), daemon=True).start()
+    Thread(target=process_pool_purger, args=(PROCESS_POOL,), daemon=True).start()
     app.run(debug=True)
