@@ -39,7 +39,7 @@ reserved_root_paths = {
     "api", "pygments.css", "map",
     "src", "guest", "r",
     "revision", "frames", "robots.txt",
-    "exec", "proc",
+    "exec", "proc", "static",
     }
 
 
@@ -152,9 +152,10 @@ def _userfiles(username, path):
         return file.content, 200, {"Content-type": "text/plain charset=utf-8"}
 
     _executors = suggest_executors(file.path)
-    for e in executors:
+    for e in executors.values():
         if not e in _executors:
             _executors.append(e)
+    print(_executors)
 
     return render_template("file-show.html", file=file, executors=_executors, token=Token.generate())
 
@@ -433,7 +434,7 @@ def _proc_info(pid):
             return jsonify({
                 "pid": ce.pid,
                 "termination-time": ce.termination_time,
-                "runnig": ce.poll() is None,
+                "running": ce.poll() is None,
             })
     return jsonify({}), 404
 
@@ -464,7 +465,7 @@ def _proc_communicate(pid):
     return jsonify({
         "stdout": out,
         "stderr": err,
-        "runing": ce.poll() is None,
+        "running": ce.poll() is None,
         "pid": ce.pid,
         "termination-time": ce.termination_time,
     })

@@ -2,7 +2,6 @@
 
 import os.path
 import subprocess
-import pty
 from time import time, sleep
 from hashlib import sha256
 from threading import Thread
@@ -120,7 +119,7 @@ class CodeExecution(subprocess.Popen):
             try:
                 self.stdin.flush()
             except (BrokenPipeError, IOError) as e:
-                raise e
+                print(e) # no raise
 
         if delay:
             sleep(delay)
@@ -143,7 +142,7 @@ def get_executer(name: str) -> dict | None:
     if name in executors:
         return executors[name]
 
-def suggest_executors(filename: str) -> list[str]:
+def suggest_executors(filename: str) -> list[dict]:
     suggestions = []
     ext = "." + filename.split(".")[-1]
     if "." not in filename:
@@ -168,11 +167,11 @@ def execute(code: str|bytes, executer: str, timeout: int = 60) -> CodeExecution:
 
     tag = randstr(16)
     temp_directory = os.path.join(MODULE_DIR, tag)
-    r = subprocess.run(["mkdir", temp_directory])
+    r = subprocess.run(["/usr/bin/mkdir", temp_directory])
     if r.returncode:
         return None
 
-    subprocess.run(["cp", f"{DOCKERFILES_DIR}/{executer['name']}", f"{temp_directory}/Dockerfile"])
+    subprocess.run(["/usr/bin/cp", f"{DOCKERFILES_DIR}/{executer['name']}", f"{temp_directory}/Dockerfile"])
 
     with open(f"{temp_directory}/{executer['filename']}", "wb") as f:
         f.write(code)
