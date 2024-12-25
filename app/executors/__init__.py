@@ -6,8 +6,8 @@ from time import time, sleep
 from hashlib import sha256
 from threading import Thread
 
-from utils import *
-from config import *
+from ..utils import *
+from ..config import *
 
 MODULE_DIR = os.path.dirname(os.path.abspath(__file__))
 DOCKERFILES_DIR = os.path.join(MODULE_DIR, 'Dockerfiles')

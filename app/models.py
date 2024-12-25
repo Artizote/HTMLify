@@ -5,7 +5,7 @@ from pygments import highlight, lexers, formatters
 from random import randint
 from re import compile, sub, match, findall
 #from utils import *
-from config import *
+from .config import *
 
 
 

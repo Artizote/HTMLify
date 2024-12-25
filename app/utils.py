@@ -1,11 +1,12 @@
 from random import randint
 from requests import get
-from models import users, files, db
+from .models import users, files, db
 from os import remove, system, path
 from shutil import rmtree
 from pathlib import Path
 from time import sleep
-from config import GIT_COMMAND_PATH
+from subprocess import run
+from .config import GIT_COMMAND_PATH
 
 # Constants 
 
@@ -145,16 +146,18 @@ def escape_html(code) -> str:
 def git_clone(user, repo, dir="", mode='r', visibility='p', overwrite=True):
 
     random_dir = randstr(10)
-    clone = not system(GIT_COMMAND_PATH + " clone " + repo + " " + random_dir)
-    if not clone:
+    result = run([GIT_COMMAND_PATH, "clone", repo, random_dir])
+    if result.returncode != 0:
         return None
-    
-    repopath = str(Path.cwd())+"/"+random_dir+"/"
-        
+
+    global path
+    repopath = str(Path.cwd())+"/"+random_dir+"/" # fix in future for windows
+ 
     filterd = []
     paths = [Path(repopath)]
     for path in paths:
         for item in path.glob("*"):
+            print(item)
             if item.is_dir():
                 if str(item)[len(repopath):][0] == ".":
                     continue
