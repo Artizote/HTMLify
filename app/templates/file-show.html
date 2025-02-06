@@ -12,7 +12,7 @@
             background-color: black;
             font-family: Monospace;
             padding: 10px;
-            width: 800px;
+            width: 90%;
             height: 400px;
             overflow-y: auto;
             border: 1px solid #333;
@@ -26,6 +26,18 @@
         }
         .editable {
             outline: none;
+        }
+        #terminal-input {
+            margin: 4px;
+            display: none;
+            font-family: Monospace;
+            width: 90%;
+            height: auto;
+            cursor: text;
+        }
+        #run-button, #executor-selector {
+            padding: 2px;
+            margin: 4px;
         }
     </style>
 </head>
@@ -47,13 +59,14 @@
         {% else %}<a href="/raw/{{ file.path }}" class="download-button" download>Download File<span class="file-size">({{ file.sizef() }})</span></a></div>
         {% endif %}
         <div>
-            <button onclick="run()">Run &gt;</button>
+            <button id="run-button" onclick="run()">Run &gt;</button>
             <select id="executor-selector">
                 {% for executor in executors %}
                 <option value="{{ executor["name"] }}">{{ executor["lang"] }}</option>
                 {% endfor %}
             </select>
             <div id="terminal" class="terminal"></div>
+            <input type="text" id="terminal-input" onkeydown="handleTerminalInput(event)" placeholder="input">
         </div>
         <div class="link-copy-box">
             <h3>Share this file:</h3>
@@ -123,6 +136,7 @@ function add_mention(username){
 
 // Treminal emulator stuffus
 const terminal = document.getElementById('terminal');
+const terminalInput = document.getElementById("terminal-input");
 var input_buffer = "";
 var last_line_enter = false;
 
@@ -188,31 +202,24 @@ function appendOutput(content) {
     }
 }
 */
+
 function appendOutput(content) {
-    let buffer = ""; 
+    let terminal = document.getElementById("terminal");
+    let lastLine = terminal.querySelector('.line:last-child');
 
-    for (const char of content) {
-        if (char === "\n") {
-            if (buffer) {
-                addOutputLine(buffer);
-                buffer = "";
-            } else {
-                addOutputLine("");
-            }
-        } else {
-            buffer += char;
-        }
+    if (!lastLine || lastLine.innerText.endsWith("\n")) {
+        // Create a new output line
+        let newLine = document.createElement("div");
+        newLine.classList.add("line");
+        newLine.innerText = content;
+        terminal.appendChild(newLine);
+    } else {
+        // Append to last line
+        lastLine.innerText += content;
     }
 
-    if (buffer) {
-        if (!document.querySelector('.terminal .line:last-child')) {
-            addOutputLine(buffer);
-        } else {
-            appendLastLine(buffer);
-        }
-    }
+    terminal.scrollTop = terminal.scrollHeight; // Auto-scroll
 }
-
 
 
 function lockLine(line) {
@@ -221,27 +228,22 @@ function lockLine(line) {
     line.classList.remove('editable');
 }
 
-// Handle keypress events in the terminal
-terminal.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-        e.preventDefault();
-
-        const currentLine = document.querySelector('.line.editable');
-        if (currentLine) {
-            lockLine(currentLine);
-            input_buffer = input_buffer + currentLine.innerText + "\n";
-            addLine();
-        }
+function handleTerminalInput(event) {
+    let inputField = document.getElementById("terminal-input");
+    
+    if (event.key === "Enter") {
+        event.preventDefault();
+        
+        let inputText = inputField.value + "\n";
+        input_buffer += '\n';
+        console.log(input_buffer);
+        inputField.value = ""; // Clear input field
+        appendOutput('\n');
+    } else if (event.key.length === 1) {
+        input_buffer += event.key;
+        appendOutput(event.key);
     }
-});
-
-terminal.addEventListener('click', () => {
-    const editableLine = document.querySelector('.line.editable');
-    if (editableLine) {
-        editableLine.focus();
-    }
-});
-
+}
 
 function run() {
     let executor = document.getElementById("executor-selector").value;
@@ -275,6 +277,7 @@ function run() {
                     }
 
                     terminal.style.display = "block";
+                    terminalInput.style.display = "block";
                     poll(pid);
                 });
         });
@@ -283,36 +286,37 @@ function run() {
 }
 
 function poll(pid) {
-    // poll and update stdout and stderr
     let intervalid = setInterval(() => {
         const formdata = new FormData();
         let user_input = input_buffer;
+        console.log(input_buffer);
         input_buffer = "";
 
         if (user_input) {
             formdata.append("input", user_input);
         }
 
-        // Send the request to the server
         fetch(`/proc/${pid}/communicate`, {
             method: "POST",
             body: formdata
         })
         .then(response => response.json())
         .then(proc => {
-            if (!('pid' in proc)) {
-                return;
-            }
+            if (!('pid' in proc)) return;
 
             let stdout = proc.stdout;
             let stderr = proc.stderr;
 
-            //appendOutput(stdout); // needed to be handle output correctly
-            addOutputLine(stdout);
-
+            if (stdout) {
+                appendOutput(stdout);
+            }
 
             if (stderr) {
                 console.error(stderr);
+            }
+
+            if (!proc.running) {
+                clearInterval(intervalid);
             }
 
         })
