@@ -27,6 +27,9 @@
         .editable {
             outline: none;
         }
+        .error {
+            color: red;
+        }
         #terminal-input {
             margin: 4px;
             display: none;
@@ -186,25 +189,8 @@ function appendLastLine(content) {
     }
     lockLine(lastline);
 }
-/*
-function appendOutput(content) {
-    let buff = ""; 
-    for (let c of content) {
-        if (c == "\n") {
-            addOutputLine(buff);
-            buff = "";
-        } else {
-                buff += c;
-        }
-    }
-    if (buff) {
-        appendLastLine(buff);
-    }
-}
-*/
 
 function appendOutput(content) {
-    let terminal = document.getElementById("terminal");
     let lastLine = terminal.querySelector('.line:last-child');
 
     if (!lastLine || lastLine.innerText.endsWith("\n")) {
@@ -221,6 +207,20 @@ function appendOutput(content) {
     terminal.scrollTop = terminal.scrollHeight; // Auto-scroll
 }
 
+function appendError(content) {
+    // same as appendOutput, but adds error class to the line
+    let lastLine = terminal.querySelector('.line:last-child');
+    if (!lastLine || lastLine.innerText.endsWith("\n")) {
+        let newLine = document.createElement("div");
+        newLine.classList.add("line");
+        newLine.classList.add("error");
+        newLine.innerText = content;
+        terminal.appendChild(newLine);
+    } else {
+        lastLine.innerText += content;
+    }
+    terminal.scrollTop = terminal.scrollHeight;
+}
 
 function lockLine(line) {
     // Lock the previous line to make it non-editable
@@ -312,7 +312,7 @@ function poll(pid) {
             }
 
             if (stderr) {
-                console.error(stderr);
+                appendError(stderr);
             }
 
             if (!proc.running) {

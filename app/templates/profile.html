@@ -29,7 +29,7 @@
             </ul>
         </section>
         {% endif %}
-        <section>
+        <section style="max-width:100%">
             <h2>Latest files of {{ user.username }}</h2>
             {% for file in user.files[::-1] %}
             {% if not file.as_guest %}
