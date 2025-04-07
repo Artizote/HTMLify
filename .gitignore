@@ -23,6 +23,3 @@ instance/
 # Media files
 media/
 
-# Track SVG files
-!media/svg/*
-

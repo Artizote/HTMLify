@@ -41,11 +41,11 @@ img {
     margin-bottom: 2em;
 }
 #up-icon {
-    transform: rotate(90deg);
-    margin-top: 2em;
+    /* transform: rotate(90deg); */
+    margin-top: 2em; */
 }
 #down-icon {
-    transform: rotate(-90deg);
+    /* transform: rotate(-90deg); */
     margin-bottom: 2em;
 }
 #title, #stats {
@@ -63,11 +63,11 @@ img {
             <tr id="row1">
                 <td id="col1"><iframe src="/frames/default" id="frame" name="frame"></iframe></td>
                 <td id="col2">
-                    <a href="" id="profile-link" target="_blank"><img src="" id="user-dp" alt="user's profile pictue"></a>
-                    <img src="/media/svg/comment-icon.svg" id="comments-icon" onclick="showcomments()" alt="share">
-                    <img src="/media/svg/left-arrow.svg" id="up-icon" onclick="frameup()" alt="up">
-                    <img src="/media/svg/left-arrow.svg" id="down-icon" onclick="framedown()" alt="down">
-                    <img src="/media/svg/share-icon.svg" id="share-icon" onclick="share()" alt="share">
+                    <a href="" id="profile-link" target="_blank"><img src="/static/svg/user.svg" id="user-dp" alt="user's profile pictue"></a>
+                    <img src="/static/svg/message-square-text.svg" id="comments-icon" onclick="showcomments()" alt="share">
+                    <img src="/static/svg/arrow-big-up.svg" id="up-icon" onclick="frameup()" alt="up">
+                    <img src="/static/svg/arrow-big-down.svg" id="down-icon" onclick="framedown()" alt="down">
+                    <img src="/static/svg/share.svg" id="share-icon" onclick="share()" alt="share">
                 </td>
             </tr>
             <tr id="row2">
@@ -77,7 +77,7 @@ img {
                         <p id="stats">Views: <span id="view-count"></span> Comments:<span id="comment-count"></span></p>
                     </div>
                 </td>
-                <td><a href="/"><img src="/media/svg/thin-arrow-left.svg" alt="back button"></a></td>
+                <td><a href="/"><img src="/static/svg/arrow-left.svg" alt="back button"></a></td>
             </tr>
         </table>
     </main>
