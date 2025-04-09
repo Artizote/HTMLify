@@ -1,13 +1,8 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>File is locked</title>
-    {% include "stylesheet.html" %}
-</head>
-<body>
+{# Locked File #}
+{% extends "base.html" %}
+{% block title %}File is locked{% endblock %}
+{% block content %}
     <h1>HTMLify your dreams</h1>
-	{% include "search-bar.html" %}
-	{% include "nav-bar.html" %}
 	<h1>Locked file</h1>
 	<center>
 	<form action="{{ request.url }}" method="POST">
@@ -17,5 +12,4 @@
 	</table>
 	</form>
 	</center>
-</body>
-</html>
+{% endblock %}

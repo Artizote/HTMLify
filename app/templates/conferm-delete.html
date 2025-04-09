@@ -1,11 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>File Delete Confirmation</title>
-{% include "stylesheet.html" %}
-        <style>
+{# File delete confirmation #}
+{% extends "base.html" %}
+{% block title %}File Delete Confirmation{% endblock %}
+{% block head_content %}
+<style>
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -64,13 +61,10 @@ h2 {
 .confirm-button:hover {
     background-color: #2333a5;
 }
- 
-        </style>
-    </head>
-    <body>
+</style>
+{% endblock %}
+{% block content %}
         <h1>HTMLify</h1>
-        {% include "search-bar.html" %}
-        {% include "nav-bar.html" %}
         <div class="container">
             <h2>Do you really want to dlete this file ?</h2>
             <div class="file-title">{{ file.name }}</div>
@@ -86,5 +80,4 @@ h2 {
             <button class="confirm-button" value="Deete">Confirm Delete</button> <a href="/dashboard" class="back-button">Back</a>
             </form>
         </div>
-    </body>
-</html>
+{% endblock %}

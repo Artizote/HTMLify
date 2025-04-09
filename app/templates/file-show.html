@@ -1,9 +1,7 @@
-
-<!DOCTYPE html>
-<html>
-<head>
-    <title>{{ file.name }}</title>
-    {% include "stylesheet.html" %}
+{# Flie Show #}
+{% extends "base.html" %}
+{% block title %}{{ file.name }}{% endblock %}
+{% block head_content %}
     <link rel="stylesheet" href="/pygments.css">
     <style>
         .terminal {
@@ -43,11 +41,9 @@
             margin: 4px;
         }
     </style>
-</head>
-<body>
+{% endblock %}
+{% block content %}
 	<h1>HTMLify</h1>
-	{% include "search-bar.html" %}
-	{% include "nav-bar.html" %}
     <div class="file-container">
         <div class="file-header">
             <div class="file-title" style="overflow:auto;">{{ file.name }}</div>
@@ -332,5 +328,4 @@ function poll(pid) {
 
 
 </script>
-</body>
-</html>
+{% endblock %}

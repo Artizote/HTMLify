@@ -1,12 +1,8 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Editing - {{ path }}</title>
-    {% include "stylesheet.html" %}
-</head>
-<body>
+{# Media Edit #}
+{% extends "base.html" %}
+{% block title %}Editing - {{ path }}{% endblock %}
+{% block content %}
     <h1>Editing - {{ path }}</h1>
-    {% include "nav-bar.html" %}
     <form class="edit-form" action="/action/edit-media" method="POST">
         <input type="hidden" name="oldname" value="{{ path[session["user"]["username"]|length+1:] }}" />
         <label for="filenameInput">File Name:</label>
@@ -39,5 +35,4 @@
         </video>
         {% endif %}
     </form>
-</body>
-</html>
+{% endblock %}

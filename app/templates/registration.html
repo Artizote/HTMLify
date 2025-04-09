@@ -1,13 +1,7 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Registration</title>
-    {% include "stylesheet.html" %}
-    <style>
-
-    </style>
-</head>
-<body>
+{# Registration #}
+{% extends "base.html" %}
+{% block title %}Registration{% endblock %}
+{% block content %}
 	<h1>HTMLify</h1>
     {% include "nav-bar.html" %}
     <div class="registration-form">
@@ -26,5 +20,4 @@
             <input type="submit" value="Register" />
         </form>
     </div>
-</body>
-</html>
+{% endblock %}

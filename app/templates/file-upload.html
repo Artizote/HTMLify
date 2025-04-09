@@ -1,15 +1,8 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Media Upload</title>
-    {% include "stylesheet.html" %}
-    <style>
-    </style>
-</head>
-<body>
+{# File Upload #}
+{% extends "base.html" %}
+{% block title %}Media Upload{% endblock %}
+{% block content %}
 	<h1>HTMLify</h1>
-    {% include "search-bar.html" %}
-    {% include "nav-bar.html" %}
     <form class="upload-form" action="/action/upload" method="POST" enctype="multipart/form-data">
         {% if request.args.get("error-msg") %}
         <div class="error-msg">
@@ -37,5 +30,4 @@
         </datalist>
         <input type="submit" value="Upload">
     </form>
-</body>
-</html>
+{% endblock %}

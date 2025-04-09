@@ -1,19 +1,8 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Login</title>
-   	{% include "stylesheet.html" %}
-    <style>
-
-    </style>
-</head>
-<body>
+{# Login #}
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+{% block content %}
 	<h1>HTMLify</h1>
-	{% include "search-bar.html" %}
-	{% include "nav-bar.html" %}
-	
-	
-	
     <div class="login-form">
         <h1>Login</h1>
         {% if error %}
@@ -28,5 +17,4 @@
             <input type="submit" value="Login" />
         </form>
     </div>
-</body>
-</html>
+{% endblock %}

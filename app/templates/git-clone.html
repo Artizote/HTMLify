@@ -1,13 +1,7 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Git Clone</title>
-    {% include 'stylesheet.html' %}
-    <style>
-    
-    </style>
-</head>
-<body>
+{# Git Clone #}
+{% extends "base.html" %}
+{% block title %}Git Clone{% endblock %}
+{% block content %}
     <h1>HTMLify</h1>
     {% include 'search-bar.html' %}
     {% include 'nav-bar.html' %}
@@ -37,12 +31,4 @@
         Note: this git clone will ingnore hidden files and directories<br>
         and ovewrite existing files.
     </form>
-</body>
-</html>
-
-
-
-
-
-
-
+{% endblock %}

@@ -1,10 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>API Endpoints Reference</title>
-        {% include 'stylesheet.html' %}
+{% extends "base.html" %}
+{% block title %}API Endpoints Reference{% endblock %}
+{% block head_content %}
         <style>
         body {
             font-family: Arial, sans-serif;
@@ -54,11 +50,9 @@
             text-align: left;
         }
         </style>
-    </head>
-    <body>
-        <h1>HTMLify - API Reference</h1>
-        {% include 'search-bar.html' %}
-        {% include 'nav-bar.html' %}
+        {% endblock %}
+{% block content %}
+    <h1>HTMLify - API Reference</h1>
     <h2>Your API Key</h2>
 
     <button onclick="toggleApiKey()" id="toggle-button">Show API Key</button>
@@ -118,5 +112,4 @@ function toggleApiKey() {
 }
 </script>
 
-</body>
-</html>
+{% endblock %}

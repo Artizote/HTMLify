@@ -197,17 +197,17 @@ def _pastebin_data(id):
     return "", 404
 
 @public.route("/r", methods=["GET", "POST"])
-def _link_shortner():
+def _link_shortener():
     shorted = url = None
     hits = None
     if request.method == "POST":
         url = request.form.get("url")
         if not url:
             flash("Please Enter URL")
-            return render_template("link-shortner.html")
+            return render_template("link-shortener.html")
         shorted = ShortLink.create(url)
         hits = ShortLink.query.filter_by(href=url).first().visits
-    return render_template("link-shortner.html", shorted=shorted, hits=hits, url=url)
+    return render_template("link-shortener.html", shorted=shorted, hits=hits, url=url)
 
 @public.route("/r/<shortcode>")
 def _short_redirection(shortcode):

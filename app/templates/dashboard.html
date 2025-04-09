@@ -1,15 +1,8 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Dashboard - {{ session["user"]["username"] }}</title>
-    {% include "stylesheet.html" %}
-    <style>
-    </style>
-</head>
-<body>
-        <h1>Dashboard</h1>
-	{% include "search-bar.html" %}
-	{% include "nav-bar.html" %}
+{# Dashboard #}
+{% extends "base.html" %}
+{% block title %}Dashboard - {{ session["user"]["username"] }}{% endblock %}
+{% block content %}
+    <h1>Dashboard</h1>
     <div class="dashboard-links">
         <a href="/edit?filepath={{ dir }}">Make new file</a>
         <a href="/file-upload?dir={{ dir }}">Upload File</a>
@@ -49,5 +42,4 @@
 	{% endif %}
         {% endfor %}
     </table>
-</body>
-</html>
+{% endblock %}

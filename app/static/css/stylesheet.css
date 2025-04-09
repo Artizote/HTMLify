@@ -1,5 +1,3 @@
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<style>
 
 html {
     scroll-behavior: smooth;
@@ -645,5 +643,3 @@ background-color: #0056b3;
     background-color: #2197ff;
 }
 
-</style>
-{% include "extras.html" %}

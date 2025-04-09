@@ -1,13 +1,8 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>HTMLify your dreams</title>
-    {% include "stylesheet.html" %}
-</head>
-<body>
+{# home.html #}
+{% extends "base.html" %}
+{% block title %}HTMLify your dreams{% endblock %}
+{% block content %}
     <h1>HTMLify your dreams</h1>
-	{% include "search-bar.html" %}
-	{% include "nav-bar.html" %}
     <form class="filter-form" action="" method="POST">
     <div class="filter-label">Filter Options:</div>
     <label class="filter-option">
@@ -35,5 +30,4 @@
     {% endif %}
     </div>
     {% endfor %}
-</body>
-</html>
+{% endblock %}

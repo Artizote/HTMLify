@@ -1,10 +1,20 @@
-<div class="links">
-	<a href="/">Home</a>
+<style></style>
+
+<div class="nav-bar">
+    <a href="/">HTMLify</a>
+
+    <!-- search bar -->
+    <div class="search-bar">
+        <form action="/search" method="GET">
+            <input type="search" name="q" value="{{ q }}" placeholder="Search" />
+            <input type="submit" value="Search" />
+        </form>
+    </div>
+
 	{% if not session.get("user") %}
     <a href="/login">Log in</a>
     <a href="/registration">Register</a>
     {% else %}
-    <a href="/action/logout">Log out</a>
     <a href="/notifications" >Notifications
     {% if session["user"]["notifications"] > 0 %}
     <!--<sup style="color:white;background-color:#ff5511;border-radius:50%;">{{ session["user"]["notifications"] }}</sup>-->
@@ -15,6 +25,9 @@
     </a>
     {% endif %}
     <a href="/dashboard">Dashboard</a>
+    <a href="/r">Shortlinks</a>
     <a href="/frames">Frames</a>
     <a href="/api">API</a>
+
+    <a href="/action/logout" class="right">Log out</a>
 </div>

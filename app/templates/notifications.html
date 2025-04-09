@@ -1,15 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Notifications</title>
-{% include "stylesheet.html" %}
-</head>
-<body>
+{# Notifications #}
+{% extends "base.html" %}
+{% block title %}Notifications{% endblock %}
+{% block content %}
   <h1>Notifications</h1>
-  {% include "search-bar.html" %}
-  {% include "nav-bar.html" %}
   <div class="notification-container">
     {% if notifications|length == 0 %}
     <h1>There is no notifications for you, check back after some time :)</h1>
@@ -28,5 +21,4 @@
     </div>
     {% endfor %}
   </div>
-</body>
-</html>
+{% endblock %}

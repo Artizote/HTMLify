@@ -1,11 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Link Shortener</title>
-    {% include "stylesheet.html" %}
-    {% include "extras.html" %}
+{# Link Shortener #}
+{% extends "base.html" %}
+{% block title %}Link Shortener{% endblock %}
+{% block head_content %}
 <style>
 body {
     font-family: Arial, sans-serif;
@@ -58,11 +54,9 @@ input[type="submit"]:hover {
     text-align: center;
 }
 </style>
-</head>
-<body>
+{% endblock %}
+{% block content %}
     <h1>HTMLify</h1>
-    {% include "search-bar.html" %}
-    {% include "nav-bar.html" %}
 <div class="container">
 <h1>Link Shortener</h1>
 <form id="shortenForm" action="" method="POST">
@@ -78,6 +72,4 @@ input[type="submit"]:hover {
 <h3>Total hits: {{ hits }}</h3>
 {% endif %}
 </div>
-
-</body>
-</html>
+{% endblock %}

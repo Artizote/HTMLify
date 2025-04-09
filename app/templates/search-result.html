@@ -1,16 +1,8 @@
-<!-- search-result.html -->
-<!DOCTYPE html>
-<html>
-<head>
-    <title>HTMLify Search - {{ q }}</title>
-    {% include "stylesheet.html" %}
-    <style>
-    </style>
-</head>
-<body>
+{# Search Result #}
+{% extends "base.html" %}
+{% block title %}HTMLify Search - {{ q }}{% endblock %}
+{% block content %}
 <h1>HTMLify</h1>
-{% include "nav-bar.html" %}
-{% include "search-bar.html" %}
     <form class="filter-form" action="" method="POST">
     <div class="filter-label">Filter Options:</div>
     <label class="filter-option">
@@ -33,5 +25,4 @@
     </div>
 {% endfor %}
 <!-- impliment pagination -->
-</body>
-</html>
+{% endblock %}

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="/static/css/stylesheet.css" rel="stylesheet">
+    <link href="/static/css/nav-bar.css" rel="stylesheet">
+    {% block head_content %}{% endblock %}
+    <title>{% block title %}HTMLify{% endblock %}</title>
+</head>
+<body>
+    {% include "nav-bar.html" %}
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

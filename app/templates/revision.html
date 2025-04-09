@@ -1,8 +1,7 @@
-<!DOCTYPE html>
-<html>
-    <head>
-    <title>Revisions</title>
-    {% include "stylesheet.html" %}
+{# Revision #}
+{% extends "base.html" %}
+{% block title %}Revisions{% endblock %}
+{% block head_content %}
     <style>
     body {
         font-family: Arial, sans-serif;
@@ -34,11 +33,9 @@
         border: none;
     }
     </style>
-    </head>
-    <body>
+{% endblock %}
+{% block content %}
     <h1>Revisions</h1>
-    {% include 'search-bar.html' %}
-    {% include 'nav-bar.html' %}
     <div>
         {% if "msg" in request.args.keys() %}
             <b><span class="msg">{{ request.args["msg"] }}</span></b><br>
@@ -65,5 +62,4 @@
         <button id="restoreBtn">Restore this version</button>
     </form>
     </div>
-    </body>
-</html>
+{% endblock %}

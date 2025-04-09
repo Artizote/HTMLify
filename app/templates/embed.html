@@ -32,7 +32,7 @@
     {% if file.mode == "p" %}<a href="{{request.scheme}}://{{request.host}}/{{file.path}}">View Live</a>{% endif %}
     {% endif %}
     {% if request.args.get("download-button", "true") == "true" %}
-    <a href="{{request.scheme}}://{{request.host}}/{{file.path}}" download>Download</a>
+    <a href="{{request.scheme}}://{{request.host}}/raw/{{file.path}}" download>Download</a>
     {% endif %}
 </div>
 <script>
