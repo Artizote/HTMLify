@@ -1,6 +1,10 @@
 {# home.html #}
 {% extends "base.html" %}
+{% from "macros.html" import file_card %}
 {% block title %}HTMLify your dreams{% endblock %}
+{% block head_content %}
+    <link href="/static/css/file-card.css" rel="stylesheet">
+{% endblock %}
 {% block content %}
     <h1>HTMLify your dreams</h1>
     <form class="filter-form" action="" method="POST">
@@ -22,12 +26,6 @@
     <button class="filter-button" type="submit">Filter</button>
     </form>
     {% for file in files %}
-    <div class="search-result">
-        <img style="width: 12px; height: 12px;" src="/media/dp/{{ file.owner }}.jpg"> <span>{{ file.name }}</span> | <span>Owner: <a href="/{{ file.owner }}">{{ file.owner }}</a></span> | Views: {{ file.views }} | Comments: {{ file.comments | length }} | <a href="{{ file.path }}">Open</a>/ <a href="/src/{{ file.path }}">Source</a>{% if session.get("user") and file.owner == session["user"]["username"] %}| <a href="/edit?filepath={{ file.path[file.owner|length + 1:] }}">Edit</a>{% endif %} {{ file.sizef() }}<br>
-    <hr>
-    {% if file.type == "text" %}
-    <p>{{ file.content[:128] }}</p>
-    {% endif %}
-    </div>
+        {{ file_card(file) }}
     {% endfor %}
 {% endblock %}

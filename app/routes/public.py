@@ -251,6 +251,8 @@ def _search_page():
         q = "user:@" + filterd_user + " "+q
 
     results = list(filter(lambda file:file["mode"] in filterd_modes, results))
+    for result in results:
+        result["file"] = files.by_path(result["path"])
     return render_template("search-result.html", results=results, page=page, q=q)
 
 @public.route("/media/dp/<username>.jpg")

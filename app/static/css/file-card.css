@@ -1,0 +1,77 @@
+/* File Card Style */
+
+.file-card {
+    width: 96%;
+    background: #eee;
+    border: 1px solid #bbb;
+    padding: 10px;
+    margin: 4px auto;
+}
+
+.file-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 2px solid #757575;
+    padding-bottom: 5px;
+    overflow: auto;
+}
+
+.file-card .profile-pic {
+    width: 32px;
+    height: 32px;
+    padding: 4px 6px;
+    margin-right: 10px;
+}
+
+.file-info {
+    flex-grow: 1;
+}
+
+.file-info .file-title {
+    display: block;
+    font-size: 18px;
+    color: black;
+}
+
+.file-info .file-path {
+    color: 333;
+}
+
+.file-card-meta {
+    text-align: right;
+    font-size: 12px;
+    color: #333;
+}
+
+.file-card-body {
+    padding: 10px 0;
+    font-size: 14px;
+    font-family: monospace;
+    overflow: auto;
+}
+
+.file-card-body .search-found {
+    text-decoration: underline;
+    background-color: yellow;
+}
+
+.action-buttons {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+}
+.action-buttons button {
+    padding: 5px 10px;
+    border: 1px solid #333;
+    background: white;
+    cursor: pointer;
+    margin: 2px;
+    border: none;
+    background: inherit;
+    transition: transform 0.2s;
+}
+
+.action-buttons button:hover {
+    transform: scale(1.2);
+}

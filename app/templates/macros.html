@@ -1,0 +1,56 @@
+{# File Card #}
+{% macro file_card(file, hls=0, hle=0, custom_body=None) %}
+<div class="file-card">
+    <div class="file-card-header">
+        <div>
+            <a href="/{{ file.owner }}">
+                <img class="profile-pic" src="/media/dp/{{ file.owner }}.jpg" title="{{ file.owner }}">
+            </a>
+        </div>
+        <div class="file-info">
+            <b class="file-title">{{ file.name }}</b>
+            <span class="file-path">{{ file.path }}</span>
+        </div>
+        <div class="meta">
+            <div>{{ file.views }} Views</div>
+            <div>{{ file.comments | length }} Comments</div>
+        </div>
+    </div>
+
+    {% if file.password -%}
+        {% set custom_body = "<i style='color:blue;'>File is locked</i>" -%}
+    {% elif file.visibility == "h" -%}
+        {% set custom_body = "<i style='color:red;'>File is hidden</i>" -%}
+    {% elif file.visibility == "o" -%}
+        {% set custom_body = "<i style='color:gray;'>File can only seen once</i>" -%}
+    {% elif file.type != "text" -%}
+        {% set custom_body = "<i style='color:green;'>Media file</i>" -%}
+    {% endif -%}
+
+    <div class="file-card-body">
+        {% if custom_body == None %}
+            {% for line in file.content[:512].split("\n")[:8] %}
+                {{ line }}<br>
+            {% endfor %}
+        {% else %}
+            {{ custom_body | safe }}
+        {% endif %}
+    </div>
+    <div class="action-buttons">
+        {% if session.get("user") and file.owner == session["user"]["username"] %}
+            <a href="/edit?filepath={{ file.path[file.owner|length + 1:] }}" title="Edit">
+                <button><img src="/static/svg/file-pen-line.svg"></button>
+            </a>
+        {% endif %}
+        <a href="/{{ file.path }}" title="View">
+            <button><img src="/static/svg/eye.svg"></button>
+        </a>
+        <a href="/src/{{ file.path }}" title="Source">
+            <button><img src="/static/svg/code.svg"></button>
+        </a>
+        <a href="/{{ file.path }}#run-button" title="Run">
+            <button><img src="/static/svg/play.svg"></button>
+        </a>
+    </div>
+</div>
+{% endmacro %}

@@ -269,55 +269,6 @@ body {
     cursor: pointer;
 }
 
-
-/* search result page style */
-/*
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f2f2f2;
-    margin: 0;
-    padding: 0;
-}
-/*
-.search-form {
-    margin: 20px;
-    text-align: center;
-}
-.search-form input[type="text"] {
-    padding: 5px;
-    width: 300px;
-}
-.search-form input[type="submit"] {
-    padding: 5px 10px;
-    background-color: #007BFF;
-    color: #fff;
-    border: none;
-    cursor: pointer;
-}
-*/
-.search-result {
-    border: 1px solid black;
-    margin: 10px;
-    padding: 10px;
-    background-color: #fff;
-}
-.search-result a {
-    color: #007BFF;
-    text-decoration: none;
-    margin-right: 10px;
-}
-.search-result p {
-    margin: 5px 0;
-    overflow: hidden;
-}
-.search-found {
-    text-decoration: underline;
-    background-color: yellow;
-    
-}
-
-
-
 /* file show style */
 .file-container {
     max-width: 800px;

@@ -21,7 +21,10 @@ db.init_app(app)
 
 register_blueprints(app)
 
-if __name__ == "__main__":
+def run_app(debug=True):
     Thread(target=search_indexing_daemon, args=(TermFrequency, app, files), daemon=True).start()
     Thread(target=process_pool_purger, args=(PROCESS_POOL,), daemon=True).start()
-    app.run(debug=True)
+    app.run(debug=debug)
+
+if __name__ == "__main__":
+    run_app()

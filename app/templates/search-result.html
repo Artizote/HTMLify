@@ -1,6 +1,10 @@
 {# Search Result #}
 {% extends "base.html" %}
+{% from "macros.html" import file_card %}
 {% block title %}HTMLify Search - {{ q }}{% endblock %}
+{% block head_content %}
+    <link href="/static/css/file-card.css" rel="stylesheet">
+{% endblock %}
 {% block content %}
 <h1>HTMLify</h1>
     <form class="filter-form" action="" method="POST">
@@ -18,11 +22,7 @@
     </form>
 
 {% for result in results %}
-    <div class="search-result">
-        <span>{{ result["name"] }}</span> | <span>Owner: {{ result["owner"] }}</span> | Views: {{ result["views"] }} | Comments: {{ result["comments"] | string }} | <a href="{{ result["path"] }}">Open</a>/ <a href="/src/{{ result["path"] }}">Source</a>{% if session.get("user") and result["owner"] == session["user"]["username"] %}| <a href="/edit?filepath={{ result["path"][result.owner|length + 1:] }}">Edit</a>{% endif %}<br>
-        <hr>
-        <p>{{ result["snippet"] | safe }}</p>
-    </div>
+    {{ file_card(result["file"], custom_body=result["snippet"]) }}
 {% endfor %}
 <!-- impliment pagination -->
 {% endblock %}
