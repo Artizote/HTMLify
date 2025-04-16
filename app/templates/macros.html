@@ -1,6 +1,8 @@
+{# Macros #}
+
 {# File Card #}
 {% macro file_card(file, hls=0, hle=0, custom_body=None) %}
-<div class="file-card">
+<div class="file-card" onclick="window.location.href='/{{ file.path }}'">
     <div class="file-card-header">
         <div>
             <a href="/{{ file.owner }}">
@@ -24,7 +26,7 @@
     {% elif file.visibility == "o" -%}
         {% set custom_body = "<i style='color:gray;'>File can only seen once</i>" -%}
     {% elif file.type != "text" -%}
-        {% set custom_body = "<i style='color:green;'>Media file</i>" -%}
+        {% set custom_body = "<i style='color:purple;'>Media file</i>" -%}
     {% endif -%}
 
     <div class="file-card-body">
@@ -50,6 +52,40 @@
         </a>
         <a href="/{{ file.path }}#run-button" title="Run">
             <button><img src="/static/svg/play.svg"></button>
+        </a>
+    </div>
+</div>
+{% endmacro %}
+
+{# Dir Card #}
+{% macro dir_card(dir) %}
+<div class="dir-card" onclick="window.location.href = '/{{ dir.dir }}'">
+    <div class="dir-card-header">
+        <div>
+            <a href="/{{ dir.dir[:dir.dir.find("/")] }}">
+                <img class="profile-pic" src="/media/dp/{{ dir.dir[:dir.dir.find("/")] }}.jpg" title="{{ dir.dir[:dir.dir.find("/")] }}">
+            </a>
+        </div>
+        <div class="dir-info">
+            <b class="dir-title">{{ dir.title }}</b>
+            <span class="dir-path">{{ dir.dir }}</span>
+        </div>
+        <div class="meta">
+            <div>{{ dir.items() | length }} Items</div>
+        </div>
+    </div>
+    <div class="dir-card-body">
+        {% for item in dir.items()[:8] %}
+        {% if item.__class__.__name__ == "Dir" %}
+            <li style="color:green;">{{ item.title }}</li>
+        {% else %}
+            <li style="color:black;">{{ item.name }}</li>
+        {% endif %}
+        {% endfor %}
+    </div>
+    <div class="action-buttons">
+        <a href="/{{ dir.dir }}" title="Open">
+            <button><img src="/static/svg/folder-open.svg"></button>
         </a>
     </div>
 </div>

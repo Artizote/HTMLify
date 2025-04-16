@@ -1,6 +1,11 @@
 {# User Profile #}
 {% extends "base.html" %}
+{% from "macros.html" import file_card, dir_card %}
 {% block title %}{{ user.username }} | HTMLify profile{% endblock %}
+{% block head_content %}
+    <link href="/static/css/file-card.css" rel="stylesheet">
+    <link href="/static/css/dir-card.css" rel="stylesheet">
+{% endblock %}
 {% block content %}
     <h1>{{ user.username }} - HTMLify profile</h1>
     <main class="profile-container">
@@ -23,16 +28,12 @@
         </section>
         {% endif %}
         <section style="max-width:100%">
-            <h2>Latest files of {{ user.username }}</h2>
-            {% for file in user.files[::-1] %}
-            {% if not file.as_guest %}
-                <div class="search-result">
-                {{ loop.index }}. <span>{{ file.name }}</span> | <span>Owner: {{ file.owner }}</span> | Views: {{ file.views }} | Comments: {{ file.comments | length }} | <a href="/{{ file.path }}">Open</a>/ <a href="/src/{{ file.path }}">Source</a>{% if session.get("user") and file.owner == session["user"]["username"] %}| <a href="/edit?filepath={{ file.path[file.owner|length + 1:] }}">Edit</a>{% endif %} {{ file.sizef() }}<br>
-                <hr>
-                {% if file.type == "text" %}
-                <p>{{ file.content[:128] }}</p>
-                {% endif %}
-                </div>
+            <h2>Latest files of {{ request.path }}</h2>
+            {% for item in items %}
+            {% if item.is_file() and not item.as_guest %}
+                {{ file_card(item) }}
+            {% else %}
+                {{ dir_card(item) }}
             {% endif %}
             {% endfor %}
         </section>

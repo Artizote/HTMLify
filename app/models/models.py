@@ -5,7 +5,7 @@ from pygments import highlight, lexers, formatters
 from random import randint
 from re import compile, sub, match, findall
 #from utils import *
-from .config import *
+from app.config import *
 
 
 
@@ -172,6 +172,63 @@ class files(db.Model):
     def last_revision(self):
         return Revision.query.filter_by(file=self.id).order_by(Revision.time.desc()).first()
 
+    def is_file(self) -> bool:
+        return True
+    
+    def is_dir(self) -> bool:
+        return False
+
+    @property
+    def dir(self):
+        return Dir(self)
+
+
+class Dir:
+    """ Directory """
+    
+    def __init__(self, file_or_path):
+        if type(file_or_path) == str:
+            self.dir = file_or_path
+        else:
+            self.dir = file_or_path.path[:file_or_path.rfind("/")]
+        if self.dir and self.dir[-1] != "/":
+            self.dir += "/"
+
+    def __repr__(self) -> str:
+        return f"<Dir '{self.dir}'>"
+
+    def __str__(self) -> str:
+        return self.dir
+
+    def __eq__(self, other) -> bool:
+        if type(self) != type(other):
+            return False
+        return self.dir == other.dir
+
+    @property
+    def title(self) -> str:
+        return self.dir[self.dir[:-1].rfind("/", ):][1:]
+
+    def is_file(self) -> bool:
+        return False
+    
+    def is_dir(self) -> bool:
+        return True
+
+    def items(self) -> list["Dir", files]:
+        """ Return items of the diroctory """
+        items_ = []    
+        filespaths = list(map(lambda i:i.path, files.query.filter(files.path.startswith(self.dir)).all()))
+        for path in filespaths:
+            if path.count("/") == self.dir.count("/"):
+                items_.append(files.by_path(path))
+            else:
+                path: str
+                dir = path[:path.find("/", len(self.dir))]
+                dir = Dir(dir)
+                if dir not in items_:
+                    items_.append(dir)
+        return items_
 
 
 class comments(db.Model):

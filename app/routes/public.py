@@ -46,6 +46,7 @@ def _home():
 def _usersites(username):
     username = username.lower()
     user = users.get_user(username)
+    items = sorted(Dir(username).items(), key=lambda i:[1, 0][type(i)==Dir])
     if not user:
         return "<center><h1>NO USER FOUND WIT NAME " + username + "</h1></center>", 404
     latest_comments = []
@@ -57,14 +58,19 @@ def _usersites(username):
             })
         except:
             pass
-    return render_template("profile.html", user=user, latest_comments=latest_comments, q="user:@"+user.username+" ")
+    return render_template("profile.html", user=user, latest_comments=latest_comments, items=items, q="user:@"+user.username+" ")
 
 @public.route("/<username>/<path:path>", methods=["GET", "POST"])
 def _userfiles(username, path):
     username = username.lower()
+    user = users.get_user(username)
     fullpath = username + "/" + path
     file = files.by_path(fullpath)
-    if not file: return "404", 404
+    items = sorted(Dir(request.path[1:]).items(), key=lambda i:[1, 0][type(i)==Dir])
+    if not file:
+        if items:
+            return render_template("profile.html", user=user, items=items)
+        return "404", 404
     
     if file.visibility == "h":
         if not session.get("user"):

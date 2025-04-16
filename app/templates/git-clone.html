@@ -3,8 +3,6 @@
 {% block title %}Git Clone{% endblock %}
 {% block content %}
     <h1>HTMLify</h1>
-    {% include 'search-bar.html' %}
-    {% include 'nav-bar.html' %}
     <form class="git-clone" action="/action/git-clone" method="post">
         {% if request.args.get("msg") %}
             <div class="error-msg">
