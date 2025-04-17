@@ -1,45 +1,33 @@
 {# Dashboard #}
 {% extends "base.html" %}
+{% from "macros.html" import files_list_view, files_gird_view %}
 {% block title %}Dashboard - {{ session["user"]["username"] }}{% endblock %}
+{% block head_content %}
+    <link href="/static/css/dashboard.css" rel="stylesheet">
+    <link href="/static/css/files-view.css" rel="stylesheet">
+{% endblock %}
 {% block content %}
     <h1>Dashboard</h1>
+
     <div class="dashboard-links">
         <a href="/edit?filepath={{ dir }}">Make new file</a>
         <a href="/file-upload?dir={{ dir }}">Upload File</a>
         <a href="/git?dir={{ dir }}">Git Clone</a>
     </div>
-        
-    <table class="file-table">
-        <tr>
-            <th>#</th>
-            <th>File Name</th>
-            <th>Edit</th>
-            <th>View</th>
-            <th>Delete</th>
-        </tr>
-        {% for filepath in filepaths[::-1] %}
-	    {% if not "/" in filepath %}
-        <tr>
-            <td>{{ filepaths|length + 1 - loop.index }}</td>
-            <td><b>{{ filepath }}</b></td>
-            <td><a href="edit?filepath={{ dir + filepath }}"><button>Edit</button></a></td>
-            <td><a href="/{{ session["user"]["username"] }}/{{ dir + filepath }}"><button>View</button></a></td>
-            <td>
-                <form action="/delete" method="POST" style="display:inline;">
-                    <input type="hidden" name="path" value="{{ session["user"]["username"] }}/{{ dir + filepath }}">
-                    <input type="submit" value="Delete">
-                </form>
-            </td>
-        </tr>
-	{% else %}
-	<tr>
-            <td>{{ loop.index }}</td>
-	    <td><a href="/dashboard?dir={{ dir + filepath }}">{{ filepath }}</a></td>
-	    <td></td>
-	    <td></td>
-	    <td></td>
-	</tr>
-	{% endif %}
+
+    {% set dirs = dir.split("/") %}
+    <div class="dir-nav">
+        <a href="/dashboard">{{ session["user"]["username"] }}</a>
+        {% for d_path in dirs %}
+        /<a href="/dashboard?dir={{ "/".join(dirs[:loop.index]) }}"
+            {% if loop.index == dirs|length %}
+            class="current"
+            {% endif %}
+            >
+            {{ d_path }}
+        </a>
         {% endfor %}
-    </table>
+    </div>
+
+    {{ files_list_view(items) }}
 {% endblock %}

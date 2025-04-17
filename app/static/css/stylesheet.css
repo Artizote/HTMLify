@@ -79,50 +79,6 @@ h1 {
 }
 
 
-/* dashboard sty;e */
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-table, th, td {
-    border: 1px solid #000;
-}
-
-th, td {
-    padding: 8px;
-    text-align: center;
-}
-
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f2f2f2;
-    margin: 0;
-    padding: 0;
-}
-.dashboard-header {
-    text-align: center;
-    padding: 20px;
-    background-color: #007BFF;
-    color: #fff;
-}
-.dashboard-links {
-    text-align: center;
-    margin: 20px;
-}
-.dashboard-links a {
-    text-decoration: none;
-    color: #007BFF;
-    padding: 5px 10px;
-    margin: 5px;
-    border: 1px solid #007BFF;
-    border-radius: 5px;
-}
-.dashboard-links a:hover {
-    background-color: #007BFF;
-    color: #fff;
-}
 
 
 

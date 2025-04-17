@@ -13,20 +13,11 @@ user = Blueprint("user", __name__)
 def dashboard():
     if not session.get("user"): return redirect("/login")
     user = session["user"]["username"]
-    _files = files.query.filter_by(owner=session["user"]["username"]).all()
-    filepaths = map(lambda f:f.path, _files)
-    pwd = user+"/"+request.args.get("dir", "")
-    current_paths = []
-    for filepath in filepaths:
-        if filepath.startswith(pwd):
-            current_path = filepath[len(pwd):]
-            if "/" in current_path:
-                current_path = current_path[:current_path.find("/", current_path.find("/"))+1]
-            if current_path in current_paths:
-                continue
-            current_paths.append(current_path)
+    dir = request.args.get("dir", "")
+    pwd = user+"/"+dir
+    items = Dir(pwd).items()[::-1]
     session["user"]["notifications"] = Notification.query.filter_by(user=user).filter_by(viewed=0).count()
-    return render_template("dashboard.html", filepaths=current_paths, user=user, dir=request.args.get("dir", ""))
+    return render_template("dashboard.html", items=items, user=user, dir=dir)
 
 @user.route("/edit", methods=["GET", "POST"])
 def edit_file():

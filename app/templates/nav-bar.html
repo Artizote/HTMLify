@@ -29,5 +29,10 @@
     <a href="/frames">Frames</a>
     <a href="/api">API</a>
 
+    {% if session.get("user") %}
+    <a href="/{{ session["user"]["username"] }}" class="right" style="padding:0px;">
+        <img src="/media/dp/{{ session["user"]["username"] }}.jpg">
+    </a>
     <a href="/action/logout" class="right">Log out</a>
+    {% endif %}
 </div>

@@ -1,0 +1,64 @@
+.files-list .item {
+  display: flex;
+  width: 96%;
+  align-items: center;
+  background-color: #eee;
+  padding: 6px 10px;
+  gap: 10px;
+  font-family: sans-serif;
+  font-size: 14px;
+  border-style: solid;
+  border-color: black;
+  border-width: 1px 0px;
+  margin: 2px auto;
+}
+
+.files-list .item:nth-child(even) {
+    background-color: #ddd;
+}
+
+.files-list .item-thumbnail {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+}
+
+.files-list .item-info {
+  flex-grow: 1;
+  line-height: 1.2;
+}
+
+.files-list .item-name {
+  margin: 0;
+  font-size: 16px;
+}
+
+.files-list .item-path {
+  margin: 2px 0 4px 0;
+  font-size: 13px;
+  font-weight: normal;
+  color: #666;
+}
+
+.files-list .item-meta {
+  font-size: 12px;
+  color: #555;
+}
+
+.files-list .item-actions {
+  display: flex;
+  gap: 5px;
+}
+
+.files-list .item-actions button {
+  padding: 4px 8px;
+  font-size: 13px;
+  cursor: pointer;
+  background: inherit;
+  border: 0px; 
+}
+
+.files-list .item-actions .delete {
+  color: red;
+}
+

@@ -1,0 +1,47 @@
+/* Dashboard Style */
+
+.dashboard-header {
+    text-align: center;
+    padding: 20px;
+    background-color: #007BFF;
+    color: #fff;
+}
+.dashboard-links {
+    text-align: center;
+    margin: 20px;
+}
+.dashboard-links a {
+    text-decoration: none;
+    color: #007BFF;
+    padding: 5px 10px;
+    margin: 5px;
+    border: 1px solid #007BFF;
+    border-radius: 5px;
+}
+.dashboard-links a:hover {
+    background-color: #007BFF;
+    color: #fff;
+}
+
+.dir-nav {
+    width: 90%;
+    overflow: scroll;
+    margin: 10px auto;
+    font-size: 17px;
+    padding: 4px 8px;
+}
+
+.dir-nav a {
+    color: #2196f3;
+    text-decoration: none;
+}
+
+.dir-nav a:hover {
+    background-color: #ddeeff;
+    border-radius: 4px;
+    text-decoration: underline;
+}
+
+.dir-nav a.current {
+    text-decoration: underline;
+}

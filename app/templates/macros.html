@@ -90,3 +90,67 @@
     </div>
 </div>
 {% endmacro %}
+
+{# Grid Item #}
+
+{# Files Grid View #}
+{% macro files_grid_view(items) %}
+{% endmacro %}
+
+{# Fils List View #}
+{% macro files_list_view(items) %}
+<div class="files-list">
+    {% for item in items %}
+    {% if item.is_file() %}
+    <div class="item" onclick="window.location.href = '/edit?filepath={{ item.path[item.path.find('/')+1:] }}'">
+        {% if item.type == "text" %}
+        <img src="/static/svg/file-code.svg" alt="Thumbnail" class="item-thumbnail">
+        {% elif item.type == "image" %}
+        <img src="/static/svg/file-image.svg" alt="Thumbnail" class="item-thumbnail">
+        {% elif item.type == "audio" %}
+        <img src="/static/svg/file-audio.svg" alt="Thumbnail" class="item-thumbnail">
+        {% elif item.type == "video" %}
+        <img src="/static/svg/file-video.svg" alt="Thumbnail" class="item-thumbnail">
+        {% else %}
+        <img src="/static/svg/file-question.svg" alt="Thumbnail" class="item-thumbnail">
+        {% endif %}
+
+        <div class="item-info">
+            <h3 class="item-name">{{ item.name or item.path[item.path.rfind("/"):] }}</h3>
+            <h5 class="item-path">{{ item.path }}</h5>
+            <div class="item-meta">Size: {{ item.sizef() }}</div>
+        </div>
+
+        <div class="item-actions">
+            <a href="{{ item.path }}">
+                <button title="View"><img src="/static/svg/eye.svg"></button>
+            </a>
+            <a href="/edit?filepath={{ item.path[item.path.find("/")+1:] }}">
+                <button title="Edit"><img src="/static/svg/file-pen-line.svg"></button>
+            </a>
+            <form action="/delete" method="POST" style="display:inline;">
+                <input type="hidden" name="path" value="{{ item.path }}">
+                <button class="delete" title="Delete"><img src="/static/svg/trash.svg"></button>
+            </form>
+        </div>
+    </div>
+    {% else %} 
+    <div class="item" onclick="window.location.href = '/dashboard?dir={{ item.dir[item.dir.find("/")+1:] }}'">
+        <img src="/static/svg/folder-open.svg" alt="Thumbnail" class="item-thumbnail">
+
+        <div class="item-info">
+            <h3 class="item-name">{{ item.title }}</h3>
+            <h5 class="item-path">{{ item.path }}</h5>
+            <div class="item-meta">Contains {{ item.items() | length }} Items</div>
+        </div>
+
+        <div class="item-actions">
+            <a href="/dashboard?dir={{ item.dir[item.dir.find("/")+1:] }}">
+                <button><img src="/static/svg/folder-open.svg"></button>
+            </a>
+        </div>
+    </div>
+    {% endif %}
+    {% endfor %}
+</div>
+{% endmacro %}
