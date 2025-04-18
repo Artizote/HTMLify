@@ -1,5 +1,8 @@
 /* Dashboard Style */
 
+
+/* Top Links */
+
 .dashboard-header {
     text-align: center;
     padding: 20px;
@@ -23,6 +26,8 @@
     color: #fff;
 }
 
+/* Diractory Navigation */
+
 .dir-nav {
     width: 90%;
     overflow: scroll;
@@ -44,4 +49,28 @@
 
 .dir-nav a.current {
     text-decoration: underline;
+}
+
+/* File Filter */
+
+#file-filter {
+    display: block;
+    width: 90%;
+    height: 4rem;
+    margin: auto;
+}
+
+#file-filter-input {
+    display: block;
+    width: 100%;
+    height: 2rem;
+}
+
+#file-filter-status {
+    margin-top: 0px;
+    display: none;
+    background-color: yellow;
+    padding: 8px;
+    border-radius: 0px 0px 6px 6px;
+    text-align: center;
 }

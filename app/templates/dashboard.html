@@ -1,6 +1,6 @@
 {# Dashboard #}
 {% extends "base.html" %}
-{% from "macros.html" import files_list_view, files_gird_view %}
+{% from "macros.html" import files_list_view, files_grid_view %}
 {% block title %}Dashboard - {{ session["user"]["username"] }}{% endblock %}
 {% block head_content %}
     <link href="/static/css/dashboard.css" rel="stylesheet">
@@ -29,5 +29,45 @@
         {% endfor %}
     </div>
 
-    {{ files_list_view(items) }}
+    <div id="file-filter">
+        <input type="search" id="file-filter-input" placeholder="Filter files">
+        <p id="file-filter-status"></p>
+    </div>
+
+    {{ files_grid_view(items) }}
+
+{% endblock %}
+{% block after_body %}
+<script>
+const file_filter_input = document.getElementById("file-filter-input");
+const file_filter_status = document.getElementById("file-filter-status");
+
+file_filter_input.addEventListener("input", () => {
+    const items = document.querySelectorAll(".item");
+    const q = file_filter_input.value.toLowerCase();
+    let match_count = 0;
+    items.forEach((item) => {
+        if (
+            item.getAttribute("data-title").toLowerCase().includes(q) ||
+            item.getAttribute("data-path").toLowerCase().includes(q)
+        ) {
+            item.style.display = "flex";
+            match_count++;
+        } else {
+            item.style.display = "none";
+        }
+    });
+    if (q.length > 0) {
+        file_filter_status.style.display = "block";
+        file_filter_status.innerText = `${match_count} Files matched out of ${items.length}`;
+        if (match_count == 0) {
+            file_filter_status.style.backgroundColor = "orange";
+        } else {
+            file_filter_status.style.backgroundColor = "yellow";
+        }
+    } else {
+        file_filter_status.style.display = "none";
+    }
+});
+</script>
 {% endblock %}

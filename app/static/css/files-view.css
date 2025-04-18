@@ -1,3 +1,8 @@
+/* Files View Style */
+
+
+/* List View */
+
 .files-list .item {
   display: flex;
   width: 96%;
@@ -61,4 +66,75 @@
 .files-list .item-actions .delete {
   color: red;
 }
+
+/* Grid View */
+
+.files-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+  padding: 10px;
+  font-family: sans-serif;
+}
+
+.files-grid .item {
+  background-color: #fdfdfd;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 1px 1px 3px rgba(0,0,0,0.05);
+  transition: box-shadow 0.2s;
+}
+
+.files-grid .item:hover {
+  box-shadow: 2px 2px 6px rgba(0,0,0,0.1);
+}
+
+.files-grid .item-icon > img {
+    width: 36px;
+    height: 36px;
+}
+
+.files-grid .file-details {
+  text-align: center;
+  font-size: 13px;
+  color: #333;
+}
+
+.files-grid .item-title {
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.files-grid .item-filename {
+  color: #666;
+  font-style: italic;
+  font-size: 12px;
+}
+
+.files-grid .item-size {
+  font-size: 12px;
+  color: #888;
+  margin-top: 2px;
+}
+
+.files-grid .item-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.files-grid .item-actions button {
+  padding: 4px 8px;
+  font-size: 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: inherit;
+}
+
 
