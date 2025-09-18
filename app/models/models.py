@@ -73,10 +73,9 @@ class files(db.Model):
     size = db.Column(db.Integer, default=0)
     views = db.Column(db.Integer, default=0)
     mode = db.Column(db.String(1), default="r")
-    # mode - showmode of the file  r | p | s
-    # r - raw mode, show as plain text
-    # p - parse mode, for html documents only
-    # s - show mode, enable syntex highlighting
+    # mode - showmode of the file  r | s
+    # r - render mode, show as plain text
+    # s - source mode, enable syntex highlighting
     visibility = db.Column(db.String(1), default="p")
     # p - public, show file to all users
     # h - hidden, hide file from other users

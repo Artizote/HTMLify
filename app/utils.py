@@ -13,7 +13,7 @@ from .config import GIT_COMMAND_PATH
 IMAGE_FILE_EXTENTIONS = [
     "png", "jpg", "jpeg", "gif", "tif",
     "tiff", "bmp", "eps", "raw", "cr2",
-    "nef", "orf", "sr2", "svg", "webp"
+    "nef", "orf", "sr2", "webp"
 ]
 AUDIO_FILE_EXTENTIONS = [
     "3gp", "amr", "m4a", "m4b", "m4p", "mp3",
@@ -45,7 +45,7 @@ TEXT_FILE_EXTENTIONS = [
     'purs', 'py', 'r', 'rb', 're',
     'resource', 'robot', 'rs', 'scala', 'sh',
     'shrc', 'sjs', 'sql', 'ss', 'suite',
-    'sv', 'swift', 'tb', 'tex', 'tk',
+    'sv', "svg", 'swift', 'tb', 'tex', 'tk',
     'ts', "txt", 'var', 'vbs', 'vhd', 'vpack',
     'vpkg', 'wasm', 'wat', 'ws', 'xml', 'xsd',
     'yaml', 'yml',
@@ -181,15 +181,13 @@ def git_clone(user, repo, dir="", mode='r', visibility='p', overwrite=True):
         ext = path.split("/")[-1].split(".")[-1].replace("/", "").lower()
 
         filemode = mode
-        if mode == 'p':
-            if not ext in {"html", "htm"}:
-                filemode = 'r'
-        
+
         if overwrite:
             if file := files.by_path(user+"/"+dir+("/"if dir else "")+path):
                 file.content = content
                 file.mode = filemode
                 file.visibility = visibility
+                file.type = filetype(ext)
                 db.session.commit()
                 continue
 

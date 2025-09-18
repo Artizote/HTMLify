@@ -14,9 +14,8 @@
         {{ session["user"]["username"] }}/<input type="text" id="directory" name="directory" placeholder="my-repo" value="{{ request.args.get("dir", "") if request.args.get("dir", " ")[-1] != "/" else request.args.get("dir", "")[:-1] }}"><br><br>
         Display Mode: 
         <select id="mode" name="mode">
-            <option value='s'>Show</option>
-            <option value='p'>Parse</option>
-            <option value='r'>Raw</option>
+            <option value='s'>Source</option>
+            <option value='r'>Render</option>
         </select>
         Visibility: 
         <select id="visibility" name="visibility">

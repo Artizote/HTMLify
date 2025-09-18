@@ -31,19 +31,15 @@ def _home():
     if request.method == "POST":
         session["filter-file-modes"]=request.form.getlist("file-modes")
         session["filter-file-order"]=request.form.get("filter-order", "r")
-    filterd_modes = session.setdefault("filter-file-modes", ["p", "s"])
+    filterd_modes = session.setdefault("filter-file-modes", ["s", "r"])
     filterd_order = session.setdefault("filter-file-order", "r")
     filterd_files = list(filter(lambda file:file.mode in filterd_modes, _files))
     if filterd_order == "r":
         shuffle(filterd_files)
-    elif filterd_order == "n":
-        pass
-    elif filterd_order == "o":
-        filterd_files = filterd_files[::-1]
     return render_template("home.html", files=filterd_files[:MAX_FILES_ON_HOME])
 
 @public.route("/<username>/")
-def _usersites(username):
+def _user_profile(username):
     username = username.lower()
     user = users.get_user(username)
     items = sorted(Dir(username).items(), key=lambda i:[1, 0][type(i)==Dir])
@@ -61,7 +57,7 @@ def _usersites(username):
     return render_template("profile.html", user=user, latest_comments=latest_comments, items=items, q="user:@"+user.username+" ")
 
 @public.route("/<username>/<path:path>", methods=["GET", "POST"])
-def _userfiles(username, path):
+def _user_files(username, path):
     username = username.lower()
     user = users.get_user(username)
     fullpath = username + "/" + path
@@ -102,17 +98,20 @@ def _userfiles(username, path):
             return send_file(file_path)
         return render_template("file-show.html", file=file, token=Token.generate())
     
-    if file.ext in {"html", "htm"}:
-        if file.mode == "r":
-            return file.content, 200, {"Content-type": "text/plain charset=utf-8"}
-        elif file.mode == "p":
-            return file.content
-    
     if file.mode == 'r':
+        if file.ext == "html" or file.ext == "htm":
+            return Response(file.content, mimetype="text/html")
         if file.ext == "css":
             return Response(file.content, mimetype='text/css')
         if file.ext == "js":
-            return Response(file.content, mimetype='text/js')
+            return Response(file.content, mimetype='text/javascript')
+        if file.ext == "json":
+            return Response(file.content, mimetype="application/json")
+        if file.ext == "xml":
+            return Response(file.content, mimetype="text/xml")
+        if file.ext == "svg":
+            return Response(file.content, mimetype="image/svg+xml")
+        # TODO: extend mimetyping
         return file.content, 200, {"Content-type": "text/plain charset=utf-8"}
 
     _executors = suggest_executors(file.path)
@@ -184,7 +183,7 @@ def _src_file(path):
 
 
     if file.visibility == "o":
-        file.visibility == "h"
+        file.visibility = "h"
     file.views += 1
     db.session.commit()
     
@@ -202,7 +201,7 @@ def _pastebin_data(id):
     if c: return c, {"Content-type": "text/plain charset=utf-8"}
     return "", 404
 
-@public.route("/r", methods=["GET", "POST"])
+@public.route("/r/", methods=["GET", "POST"])
 def _link_shortener():
     shorted = url = None
     hits = None
@@ -232,7 +231,7 @@ def _short_redirection(shortcode):
 def _search_page():
     if request.method == "POST":
         session["filter-file-modes"]=request.form.getlist("file-modes")
-    filterd_modes = session.setdefault("filter-file-modes", ["p", "s"])
+    filterd_modes = session.setdefault("filter-file-modes", ["r", "s"])
 
     q = request.args.get("q", "").lower()
     page = request.args.get("p", 1)
@@ -291,7 +290,7 @@ def _frames():
 def _frame_feed():
     _files = list(filter(lambda f:f.ext in {"html", "htm"},
                     files.query
-                  .filter_by(mode="p")
+                  .filter_by(mode="r")
                   .filter_by(password="")
                   .filter_by(as_guest=False)
                   .order_by(files.views).all()))

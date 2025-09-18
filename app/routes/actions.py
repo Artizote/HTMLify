@@ -19,7 +19,8 @@ reserved_root_paths = {
     "src", "guest", "r",
     "revision", "frames", "robots.txt",
     "exec", "proc", "static",
-    "login", "logout",
+    "login", "logout", "print"
+    "clone",
     }
 
 @action.route("/login", methods=["POST"])

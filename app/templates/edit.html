@@ -73,10 +73,8 @@
     <br>
     <label for="filemode">File Mode:</label>
     <select id="filemode" name="mode">
-        <option value="p" {% if current_mode == "p" or not "user" in session %}selected{% endif %}>Parse</option>
-        
-        <option value="s" {% if current_mode == "s"%}selected{% endif %}>Show</option>
-        <option value="r" {% if current_mode == "r"%}selected{% endif %}>Raw</option>
+        <option value="s" {% if current_mode == "s"%}selected{% endif %}>Source Mode</option>
+        <option value="r" {% if current_mode == "r"%}selected{% endif %}>Render Mode</option>
     </select>
     <label for="visibility">File Visibility:</label>
     <select id="visibility" name="visibility">
