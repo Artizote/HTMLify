@@ -25,6 +25,7 @@
         margin-bottom: 5px;
     }
     .edit-form input[type="text"],
+    .edit-form input[type="password"],
     select,
     textarea {
         width: 100%;
@@ -33,6 +34,9 @@
         border: 1px solid #ccc;
         border-radius: 5px;
         box-sizing: border-box;
+    }
+    #password {
+        width: 80%;
     }
     .button-container {
         text-align: center;
@@ -60,8 +64,13 @@
     <input type="text" id="filepath" name="path" value="{{ path }}" placeholder="File path">
     <label for="filename">File Name:</label>
     <input type="text" id="filename" name="title" value="{{ title }}">
-    <label for="password">Password:</label>
-    <input type="password" id="password" name="password" value="{{ password }}" placeholder="Optional, fille if you want to protect your file" style="min-width:50%">
+    <details>
+        <summary>Protaction</summary>
+            <label>Lock file</label>
+        <input type="password" id="password" name="password" value="{{ password }}" placeholder="" style="min-width:50%">
+        <a onclick="togglePasswordShow()" id="password-show-toggle">Show</a>
+    </details>
+    <br>
     <label for="filemode">File Mode:</label>
     <select id="filemode" name="mode">
         <option value="p" {% if current_mode == "p" or not "user" in session %}selected{% endif %}>Parse</option>
@@ -116,6 +125,18 @@
         } else {
             filePathInput.disabled = false;
             fileExtensionContainer.style.display = "none";
+        }
+    }
+
+    function togglePasswordShow() {
+        var password_field = document.getElementById("password");
+        var password_toggle_button = document.getElementById("password-show-toggle");
+        if (password_toggle_button.innerText == "Show") {
+            password_toggle_button.innerText = "Hide";
+            password_field.setAttribute("type", "text");
+        } else {
+            password_toggle_button.innerText = "Show";
+            password_field.setAttribute("type", "password");
         }
     }
     {% if not "user" in session %}

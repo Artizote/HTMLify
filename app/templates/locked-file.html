@@ -2,14 +2,12 @@
 {% extends "base.html" %}
 {% block title %}File is locked{% endblock %}
 {% block content %}
-    <h1>HTMLify your dreams</h1>
-	<h1>Locked file</h1>
-	<center>
-	<form action="{{ request.url }}" method="POST">
-	<table>
-	<tr><td>Enter Password:</td><td><input type="password" name="password" required /></td></tr>
-	<tr><td></td><td><input type="submit" value="Unlock"></td></tr>
-	</table>
-	</form>
-	</center>
+<h1>Locked file</h1>
+<center>
+    <h3><label for="password">Enter Password</label></h3>
+    <form action="{{ request.url }}" method="POST">
+        <input type="password" name="password" required autofocus autocomplete="new-password"/>
+        <input type="submit" value="Unlock">
+    </form>
+</center>
 {% endblock %}
