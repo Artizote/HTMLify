@@ -48,7 +48,7 @@ def _usersites(username):
     user = users.get_user(username)
     items = sorted(Dir(username).items(), key=lambda i:[1, 0][type(i)==Dir])
     if not user:
-        return "<center><h1>NO USER FOUND WIT NAME " + username + "</h1></center>", 404
+        return "<center><h1>NO USER FOUND WITH NAME '<b>" + username + "</b>'</h1></center>", 404
     latest_comments = []
     for comment in comments.query.filter_by(author=username).order_by(comments.id.desc()).limit(8).all():
         try:

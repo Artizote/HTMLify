@@ -72,7 +72,7 @@ def get_extentions(type):
     if type == "audio":
         extentions = AUDIO_FILE_EXTENTIONS
     if type == "video":
-        extentions = VIDEIO_FILE_EXTENTIONS
+        extentions = VIDEO_FILE_EXTENTIONS
     if type == "document":
         extentions = DOCUMENT_FILE_EXTENTIONS
     for ext in extentions:

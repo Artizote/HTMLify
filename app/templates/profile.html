@@ -21,7 +21,7 @@
         <section class="comments-activity-container">
             <ul class="user-comments" style="width:90%;">
             {% for comment in latest_comments[::-1] %}
-            <!--<li><p>{{ user.username }} commented something <a href="{{ comment["filepath"] }}#comment-{{ comment["id"] }}" target="_blank">@{{ comment["filepath"] }}</a></p></li>-->
+            <!--<li><p>{{ user.username }} commented something <a href="/{{ comment["filepath"] }}#comment-{{ comment["id"] }}" target="_blank">@{{ comment["filepath"] }}</a></p></li>-->
             <span class="comment-activity">{{ user.username }} commented something <a href="{{ comment["filepath"] }}#comment-{{ comment["id"] }}">@{{ comment["filepath"] }}</a><br/></span>
             {% endfor %}
             </ul>
