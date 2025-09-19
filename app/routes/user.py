@@ -17,6 +17,8 @@ def dashboard():
     pwd = user+"/"+dir
     items = Dir(pwd).items()[::-1]
     session["user"]["notifications"] = Notification.query.filter_by(user=user).filter_by(viewed=0).count()
+    if fv := request.args.get("files-view"):
+        session["dashboard-files-view"] = fv
     return render_template("dashboard.html", items=items, user=user, dir=dir)
 
 @user.route("/edit", methods=["GET", "POST"])

@@ -7,7 +7,7 @@
 {% endblock %}
 {% block content %}
     <h1>HTMLify your dreams</h1>
-    <form class="filter-form" action="" method="POST">
+    <form id="filter-form" class="filter-form" action="" method="POST">
     <div class="filter-label">Filter Options:</div>
     <label class="filter-option">
     <input type="checkbox" name="file-modes" value="s" {% if 's' in session["filter-file-modes"] %}checked{% endif %}> Source
@@ -24,4 +24,21 @@
     {% for file in files %}
         {{ file_card(file) }}
     {% endfor %}
+    <script>
+        // to prevent the Document expire worning on bact-to-home after filter
+        document.getElementById("filter-form").addEventListener("submit", function(e) {
+            e.preventDefault(); 
+            let formData = new FormData(this);
+            fetch("", {
+                method: "POST",
+                body: formData
+            })
+            .then(responce => responce.text())
+            .then(data => {
+                console.log("data:", data);
+                location.reload();
+            });
+        });
+    </script>
+
 {% endblock %}

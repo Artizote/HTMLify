@@ -9,10 +9,17 @@
 {% block content %}
     <h1>Dashboard</h1>
 
+    {% set files_view = session.get("dashboard-files-view", "list") %}
+
     <div class="dashboard-links">
         <a href="/edit?filepath={{ dir }}">Make new file</a>
         <a href="/file-upload?dir={{ dir }}">Upload File</a>
         <a href="/git?dir={{ dir }}">Git Clone</a>
+        {% if files_view == "grid" %}
+        <a href="/dashboard?files-view=list">List View</a>
+        {% else %}
+        <a href="/dashboard?files-view=grid">Grid View</a>
+        {% endif %}
     </div>
 
     {% set dirs = dir.split("/") %}
@@ -34,7 +41,11 @@
         <p id="file-filter-status"></p>
     </div>
 
+    {% if files_view == "list" %}
+    {{ files_list_view(items) }}
+    {% else %}
     {{ files_grid_view(items) }}
+    {% endif %}
 
 {% endblock %}
 {% block after_body %}
