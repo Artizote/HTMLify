@@ -6,6 +6,12 @@
     border: 2px solid #757575;
     padding: 10px;
     margin: 4px auto;
+    border-left: 5px solid #10b981;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.file-card:hover {
+    transform: translateY(-3px);
 }
 
 .file-card-header {
@@ -31,7 +37,7 @@
 .file-info .file-title {
     display: block;
     font-size: 18px;
-    color: black;
+    color :#065f46;
 }
 
 .file-info .file-path {
@@ -75,3 +81,44 @@
 .action-buttons button:hover {
     transform: scale(1.2);
 }
+
+/* File Card colors */
+
+/* Lock */
+
+.file-card.locked {
+  border-left: 5px solid #3b82f6;
+  background: #dbeafe;
+}
+.file-card.locked .file-title {
+  color: #1e3a8a;
+}
+
+/* Visibility */
+
+.file-card.hidden {
+  border-left: 5px solid #334155;
+  background: #dedede;
+}
+.file-card.hidden .file-title {
+  color: #0f172a;
+}
+
+.file-card.once {
+  border-left: 5px solid #64748b;
+  background: #f1f5f9;
+}
+.file-card.once .file-title {
+  color: #0f172a;
+}
+
+/* Type */
+
+.file-card.media {
+  border-left: 5px solid #8b5cf6;
+  background: #ede9fe;
+}
+.file-card.media .file-title {
+  color: #4c1d95;
+}
+

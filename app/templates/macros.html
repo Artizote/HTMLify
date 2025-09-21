@@ -2,7 +2,18 @@
 
 {# File Card #}
 {% macro file_card(file, hls=0, hle=0, custom_body=None) %}
-<div class="file-card" onclick="window.location.href='/{{ file.path }}'">
+<div
+    class="file-card
+    {% if file.password %} locked {% endif %}
+    {% if file.visibility == 'h' %} hidden {% endif %}
+    {% if file.visibility == 'o' %} once {% endif %}
+    {% if file.type != 'text' %} media {% endif %}
+    {# {% else %} normal {% endif %} #}
+    "
+    onclick="window.location.href='/{{ file.path }}'"
+    data-visibility="{{ file.visibility }}"
+    data-type="{{ file.type }}"
+    >
     <div class="file-card-header">
         <div>
             <a href="/{{ file.owner }}">
@@ -59,7 +70,10 @@
 
 {# Dir Card #}
 {% macro dir_card(dir) %}
-<div class="dir-card" onclick="window.location.href = '/{{ dir.dir }}'">
+<div
+    class="dir-card"
+    onclick="window.location.href = '/{{ dir.dir }}'"
+    >
     <div class="dir-card-header">
         <div>
             <a href="/{{ dir.dir[:dir.dir.find("/")] }}">
@@ -77,7 +91,7 @@
     <div class="dir-card-body">
         {% for item in dir.items()[:8] %}
         {% if item.__class__.__name__ == "Dir" %}
-            <li style="color:green;">{{ item.title }}</li>
+            <li style="color:orange;">{{ item.title }}</li>
         {% else %}
             <li style="color:black;">{{ item.name }}</li>
         {% endif %}
@@ -103,6 +117,8 @@
         onclick="window.location.href = '/edit?filepath={{ item.path[item.path.find('/')+1:] }}'"
         data-title="{{ item.name }}"
         data-path="{{ item.path }}"
+        data-visibility="{{ item.visibility }}"
+        data-type="{{ item.type }}"
         >
         <div class="item-icon">
             {% if item.type == "text" %}
