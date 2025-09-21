@@ -1,10 +1,13 @@
 # api
 
-from flask import Blueprint, session, render_template, jsonify, request
+import qrcode
+from flask import Blueprint, session, render_template, jsonify, request, send_file
 from pygments import formatters
 
 import json
 from datetime import datetime
+from hashlib import sha256
+from pathlib import Path
 
 from ..models import *
 from ..utils import *
@@ -402,3 +405,14 @@ def exec():
         "status-code": 0,
         "pid": ce.pid
     })
+
+@api.get("/qr")
+def qr():
+    url = request.args.get("url", "")
+    if not url:
+        return "URL NOT PROVIDED", 404
+    from os import path
+    qr_image_filepath = path.abspath(path.join("media", "qr", sha256(url.encode()).hexdigest()) + ".png")
+    qr_image = qrcode.make(url)
+    qr_image.save(qr_image_filepath)
+    return send_file(qr_image_filepath)

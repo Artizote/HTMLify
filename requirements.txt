@@ -3,3 +3,4 @@ flask_sqlalchemy
 requests
 pygments
 peewee
+qrcode
