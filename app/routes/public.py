@@ -377,7 +377,11 @@ Sitemap: """ + request.scheme + "://" + request.host+ "/map/xml",
 
 @public.route("/map/")
 def _map():
-    return "<a href='xml'>xml sitemap</a>"
+    return """
+<a href='xml'>xml sitemap</a>
+<a href='txt'>txt sitemap</a>
+<a href='html'>html sitemap</a>
+"""
 
 @public.route("/map/xml")
 def _map_xml():
@@ -390,6 +394,28 @@ def _map_xml():
         xml += "<url>\n    <loc>" + site +"/"+ escape_html(file.path) + "</loc>\n</url>\n"
     xml += "</urlset>"
     return Response(xml, mimetype="text/xml")
+
+@public.route("/map/txt")
+def _map_txt():
+    site = request.scheme + "://" + request.host
+    txt = ""
+    for user in users.query.all():
+        txt += site + "/" + user.username + "\n"
+    for file in files.query.all():
+        txt += site + "/" + file.path + "\n"
+    if txt[-1] == "\n":
+        txt = txt[:-1]
+    return Response(txt, mimetype="text/txt")
+
+@public.route("/map/html")
+def _map_html():
+    site = request.scheme + "://" + request.host
+    html = ""
+    for user in users.query.all():
+        html += "<a href=\"" + site + "/" + user.username + "\">" + site + "/" + user.username + "</a><br>"
+    for file in files.query.all():
+        html += "<a href=\"" + site + "/" + file.path + "\">" + site + "/" + file.path + "</a><br>"
+    return html
 
 @public.route("/login")
 def _login_page():
