@@ -136,7 +136,7 @@ def upload():
             
         rs = randstr(10)
         #sourcepath = "/media/" + rs + "." + ext.replace("/", "")
-        sourcepath = path.abspath(path.join("media", f"{rs}.{ext.replace("/", "")}"))
+        sourcepath = path.abspath(path.join("media", f"{rs}.{ext.replace('/', '')}"))
         if files.by_path(session["user"]["username"]+"/"+name):
             rs = randstr(10)
             name = name[:-len(name.split("/")[-1])] + rs + "." + ext
@@ -146,7 +146,7 @@ def upload():
         with open(sourcepath, 'rb') as f:
             filesize = sum(len(line) for line in f.readlines())
         
-        file = files(name=name, ext=ext, type=type, path=filepath, content=f"/media/{sourcepath.split("/")[-1]}", size=filesize, owner=session["user"]["username"])
+        file = files(name=name, ext=ext, type=type, path=filepath, content=f"/media/{sourcepath.split('/')[-1]}", size=filesize, owner=session["user"]["username"])
         db.session.add(file)
         db.session.commit()
 

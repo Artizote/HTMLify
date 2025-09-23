@@ -10,13 +10,6 @@
     box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
-h1 {
-    text-align: center;
-    margin-bottom: 24px;
-    font-size: 28px;
-    color: #111827;
-}
-
 #shortenForm input[type="text"] {
     width: 100%;
     padding: 12px;
@@ -112,9 +105,16 @@ h1 {
     background-color: #1e40af;
 }
 
-h3 {
+#hit-count {
     margin-top: 20px;
+    width: inline;
 }
+
+#mention {
+    width: block;
+    font-family: monospace;
+}
+
 </style>
 {% endblock %}
 
@@ -136,7 +136,8 @@ h3 {
         <img id="qr-code" src="/api/qr?url={{ shortlink }}" alt="QR Code">
         <a id="qr-download-button" href="/api/qr?url={{ shortlink }}" download>Download QR Code</a>
     </div>
-    <h3>Total hits: {{ hits }}</h3>
+    <h3 id="hit-count">Total hits: {{ hits }}</h3>
+    <h3>Comment mention: <span id="mention">@r/{{ shorted }}</span></h3>
     {% endif %}
 </div>
 {% endblock %}

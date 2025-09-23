@@ -1,38 +1,78 @@
-<style></style>
+{# navbar #}
 
-<div class="nav-bar">
-    <a href="/">HTMLify</a>
+{% macro navbar_links() %}
+{% if not session.get("user") %}
+<a href="/login">Log in</a>
+<a href="/registration">Register</a>
+{% else %}
+<a href="/notifications">Notifications
+    {% if session["user"]["notifications"] > 0 %}
+    <sup style="color:white; background-color:#ff5511; border-radius:50%; padding:2px 5px;"> {{ session["user"]["notifications"] }} </sup>
+    {% endif %}
+</a>
+{% endif %}
+<a href="/dashboard">Dashboard</a>
+<a href="/r">Shortlinks</a>
+<a href="/frames">Frames</a>
+<a href="/api">API</a>
+{% if session.get("user") %}
+<a href="/action/logout">Logout</a>
+{% endif %}
+{% endmacro %}
 
-    <!-- search bar -->
-    <div class="search-bar">
-        <form action="/search" method="GET">
-            <input type="search" name="q" value="{{ q }}" placeholder="Search" />
-            <input type="submit" value="Search" />
+<nav>
+    <div style="display: flex; align-items: center;">
+        <a href="/"><h1>HTMLify</h1></a>
+
+        <form class="search-form" action="/search">
+            <input type="search" placeholder="Search..." name="q" value="{{ q }}">
+            <button type="submit" id="search-toggle"><img class="icon" src="/static/svg/search.svg"></button>
         </form>
     </div>
 
-	{% if not session.get("user") %}
-    <a href="/login">Log in</a>
-    <a href="/registration">Register</a>
-    {% else %}
-    <a href="/notifications" >Notifications
-    {% if session["user"]["notifications"] > 0 %}
-    <!--<sup style="color:white;background-color:#ff5511;border-radius:50%;">{{ session["user"]["notifications"] }}</sup>-->
-    <sup style="color:white; background-color:#ff5511; border-radius:50%; padding: 2px 5px;">
-    {{ session["user"]["notifications"] }}
-    </sup>
-    {% endif %}
-    </a>
-    {% endif %}
-    <a href="/dashboard">Dashboard</a>
-    <a href="/r">Shortlinks</a>
-    <a href="/frames">Frames</a>
-    <a href="/api">API</a>
+    <div style="display: flex; align-items: center;">
 
-    {% if session.get("user") %}
-    <a href="/{{ session["user"]["username"] }}" class="right" style="padding:0px;">
-        <img src="/media/dp/{{ session["user"]["username"] }}.jpg">
-    </a>
-    <a href="/action/logout" class="right">Log out</a>
-    {% endif %}
+        <div class="nav-links">
+            {{ navbar_links() }}
+        </div>
+        {% if session.get("user") %}
+        <a href="/{{ session["user"]["username"] }}">
+            <img class="profile-img" src="/media/dp/{{ session["user"]["username"] }}.jpg" alt="profile">
+        </a>
+        {% endif %}
+        <button type="button" id="mobile-menu-btn"><img class="icon" src="/static/svg/menu.svg"></i></button>
+    </div>
+</nav>
+
+<!-- Mobile menu -->
+<div id="mobile-menu">
+    {{ navbar_links() }}
 </div>
+
+<script>
+const mobile_menu = document.getElementById('mobile-menu');
+const mobile_menu_button = document.getElementById('mobile-menu-btn');
+const search_form = document.querySelector('.search-form');
+const search_toggle = document.getElementById('search-toggle');
+const search_input = search_form.querySelector('input');
+
+mobile_menu_button.addEventListener('click', () => {
+    if (mobile_menu.style.left === '0px') {
+        mobile_menu.style.left = '100%';
+        mobile_menu_button.innerHTML = `<img class="icon" src="/static/svg/menu.svg">`;
+    } else {
+        mobile_menu.style.left = '0px';
+        mobile_menu_button.innerHTML = `<img class="icon" src="/static/svg/x.svg">`;
+    }
+});
+
+search_toggle.addEventListener('click', (e) => {
+    if (window.innerWidth <= 768) {
+        if (!search_form.classList.contains('expanded')) {
+            search_form.classList.toggle('expanded');
+            search_input.focus();
+            e.preventDefault();
+        }
+    }
+});
+</script>
