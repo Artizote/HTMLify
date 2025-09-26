@@ -4,27 +4,9 @@ from datetime import datetime, timedelta
 from pygments import highlight, lexers, formatters
 from random import randint
 from re import compile, sub, match, findall
-#from utils import *
+from ..utils.helpers import randstr, escape_html
 from app.config import *
 
-
-
-def randstr(n):
-    s = ""
-    chars = "qwertyuiopasdfghjklzxcvbnm1234567890"
-    for _ in range(n):
-        s += chars[randint(0, 35)]
-    return s
-
-def escape_html(code) -> str:
-    entitys = {
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;"
-    }
-    for e in entitys.keys():
-        code = code.replace(e, entitys[e])
-    return code
 
 def api_key():
     return randstr(32)
