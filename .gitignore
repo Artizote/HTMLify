@@ -23,3 +23,6 @@ instance/
 # Media files
 media/
 
+# Config files
+dev-config.json
+prod-config.json
