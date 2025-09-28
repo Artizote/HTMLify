@@ -440,34 +440,6 @@ background-color: #0056b3;
     font-size: 14px;
     margin-left: 10px;
 }
-/* Profile page style */
-.profile-container {
-    padding: 20px;
-    background-color: #f0f0f0;
-    min-height: 100vh;
-    align-items: center;
-}
-
-.profile-header {
-    display: flex;
-    align-items: center;
-}
-
-.profile-picture {
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
-    margin-right: 20px;
-}
-
-.profile-info {
-    text-align: left;
-}
-
-.profile-name {
-    font-size: 24px;
-    margin-bottom: 10px;
-}
 
 .total-files {
     color: #666;
@@ -525,9 +497,7 @@ background-color: #0056b3;
    }
 
 .filter-form {
-    //background-color: #f0f0f0;
     padding: 10px;
-    //border: 1px solid #ccc;
     border-radius: 5px;
     width: 100%;
 }

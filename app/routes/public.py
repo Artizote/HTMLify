@@ -42,7 +42,9 @@ def _home():
 def _user_profile(username):
     username = username.lower()
     user = users.get_user(username)
-    items = sorted(Dir(username).items(), key=lambda i:[1, 0][type(i)==Dir])
+    items = sorted(Dir(username).items(), key=lambda i:0 if type(i)==Dir else i.id)
+    items = filter(lambda i: type(i) == Dir, Dir(username).items())
+    items = sorted(items, key=lambda i:i.title) + sorted(filter(lambda i: type(i)==files, Dir(username).items()), key=lambda i:-i.id)
     if not user:
         return "<center><h1>NO USER FOUND WITH NAME '<b>" + username + "</b>'</h1></center>", 404
     latest_comments = []
