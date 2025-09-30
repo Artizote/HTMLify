@@ -85,7 +85,7 @@ print()
 
 print("creating directories")
 
-for r_dir in ["media", "media/dp", "media/qr", "instance"]:
+for r_dir in ["media", "media/dp", "media/qr", "media/tmp", "instance"]:
     if not os.path.exists(r_dir):
         os.mkdir(r_dir)
         print("created directory", r_dir)

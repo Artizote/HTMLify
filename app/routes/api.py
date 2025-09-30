@@ -416,3 +416,27 @@ def qr():
     qr_image = qrcode.make(url)
     qr_image.save(qr_image_filepath)
     return send_file(qr_image_filepath)
+
+@api.post("/tmp")
+def tmp():
+    file = request.files.get("file")
+    name = request.form.get("name", "")
+    if not file:
+        return jsonify({
+            "error": True,
+            "message": "file not provided",
+        })
+    tf = TmpFile.create_with_buffer(file)
+    if not tf:
+        return jsonify({
+            "error": True,
+            "message": "Some internal error accure",
+        })
+    tf.name = name or file.name or f"temp-file-{tf.code}"
+    tf.save()
+    return jsonify({
+        "error": False,
+        "message": "File uploaded",
+        "url": request.scheme + "://" + request.host + "/tmp/" + tf.code
+    })
+    

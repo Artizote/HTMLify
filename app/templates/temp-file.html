@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block head_content %}
+<style>
+.upload-box {
+  background: #fff;
+  padding: 30px;
+  padding-top: 40px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  width: 100%;
+  max-width: 420px;
+  margin: auto;
+  text-align: center;
+}
+
+.upload-box h1 {
+  font-size: 22px;
+  margin-bottom: 20px;
+  color: #1e293b;
+}
+
+input[type="file"] {
+  width: 100%;
+  margin-bottom: 16px;
+  padding: 10px;
+  border: 2px dashed #cbd5e1;
+  border-radius: 10px;
+  cursor: pointer;
+  background: #f9fafb;
+}
+input[type="file"]::file-selector-button {
+  margin-right: 10px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  background: #3b82f6;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 600;
+}
+input[type="file"]::file-selector-button:hover {
+  background: #2563eb;
+}
+
+/* Upload button */
+#upload-button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 8px;
+  border: none;
+  border-radius: 10px;
+  background: #2563eb;
+  color: #fff;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+#upload-button:hover { background: #1d4ed8; }
+#upload-button[disabled] { opacity: 0.6; cursor: not-allowed; }
+
+/* Progress bar */
+#progress-bar {
+  width: 100%;
+  height: 100%;
+  display: none;
+  transition: width 0.2s ease;
+}
+
+#download-url-container {
+    display: none;
+}
+#download-url {
+  display: block;
+  border: 1px dotted blue;
+  font-size: 14px;
+  font-family: monospace;
+  color: #0f172a;
+  margin-top: 10px;
+  word-break: break-all;
+  padding: 4px;
+}
+#download-url a {
+  color: #2563eb;
+  text-decoration: none;
+  font-weight: 600;
+  cursor: copy;
+}
+#download-url:hover {
+    text-decoration: underline;
+}
+
+</style>
+{% endblock %}
+
+{% block content %}
+
+<h1>Temp File Share</h1>
+<div class="upload-box">
+    <p>Upload "your files to get a sharable downloadable link</p>
+    <input type="file" id="file-input">
+    <div id="download-url-container">
+        <div id="download-url" title="Valid till 24 hours" onclick="copy_link()"></div>
+    </div>
+    <progress id="progress-bar" value="0" max="100"></progress>
+    <button id="upload-button" onclick="upload_tmp_file()">Upload</button>
+</div>
+
+{% endblock %}
+
+{% block after_body %}
+<script>
+function upload_tmp_file() {
+    const file_input = document.getElementById("file-input");
+    const progress_bar = document.getElementById("progress-bar");
+    const download_url_container = document.getElementById("download-url-container");
+    const download_url = document.getElementById("download-url");
+    const form_data = new FormData();
+    const request = new XMLHttpRequest();
+    const file = file_input.files[0];
+    const filename = file.name;
+
+    if (!file) {
+        alert("Please Select a File");
+        return
+    }
+
+    progress_bar.style.display = "block";
+    form_data.append("file", file);
+    form_data.append("name", filename);
+    request.open("POST", "/api/tmp");
+
+    request.upload.addEventListener("progress", function(e) {
+        let progress_percent = e.loaded / e.total;
+        progress_bar.setAttribute("value", progress_percent);
+        progress_bar.innerText = progress_percent.toString() + "%";
+    });
+
+    request.addEventListener("load", function() {
+        let response = JSON.parse(request.response);
+        let url = response.url; 
+        progress_bar.setAttribute("value", "100");
+        progress_bar.innerText = "100%";
+        download_url_container.style.display = "block";
+        download_url.innerText = url;
+    });
+
+    request.send(form_data);
+}
+
+function copy_link() {
+    const download_url = document.getElementById("download-url").innerText;
+    copyToClipboard(download_url);
+}
+</script>
+{% endblock %}
