@@ -26,15 +26,18 @@ class TmpFile(Model):
         code = randstr(5)
         while cls.by_code(code):
             code = randstr(5)
-        
+         
         tf = TmpFile.create(
             name = buffer.name,
             code = code,
         )
-
-        f = open(tf.filepath, "wb")
-        f.write(buffer.getvalue())
-        f.close()
+         
+        if buffer.__class__.__name__ == "FileStorage": # werkzeug's datastructer
+            buffer.save(tf.filepath)
+        else:
+            f = open(tf.filepath, "wb")
+            f.write(buffer.getvalue())
+            f.close()
 
         cls.purge()
 
