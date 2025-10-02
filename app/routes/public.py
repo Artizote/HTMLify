@@ -27,16 +27,40 @@ def serve_pygments_css():
 
 @public.route("/", methods=["GET", "POST"])
 def _home():
-    _files = files.query.filter_by(as_guest=False).all()[::-1]
+    file_count = files.query.filter_by(as_guest=False).count()
+    _files = []
+    if file_count == 0:
+        return render_template("home.html", files=_files)
+    max_file_id = files.query.filter_by(as_guest=False).order_by(files.id.desc()).first().id
+
     if request.method == "POST":
         session["filter-file-modes"]=request.form.getlist("file-modes")
         session["filter-file-order"]=request.form.get("filter-order", "r")
+    
     filterd_modes = session.setdefault("filter-file-modes", ["s", "r"])
     filterd_order = session.setdefault("filter-file-order", "r")
-    filterd_files = list(filter(lambda file:file.mode in filterd_modes, _files))
+
+    _files = files.query.filter_by(as_guest=False).filter(files.mode.in_(filterd_modes))
+
     if filterd_order == "r":
-        shuffle(filterd_files)
-    return render_template("home.html", files=filterd_files[:MAX_FILES_ON_HOME])
+        file_count = files.query.filter_by(as_guest=False).filter(files.mode.in_(filterd_modes)).count()
+        if file_count <= MAX_FILES_ON_HOME:
+            _files = _files.all()
+            shuffle(_files)
+            return render_template("home.html", files=_files)
+
+        # currently ignoring duplicate files
+        _files = []
+        while len(_files) < MAX_FILES_ON_HOME:
+            r = randint(1, max_file_id)
+            f = files.query.get(r)
+            if f and not f.as_guest and f.mode in filterd_modes:
+                _files.append(f)
+        return render_template("home.html", files=_files)
+
+    _files = _files.limit(MAX_FILES_ON_HOME).all()
+
+    return render_template("home.html", files=_files)
 
 @public.route("/<username>/")
 def _user_profile(username):
@@ -237,7 +261,7 @@ def _temp_file():
 def _download_tmp_file(code):
     tf = TmpFile.by_code(code)
     if not tf:
-        return "<h1>404 File Not Found</h1>", 404
+        return "<h1>404 File Not Found</br><a href='/'>Back to home</a></h1>", 404
     return send_file(tf.filepath, download_name=tf.name)
 
 @public.route("/search", methods=["GET", "POST"])
@@ -380,21 +404,22 @@ def _proc_communicate(pid):
 
 @public.route("/robots.txt")
 def _robots_txt():
-    return ("""
-User-agent: *
-Disallow: /r/
-Disallow: /raw/
-Disallow: /pastebin/
-Sitemap: """ + request.scheme + "://" + request.host+ "/map/xml",
-200, {"Content-type": "text/text"})
+    return "\n".join([
+        "User-agent: *",
+        "Disallow: /r/",
+        "Disallow: /raw/",
+        "Disallow: /pastebin/",
+        "Disallow: /tmp/",
+        "Sitemap: " + request.scheme + "://" + request.host+ "/map/xml",
+    ]), 200, {"Content-type": "text/text"}
 
 @public.route("/map/")
 def _map():
-    return """
-<a href='xml'>xml sitemap</a>
-<a href='txt'>txt sitemap</a>
-<a href='html'>html sitemap</a>
-"""
+    return "\n".join([
+        "<a href='xml'>xml sitemap</a></br>",
+        "<a href='txt'>txt sitemap</a></br>",
+        "<a href='html'>html sitemap</a></br>",
+    ])
 
 @public.route("/map/xml")
 def _map_xml():

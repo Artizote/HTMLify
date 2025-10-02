@@ -14,9 +14,9 @@ function copyToClipboard(text, notify = true) {
         textarea.select();
         try {
             document.execCommand("copy");
-            if (notify) alert("Failed to copy automaticly, please copy manualy:\n\n" + text);
-        } catch (err) {
             if (notify) alert("Copied to clipboard");
+        } catch (err) {
+            if (notify) alert("Failed to copy automaticly, please copy manualy:\n\n" + text);
         }
         document.body.removeChild(textarea);
         return;
@@ -24,9 +24,9 @@ function copyToClipboard(text, notify = true) {
 
     navigator.clipboard.writeText(text)
         .then(() => {
-            if (notify) alert("Failed to copy automaticly, please copy manualy:\n\n" + text);
+            if (notify) alert("Copied to clipboard");
         })
         .catch(err => {
-            if (notify) alert("Copied to clipboard");
+            if (notify) alert("Failed to copy automaticly, please copy manualy:\n\n" + text);
         });
 }

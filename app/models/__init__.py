@@ -1,3 +1,3 @@
 from .models import *
 
-from .TmpFile import TmpFile
+from .tmpfile import TmpFile

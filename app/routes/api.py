@@ -421,6 +421,7 @@ def qr():
 def tmp():
     file = request.files.get("file")
     name = request.form.get("name", "")
+    expiry = request.form.get("expiry", 0, int)
     if not file:
         return jsonify({
             "error": True,
@@ -433,10 +434,16 @@ def tmp():
             "message": "Some internal error accure",
         })
     tf.name = name or file.name or f"temp-file-{tf.code}"
+    if expiry:
+        print("expiry:", expiry)
+        print("tf.expiry.timestamp", tf.expiry)
+        if expiry < tf.expiry.timestamp():
+            tf.expiry = datetime.fromtimestamp(expiry)
     tf.save()
     return jsonify({
         "error": False,
         "message": "File uploaded",
-        "url": request.scheme + "://" + request.host + "/tmp/" + tf.code
+        "url": request.scheme + "://" + request.host + "/tmp/" + tf.code,
+        "code": tf.code
     })
     

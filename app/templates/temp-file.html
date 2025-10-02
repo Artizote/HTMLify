@@ -91,6 +91,31 @@ input[type="file"]::file-selector-button:hover {
     text-decoration: underline;
 }
 
+#qr-code {
+    margin-top: 16px;
+    padding: 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #fff;
+}
+
+#qr-download-button {
+    display: inline-block;
+    margin-top: 12px;
+    width: 100%;
+    padding: 12px;
+    background-color: #2563eb;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 16px;
+    transition: background-color 0.2s;
+}
+#qr-download-button:hover {
+    background-color: #1e40af;
+}
 </style>
 {% endblock %}
 
@@ -100,8 +125,18 @@ input[type="file"]::file-selector-button:hover {
 <div class="upload-box">
     <p>Upload "your files to get a sharable downloadable link</p>
     <input type="file" id="file-input">
+    <select id="expiry">
+        <option value="86400">1 day</option>
+        <option value="36000">10 hr</option>
+        <option value="18000">5 hr</option>
+        <option value="3600">1 hr</option>
+        <option value="600">10 min</option>
+        <option value="300">5 min</option>
+    </select>
     <div id="download-url-container">
         <div id="download-url" title="Valid till 24 hours" onclick="copy_link()"></div>
+        <img id="qr-code" alt="QR Code">
+        <a id="qr-download-button" download>Download QR Code</a>
     </div>
     <progress id="progress-bar" value="0" max="100"></progress>
     <button id="upload-button" onclick="upload_tmp_file()">Upload</button>
@@ -116,10 +151,14 @@ function upload_tmp_file() {
     const progress_bar = document.getElementById("progress-bar");
     const download_url_container = document.getElementById("download-url-container");
     const download_url = document.getElementById("download-url");
+    const qr_code_img = document.getElementById("qr-code");
+    const qr_download_button = document.getElementById("qr-download-button");
+    const expiry_selector = document.getElementById("expiry");
     const form_data = new FormData();
     const request = new XMLHttpRequest();
     const file = file_input.files[0];
     const filename = file.name;
+    const expiry = parseInt(expiry_selector.value) + Math.floor(Date.now()/1000);
 
     if (!file) {
         alert("Please Select a File");
@@ -129,6 +168,7 @@ function upload_tmp_file() {
     progress_bar.style.display = "block";
     form_data.append("file", file);
     form_data.append("name", filename);
+    form_data.append("expiry", expiry);
     request.open("POST", "/api/tmp");
 
     request.upload.addEventListener("progress", function(e) {
@@ -144,6 +184,8 @@ function upload_tmp_file() {
         progress_bar.innerText = "100%";
         download_url_container.style.display = "block";
         download_url.innerText = url;
+        qr_code_img.src = "/api/qr?url=" + url;
+        qr_download_button.href = "/api/qr?url=" + url;
     });
 
     request.send(form_data);
