@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block head_content %}
+<style>
+.folder-box {
+    max-width: 600px;
+    margin: 2rem auto;
+    padding: 1.5rem;
+    border-radius: 12px;
+    background: #f9f9f9;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    font-family: sans-serif;
+}
+
+.btn {
+    background: #4a90e2;
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    font-size: 14px;
+}
+
+.btn:hover {
+    background: #357ab8;
+}
+
+.folder-box input[type="file"] {
+    margin: 0.5rem 0;
+    display: block;
+}
+
+#url-field {
+    width: 90%;
+    margin: auto;
+    display: block;
+    margin-bottom: 4px;
+    border: 1px dotted gray;
+}
+
+#qr-code-img {
+    max-width: 200px;
+    height: auto;
+    display: block;
+    margin: auto;
+    border: 1px dotted gray;
+}
+
+#files-container {
+    margin-top: 1rem;
+}
+
+input[type="file"] {
+    width: 100%;
+    margin-bottom: 16px;
+    padding: 10px;
+    border: 2px dashed #cbd5e1;
+    border-radius: 10px;
+    cursor: pointer;
+    background: #f9fafb;
+}
+
+#progress-bar {
+  width: 100%;
+  height: 100%;
+  transition: width 0.2s ease;
+}
+
+#files-container div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    margin-bottom: 6px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: white;
+    font-size: 14px;
+}
+
+#files-container div span {
+    flex: 1;
+    word-break: break-word;
+}
+
+.download-file-link {
+    background: #4ce73c;
+    padding: 4px 10px;
+    font-size: 13px;
+    margin: 2px;
+    color: white;
+    text-decoration: none;
+}
+
+.download-file-link:hover {
+    background: #39c02b;
+}
+
+.remove-file-button {
+    color: white;
+    background: #e74c3c;
+    padding: 4px 10px;
+    font-size: 13px;
+}
+
+.remove-file-button:hover {
+    background: #c0392b;
+}
+
+em {
+    color: #888;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+    <h1>Temp Folder</h1>
+<div class="folder-box" style="max-width:600px; margin:2rem auto; text-align:center;">
+    
+    <div id="folder-section">
+        <p>Create a Temp Folder for your Temp Files, Open to acccess a folder's files.<br>
+        <sup>Just want a single file? Checkout <a href="/tmp">Temp File Share</a><sup></p>
+        <button id="create-folder-btn" class="btn" onclick="create_temp_folder()">Create Folder</button>
+        <button id="open-folder-btn" class="btn" onclick="open_temp_folder()">Open folder</button>
+    </div>
+
+    <div id="upload-section" style="display:none; margin-top:1rem;">
+        <input id="file-upload-field" type="file" multiple>
+        <div id="progress-container" style="display:none;">
+            Uploading: <span id="current-upload-name"></span> | <span id="current-upload-percent"></span>%
+            <progress id="progress-bar" value="0" max="100"></progress>
+        </div>
+        <button class="btn" onclick="upload_files()">Upload Files</button>
+    </div>
+
+    <div id="files-container" style="margin-top:1rem; text-align:left;"> </div>
+</div>
+{% endblock %}
+
+{% block after_body %}
+<script src="/static/js/temp-folder.js"></script>
+<script>
+load_folder();
+</script>
+{% endblock %}
+

@@ -123,7 +123,8 @@ input[type="file"]::file-selector-button:hover {
 
 <h1>Temp File Share</h1>
 <div class="upload-box">
-    <p>Upload "your files to get a sharable downloadable link</p>
+    <p>Upload your files to get a sharable downloadable link.<br>
+    <sup>Need multiple file share? Checkout <a href="/tmp/f">Temp Folder</a>.</sup></p>
     <input type="file" id="file-input">
     <select id="expiry">
         <option value="86400">1 day</option>
@@ -172,7 +173,7 @@ function upload_tmp_file() {
     request.open("POST", "/api/tmp");
 
     request.upload.addEventListener("progress", function(e) {
-        let progress_percent = e.loaded / e.total;
+        let progress_percent = (e.loaded / e.total) * 100;
         progress_bar.setAttribute("value", progress_percent);
         progress_bar.innerText = progress_percent.toString() + "%";
     });

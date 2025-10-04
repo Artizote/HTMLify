@@ -417,8 +417,20 @@ def qr():
     qr_image.save(qr_image_filepath)
     return send_file(qr_image_filepath)
 
+@api.get("/tmp")
+@api.get("/tmp-file")
+def _get_tmp_file():
+    code = request.args.get("code", "")
+    if not code:
+        return jsonify({})
+    tf = TmpFile.by_code(code)
+    if tf:
+        return jsonify(tf.to_dict())
+    return jsonify({})
+
 @api.post("/tmp")
-def tmp():
+@api.post("/tmp-file")
+def _create_tmp_file():
     file = request.files.get("file")
     name = request.form.get("name", "")
     expiry = request.form.get("expiry", 0, int)
@@ -446,4 +458,95 @@ def tmp():
         "url": request.scheme + "://" + request.host + "/tmp/" + tf.code,
         "code": tf.code
     })
-    
+
+@api.get("/tmp-folder")
+def _get_tmp_folder():
+    code = request.args.get("code", "")
+    if not code:
+        return jsonify({})
+    tf = TmpFolder.by_code(code)
+    if not tf:
+        return jsonify({})
+    if auth_code := session.get("tmp-folder-auth-codes-"+tf.code):
+        print("auth code found in session")
+        data = tf.to_dict()
+        data["auth-code"] = auth_code
+        return jsonify(data)
+    print("auth code not found in session")
+    return jsonify(tf.to_dict())
+
+@api.post("/tmp-folder")
+def _create_tmp_folder():
+    name = request.form.get("name", "")
+    tf = TmpFolder.create(name=name)
+    if not tf:
+        return jsonify({
+            "error": True,
+            "message": "Temp folder cannot be created, try again",
+        })
+    session["tmp-folder-auth-codes-"+tf.code] = tf.auth_code # don't know why dict approach is not working
+    return jsonify({
+        "error": False,
+        "message": "Temp folder created",
+        "code": tf.code,
+        "auth-code": tf.auth_code,
+        "url": request.scheme + "://" + request.host + "/tmp/f/" + tf.code,
+    })
+
+@api.post("/tmp-folder-add")
+def _add_to_tmp_folder():
+    code = request.form.get("code", "")
+    print("code:", code)
+    auth_code = request.form.get("auth-code", "")
+    print("auth_code:", auth_code)
+    file_code = request.form.get("file-code", "")
+    print("file_code:", file_code)
+    if not code or not auth_code or not file_code:
+        return jsonify({
+            "error": True,
+            "message": "Code, Auth Code, File Code is require",
+        })
+    tf = TmpFolder.by_code(code)
+    if not tf:
+        return jsonify({
+            "error": True,
+            "message": "Temp Folder not found",
+        })
+    if auth_code != tf.auth_code:
+        return jsonify({
+            "error": True,
+            "message": "Auth code did not match",
+        })
+    tf.add_file(file_code)
+    return jsonify({
+        "error": False,
+        "message": "",
+    })
+
+@api.post("/tmp-folder-remove")
+def _remove_from_tmp_folder():
+    code = request.form.get("code", "")
+    auth_code = request.form.get("auth-code", "")
+    file_code = request.form.get("file-code", "")
+    if not code or not auth_code or not file_code:
+        return jsonify({
+            "error": True,
+            "message": "Code, Auth Code, File Code is require",
+        })
+    tf = TmpFolder.by_code(code)
+    if not tf:
+        return jsonify({
+            "error": True,
+            "message": "Temp Folder not found",
+        })
+    if auth_code != tf.auth_code:
+        return jsonify({
+            "error": True,
+            "message": "Auth code did not match",
+        })
+    tf.remove_file(file_code)
+    return jsonify({
+        "error": False,
+        "message": "",
+    })
+

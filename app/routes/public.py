@@ -253,16 +253,27 @@ def _short_redirection(shortcode):
         return redirect(link.href, 302)
     return "<h1>404</h1>", 404
 
-@public.route("/tmp")
-def _temp_file():
+@public.route("/tmp/")
+def _create_temp_file():
     return render_template("temp-file.html")
 
 @public.route("/tmp/<code>")
-def _download_tmp_file(code):
+def _tmp_file(code):
     tf = TmpFile.by_code(code)
     if not tf:
         return "<h1>404 File Not Found</br><a href='/'>Back to home</a></h1>", 404
     return send_file(tf.filepath, download_name=tf.name)
+
+@public.route("/tmp/f/")
+def _temp_folder():
+    return render_template("temp-folder.html")
+
+@public.route("/tmp/f/<code>")
+def _tmp_folder(code):
+    tf = TmpFolder.by_code(code)
+    if not tf:
+        return "<h1>404 Temp folder Not found</br><a href='/'>Back to home</a></h1>", 404
+    return render_template("temp-folder.html")
 
 @public.route("/search", methods=["GET", "POST"])
 def _search_page():
