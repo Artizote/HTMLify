@@ -40,7 +40,7 @@ def _home():
     filterd_modes = session.setdefault("filter-file-modes", ["s", "r"])
     filterd_order = session.setdefault("filter-file-order", "r")
 
-    _files = files.query.filter_by(as_guest=False).filter(files.mode.in_(filterd_modes))
+    _files = files.query.filter_by(as_guest=False).filter(files.mode.in_(filterd_modes)).order_by(files.id.desc())
 
     if filterd_order == "r":
         file_count = files.query.filter_by(as_guest=False).filter(files.mode.in_(filterd_modes)).count()

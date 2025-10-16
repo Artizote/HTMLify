@@ -450,7 +450,7 @@ def _create_tmp_file():
         print("expiry:", expiry)
         print("tf.expiry.timestamp", tf.expiry)
         if expiry < tf.expiry.timestamp():
-            tf.expiry = datetime.fromtimestamp(expiry)
+            tf.expiry = datetime.utcfromtimestamp(expiry)
     tf.save()
     return jsonify({
         "error": False,
@@ -467,13 +467,11 @@ def _get_tmp_folder():
     tf = TmpFolder.by_code(code)
     if not tf:
         return jsonify({})
+    data = tf.to_dict()
     if auth_code := session.get("tmp-folder-auth-codes-"+tf.code):
-        print("auth code found in session")
-        data = tf.to_dict()
         data["auth-code"] = auth_code
-        return jsonify(data)
-    print("auth code not found in session")
-    return jsonify(tf.to_dict())
+    data["url"] = request.scheme + "://" + request.host + "/tmp/f" + tf.code
+    return jsonify(data)
 
 @api.post("/tmp-folder")
 def _create_tmp_folder():

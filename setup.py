@@ -24,9 +24,8 @@ has_pip3 = check_command("pip3")
 has_python = check_command("python")
 has_python3 = check_command("python3")
 has_git = check_command("git")
-# has_git_from_config = check_command(GIT_COMMAND_PATH)
 has_docker = check_command("docker")
-# has_docker_from_config_path = check_command(DOCKER_COMMAND_PATH)
+has_gcc = check_command("gcc")
 
 pip_command = python_command = ""
 
@@ -109,6 +108,8 @@ print()
 
 # config
 
+print("checking config file")
+
 if not os.path.exists("dev-config.json"):
     print("dev-config not found")
     config_file = open("dev-config.json", "w")
@@ -119,6 +120,7 @@ if not os.path.exists("dev-config.json"):
     print("\tdev-config.json generated")
     print()
 
+print()
 
 # end
 

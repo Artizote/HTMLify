@@ -22,11 +22,14 @@ db.init_app(app)
 
 register_blueprints(app)
 
+def run_daemons():
+    Thread(target=search_indexing_daemon,   args=(TermFrequency, app, files),   daemon=True).start()
+    Thread(target=process_pool_purger,      args=(PROCESS_POOL,),               daemon=True).start()
+    Thread(target=tmp_file_purger,          args=(TmpFile,),                    daemon=True).start()
+    Thread(target=tmp_folder_purger,        args=(TmpFolder,),                  daemon=True).start()
+
 def run_app(debug=True):
-    Thread(target=search_indexing_daemon, args=(TermFrequency, app, files), daemon=True).start()
-    Thread(target=process_pool_purger, args=(PROCESS_POOL,), daemon=True).start()
-    Thread(target=tmp_file_purger, args=(TmpFile,), daemon=True).start()
-    Thread(target=tmp_folder_purger, args=(TmpFolder,), daemon=True).start()
+    run_daemons()
     app.run(debug=debug)
 
 if __name__ == "__main__":

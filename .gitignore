@@ -26,3 +26,6 @@ media/
 # Config files
 dev-config.json
 prod-config.json
+
+# Shared Objects
+*.so

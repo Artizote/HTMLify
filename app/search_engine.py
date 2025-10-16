@@ -194,14 +194,4 @@ def query(term: str) -> list[dict]:
 def file(id):
     return files.query.filter_by(id=id).first()
 
-def search_indexing_daemon(TermFrequency, app, files):
-    with app.app_context():
-        while True:
-            sleep(SEARCH_INDEXING_TIME_DELAY)
-            file_count = files.query.order_by(files.id.desc()).first()
-            if not file_count:
-                continue
-            for id in range(1, file_count.id+1):
-                TermFrequency.feed(id)
-
 search_index_database.create_tables([TermFrequency, ContentHashes])

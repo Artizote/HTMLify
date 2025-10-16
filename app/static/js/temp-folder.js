@@ -31,7 +31,11 @@ function load_folder(code="") {
         }
         folder_name = data.name;
         folder_auth_code = data["auth-code"] ? data["auth-code"] : "";
-        document.getElementById("folder-section").innerHTML = `<strong>${folder_name} [${folder_code}]</strong>`;
+        document.getElementById("folder-section").innerHTML = `
+            <h3>${folder_name} <code onclick="copyToClipboard('${folder_code}');">[${folder_code}]</code></h3>
+            <input id="url-field" value="${data.url}" onclick="copyToClipboard('${data.url}')" readonly>
+            <img id="qr-code-img" src="/api/qr?url=${data.url}">
+            `;
         if (folder_auth_code != "")
             document.getElementById("upload-section").style.display = "block";
         render_folder_files();
@@ -53,7 +57,7 @@ function create_temp_folder(name="") {
         folder_code = data["code"];
         folder_auth_code = data["auth-code"];
         document.getElementById("folder-section").innerHTML = `
-            <h3>${folder_name} [${folder_code}]</h3>
+            <h3>${folder_name} <code onclick="copyToClipboard('${folder_code}');">[${folder_code}]</code></h3>
             <input id="url-field" value="${data.url}" onclick="copyToClipboard('${data.url}')" readonly>
             <img id="qr-code-img" src="/api/qr?url=${data.url}">
             `;
