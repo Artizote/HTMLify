@@ -63,11 +63,11 @@
     <label for="filepath">File Path:</label>
     <input type="text" id="filepath" name="path" value="{{ path }}" placeholder="File path">
     <label for="filename">File Name:</label>
-    <input type="text" id="filename" name="title" value="{{ title }}">
+    <input type="text" id="filename" name="title" value="{{ title }}" autocomplete="new-filename">
     <details>
         <summary>Protaction</summary>
             <label>Lock file</label>
-        <input type="password" id="password" name="password" value="{{ password }}" placeholder="" style="min-width:50%">
+        <input type="password" id="password" name="password" value="{{ password }}" placeholder="" autocomplete="new-password" style="min-width:50%">
         <a onclick="togglePasswordShow()" id="password-show-toggle">Show</a>
     </details>
     <br>
