@@ -1,115 +1,122 @@
 {% extends "base.html" %}
 {% block title %}API Endpoints Reference{% endblock %}
 {% block head_content %}
-        <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f0f0f0;
-        }
+<style>
+main {
+    padding: 30px;
+}
 
-        h1, h2, h3 {
-            color: #333;
-        }
+.api-container {
+    max-width: 950px;
+    margin: auto;
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 25px 30px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
 
-        .endpoint {
-            background-color: #fff;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            margin-bottom: 20px;
-        }
+.endpoint {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    padding: 20px;
+    margin-bottom: 20px;
+}
 
-        .endpoint h3 {
-            margin-top: 0;
-        }
+.endpoint strong {
+    color: #333;
+}
 
-        .endpoint p {
-            margin-bottom: 10px;
-        }
+.endpoint table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
 
-        .endpoint ul {
-            list-style-type: none;
-            padding: 0;
-            margin: 0;
-        }
+.endpoint td {
+    border-bottom: 1px solid #f1f3f5;
+    padding: 5px 10px;
+    vertical-align: top;
+}
 
-        .endpoint ul li {
-            margin-bottom: 5px;
-        }
+pre {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 5px;
+    padding: 10px;
+    overflow-x: auto;
+    font-family: 'Fira Code', monospace;
+    font-size: 13px;
+    color: #212529;
+}
 
-        pre {
-            background-color: #f9f9f9;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            padding: 10px;
-            overflow-x: auto;
-        }
-        td {
-            text-align: left;
-        }
-        </style>
-        {% endblock %}
+.status-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.status-table td {
+    border-bottom: 1px solid #f1f3f5;
+    padding: 6px 10px;
+}
+
+.status-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+code {
+    background-color: #eef2ff;
+    padding: 2px 5px;
+    border-radius: 4px;
+    font-family: 'Fira Code', monospace;
+}
+</style>
+{% endblock %}
+
 {% block content %}
+<main>
+<div class="api-container">
     <h1>HTMLify - API Reference</h1>
-    <h2>Your API Key</h2>
-
-    <button onclick="toggleApiKey()" id="toggle-button">Show API Key</button>
-    <div id="api-key" style="display:none;">
-        <p>Your API key: <code>{{ api_key | safe }}</code></p>
-    </div>
 
     <h2>Endpoints</h2>
     {% for endpoint in endpoints %}
     <div class="endpoint">
         <h3>{{ endpoint["name"] }}</h3>
-        <p><strong>Endpoint:</strong> {{ endpoint["route"] }}</p>
-        <p><strong>Method:</strong> {{ endpoint["method"] }}</p>
+        <p><strong>Endpoint:</strong> <code>{{ endpoint["route"] }}</code></p>
+        <p><strong>Method:</strong> <code>{{ endpoint["method"] }}</code></p>
 
         <h4>Arguments:</h4>
         <table>
             {% for arg in endpoint["args"] %}
             <tr>
-                <td>{{ arg["arg"] }}</td>
+                <td width="30%"><code>{{ arg["arg"] }}</code></td>
                 <td>{{ arg["desc"] }}</td>
             </tr>
             {% endfor %}
         </table>
 
         {% if endpoint["sample-output"] %}
-        <h4>Sample responce:</h4>
-        <pre>
-    <code>
-{{endpoint["sample-output"]}}</code>
-        </pre>
+        <h4>Sample Response:</h4>
+        <pre><code>{{ endpoint["sample-output"] }}</code></pre>
         {% endif %}
     </div>
     {% endfor %}
 
     <h2>Status Codes</h2>
-    <table>
+    <table class="status-table">
         {% for code in status_codes.keys() %}
         <tr>
-            <td>{{ code }}</td>
+            <td width="15%"><code>{{ code }}</code></td>
             <td>{{ status_codes[code] }}</td>
         </tr>
         {% endfor %}
     </table>
-
-
-<script>
-function toggleApiKey() {
-    var apiKeyDiv = document.getElementById("api-key");
-    var toggleButton = document.getElementById("toggle-button");
-    if (apiKeyDiv.style.display === "none") {
-        apiKeyDiv.style.display = "block";
-        toggleButton.innerHTML = "Hide API key";
-    } else {
-        apiKeyDiv.style.display = "none";
-        toggleButton.innerHTML = "Show API key";
-    }
-}
-</script>
+</div>
+</main>
 
 {% endblock %}
+
