@@ -1,4 +1,6 @@
 from random import randint
+from hashlib import sha256
+import os
 
 def randstr(n):
     s = ""
@@ -16,6 +18,19 @@ def escape_html(code) -> str:
     for e in entitys.keys():
         code = code.replace(e, entitys[e])
     return code
+
+def hash_sha256(string: str | bytes) -> str:
+    """Returns sha256 hexdigest of given string or bytes"""
+    if isinstance(string, str):
+        string = string.encode()
+    return sha256(string).hexdigest()
+
+def hash_password(password: str):
+    return sha256(password.encode()).hexdigest()
+
+def file_path(*path) -> str:
+    """Returns abslute path for file inside files dir"""
+    return os.path.abspath((os.path.join("files", *path)))
 
 def normalizer(string: str) -> str:
     """Returns a normlized version of `string`"""

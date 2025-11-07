@@ -1,37 +1,152 @@
+from peewee import Model, SqliteDatabase, AutoField, CharField, IntegerField, BooleanField, TimestampField
+from pygments import lexers, highlight
+from pygments.formatters import HtmlFormatter
 
-Mkodel = str
+from typing import List, Union
+from time import time
+from mimetypes import guess_type
 
-class files(Mkodel):
-    #id 
-    #name
-    #path
-    #content
-    #ext
-    #type
-    #owner
-    #size
-    #views
-    #mode
-    ## mode - showmode of the file  r | s
-    ## r - render mode, show as plain text
-    ## s - source mode, enable syntex highlighting
-    #visibility
-    ## p - public, show file to all users
-    ## h - hidden, hide file from other users
-    ## o - once, file can be only seen once then visiblity will chnage to h
-    #comments
-    #revisions
-    #password 
-    #as_guest 
-    ##stared = db.Column("")
-    ## --------- to be add, start system ------------- #
+from .blob import Blob
+
+
+file_db = SqliteDatabase("instance/files.db")
+text_lexer = lexers.get_lexer_by_name("text")
+html_formatter = HtmlFormatter()
+html_formatter_with_linenos = HtmlFormatter(linenos=True)
+
+
+class FileMode:
+    RENDER  = 1
+    SOURCE  = 2
+
+    render  = 1
+    source  = 2
+
+
+class FileVisibility:
+    PUBLIC  = 1
+    HIDDEN  = 2
+    ONCE    = 3
+
+    public  = 1
+    hidden  = 2
+    once    = 3
+
+
+class FileType:
+    UNKNOWN     = 0
+    APPLICATION = 1
+    AUDIO       = 2
+    CHEMICAL    = 3
+    FONT        = 4
+    IMAGE       = 5
+    MESSAGE     = 6
+    MODEL       = 7
+    TEXT        = 8
+    VIDEO       = 9
+
+    unknown     = 0
+    application = 1
+    audio       = 2
+    chemical    = 3
+    font        = 4
+    image       = 5
+    message     = 6
+    model       = 7
+    text        = 8
+    video       = 9
+
+    type_map = {
+        "unknown"       : 0,
+        "application"   : 1,
+        "audio"         : 2,
+        "chemical"      : 3,
+        "font"          : 4,
+        "image"         : 5,
+        "message"       : 6,
+        "model"         : 7,
+        "text"          : 8,
+        "video"         : 9,
+    }
+
+    @staticmethod
+    def mimetype(filename: str) -> str:
+        mime = str(guess_type(filename)[0])
+        return mime
+
+    @staticmethod
+    def mime_type(filename: str) -> str:
+        type = FileType.mimetype(filename).split("/")[0]
+        return type
+
+    @staticmethod
+    def mime_subtype(filename: str) -> str:
+        subtype = FileType.mimetype(filename).split("/")[-1]
+        return subtype
+    
+    @staticmethod
+    def filetype(filename: str) -> int:
+        type = FileType.mime_type(filename)
+        return FileType.type_map.get(type, 0)
+
+
+class File(Model):
+    """ File """
+
+    class Meta:
+        database = file_db
+
+    id : int | AutoField = AutoField()
+    user_id : int | IntegerField = IntegerField(null=True)
+    title : str | CharField = CharField(max_length=255, default="")
+    path : str | CharField = CharField(max_length=4096, unique=True)
+    views : int | IntegerField = IntegerField(default=0)
+    blob_hash : str | CharField = CharField(64)
+    mode : int | IntegerField = IntegerField(default=FileMode.RENDER)
+    visibility : int | IntegerField = IntegerField(default=FileVisibility.PUBLIC)
+    password : str | CharField = CharField(max_length=64, null=True, default="")
+    as_guest : bool | BooleanField = BooleanField(default=False)
+    modified : int | TimestampField = TimestampField(utc=True)
+
+    __unlocked : bool = False
+
+    @staticmethod
+    def username_from_path(path) -> str:
+        if not path.startswith("/"):
+            path = "/" + path
+        path_parts = path.split("/")
+        if len(path_parts) > 1:
+            return path_parts[1]
+        return ""
+
+    @classmethod
+    def by_id(cls, id) -> "File":
+        return cls.get_or_none(cls.id==id)
     
     @classmethod
-    def by_path(files, path):
-        return files.query.filter_by(path=path).first()
+    def by_path(cls, path):
+        return cls.get_or_none(cls.path==path)
+
+    def save(self, *args, **kwargs):
+        self.modified = int(time())
+        super().save(*args, **kwargs)
+
+    def rename(self, new_path, force=False) -> bool:
+        if "/" not in new_path:
+            new_path = str(self.dir) + new_path
+        if self.username_from_path(new_path) != self.user.username:
+            return False
+        other_file = File.by_path(new_path)
+        if other_file:
+            if force:
+                return False
+            other_file.delete_instance()
+        self.path = new_path
+        self.save()
+        return True
     
-    def sizef(file):
-        size = file.size
+    def sizef(self):
+        size = self.size
         units = ["", "K", "M", "G"]
         degre = 0
         while size // 1024 > 0:
@@ -39,131 +154,253 @@ class files(Mkodel):
             size /= 1024
         size = round(size, 2)
         return str(size) + " " + units[degre] + "B"
-    
-    def highlighted(file):
+
+    def highlighted_html(self, linenos=False) -> str | None:
         try:
-            l = lexers.get_lexer_for_filename(file.path.split("/")[-1])
+            lexer = lexers.get_lexer_for_filename(self.name)
         except:
-            l = lexers.get_lexer_for_filename("file.txt")
-        return highlight(file.content, l, formatters.HtmlFormatter())
+            lexer = text_lexer
+        if linenos:
+            formatter = html_formatter_with_linenos
+        else:
+            formatter = html_formatter
+        return highlight(self.text, lexer, formatter)
 
-    def get_sub_directories(path: str) -> list[str]:
-        if path and path[-1] != "/":
-            path += "/"
-        tree = files.query.filter(files.path.startswith(path)).all()
-        sd = []
-        for item in tree:
-            if item.path.find("/", len(path)) == -1:
-                continue
-            directory = item.path[:item.path.find("/", len(path))]
-            if directory not in sd:
-                sd.append(directory)
-        sd.remove(path)
-        return sd
+    def unlock(self, password: str) -> bool:
+        if self.password == password:
+            self.__unlocked = True
+        return self.__unlocked
 
-    def get_tree(path: str) -> list[str]:
-        if path and path[-1] != "/":
-            path += "/"
-            tree = list(map(lambda i:i.path, files.query.filter(files.path.startswith(path)).all()))
-        return tree
-
-    def get_directory_tree(path: str) -> list[str]:
-        if path and path[-1] != "/":
-            path += "/"
-        tree = files.query.filter(files.path.startswith(path)).all()
-        dtree = []
-        for item in tree:
-            directory = item.path[:item.path.rfind("/")]
-            if directory not in dtree:
-                dtree.append(directory)
-        return dtree
-
-    @classmethod
-    def create_as_guest(files, username, filecontent, password="", ext="txt", visibility="p", mode="s"):
-
-        if not users.query.filter_by(username=username):
-            return
-
-        path = randstr(10)
-        while files.by_path("guest/"+path+"."+ext):
-            path = randstr(10)
-
-        file = files(
-            path = "guest"+path+"."+ext,
-            owner = username,
-            title = title,
-            password = password,
-            ext = ext,
-            type = "text",
-            content = filecontent,
-            visibility = visibility,
-            mode = mode,
-        )
-        db.session.add(file)
-        db.session.commit()
-
-        return file.path
+    def hit(self):
+        self.views += 1
+        self.save()
 
     def shortlink(self):
-        return ShortLink.create("/"+self.path)
+        return NotImplemented
 
     def last_revision(self):
-        return Revision.query.filter_by(file=self.id).order_by(Revision.time.desc()).first()
+        return NotImplemented
 
+    def to_dict(self, password: str | None = None) -> dict:
+        if password:
+            self.unlock(password)
+
+        if self.is_unlocked:
+            content = self.blob.get_base64()
+            blob_hash = self.blob.hash
+        else:
+            content = None
+            blob_hash = None
+
+        if self.as_guest:
+            user_id = 0
+        elif self.user:
+            user_id = self.user.id
+        else:
+            user_id = 0
+
+        return {
+            "id": self.id,
+            "title": self.title,
+            "path": self.path,
+            "user": user_id,
+            "views": self.views,
+            "mode": self.mode,
+            "visibility": self.visibility,
+            "modified": self.modified,
+            "blob_hash": blob_hash,
+            "content": content
+        }
+
+    @property
+    def name(self) -> str:
+        return self.path.split("/")[-1]
+
+    @name.setter
+    def name(self, new_name) -> bool:
+        if "/" in new_name:
+            return False
+        return self.rename(new_name)
+
+    @property
+    def ext(self) -> str:
+        return self.name.split(".")[-1]
+
+    @property
+    def content(self) -> bytes | str:
+        return self.blob.get_content()
+
+    @content.setter
+    def content(self, content: bytes | str | Blob) -> bool:
+        if isinstance(content, Blob):
+            blob = content
+        else:
+            blob = Blob.create(content)
+        if not blob:
+            return False
+        self.blob_hash = blob.hash
+        return True
+
+    @property
+    def user(self):
+        return NotImplemented
+
+    @property
+    def comments(self):
+        return NotImplemented
+
+    @property
+    def type(self):
+        return FileType.filetype(self.name)
+
+    @property
     def is_file(self) -> bool:
         return True
-    
+
+    @property
     def is_dir(self) -> bool:
         return False
 
     @property
-    def dir(self):
+    def is_locked(self) -> bool:
+        if not self.password:
+            return False
+        return not self.__unlocked
+
+    @property
+    def is_unlocked(self) -> bool:
+        return not self.is_locked
+
+    @property
+    def mode_s(self) -> str:
+        match self.mode:
+            case FileMode.RENDER:
+                return "render"
+            case FileMode.SOURCE:
+                return "source"
+            case _:
+                return ""
+
+    @property
+    def visibility_s(self) -> str:
+        match self.mode:
+            case FileVisibility.PUBLIC:
+                return "public"
+            case FileVisibility.HIDDEN:
+                return "hidden"
+            case FileVisibility.ONCE:
+                return "once"
+            case _:
+                return ""
+
+    @property
+    def type_s(self) -> str:
+        match (self.type):
+            case FileType.UNKNOWN:
+                return "unknown"
+            case FileType.APPLICATION:
+                return "application"
+            case FileType.AUDIO:
+                return "audio"
+            case FileType.CHEMICAL:
+                return "chemical"
+            case FileType.FONT:
+                return "font"
+            case FileType.IMAGE:
+                return "image"
+            case FileType.MODEL:
+                return "model"
+            case FileType.TEXT:
+                return "text"
+            case FileType.VIDEO:
+                return "unknown"
+            case _:
+                return "unknown"
+
+    @property
+    def dir(self) -> "Dir":
         return Dir(self)
+
+    @property
+    def blob(self) -> Blob:
+        blob = Blob.by_hash(self.blob_hash)
+        return blob
+
+    @property
+    def text(self) -> str:
+        return self.blob.get_text()
+
+    @property
+    def binary(self) -> bytes:
+        return self.blob.get_binary()
+
+    @property
+    def size(self) -> int:
+        return self.blob.size
 
 
 class Dir:
     """ Directory """
-    
-    def __init__(self, file_or_path):
-        if type(file_or_path) == str:
-            self.dir = file_or_path
+
+    def __init__(self, file_or_path: File | str):
+        if isinstance(file_or_path, File):
+            self.__dir = file_or_path.path[:file_or_path.path.rfind("/")]
         else:
-            self.dir = file_or_path.path[:file_or_path.rfind("/")]
-        if self.dir and self.dir[-1] != "/":
-            self.dir += "/"
+            self.__dir = file_or_path
+        if not self.__dir:
+            self.__dir = "/"
+        if not self.__dir.endswith("/"):
+            self.__dir += "/"
+        if not self.__dir.startswith("/"):
+            self.__dir = "/" + self.__dir
 
     def __repr__(self) -> str:
-        return f"<Dir '{self.dir}'>"
-
+        return f"<Dir '{self.__dir}'>"
+    
     def __str__(self) -> str:
-        return self.dir
+        return self.__dir
 
     def __eq__(self, other) -> bool:
         if type(self) != type(other):
             return False
-        return self.dir == other.dir
+        return self.__dir == other.__dir
+
+    def __len__(self) -> int:
+        return self.items.__len__()
+
+    @property
+    def name(self) -> str:
+        return self.__dir.split("/")[-1].replace("/", "")
 
     @property
     def title(self) -> str:
-        return self.dir[self.dir[:-1].rfind("/", ):][1:]
+        return self.name
 
+    @property
+    def dir(self) -> "Dir":
+        return self
+
+    @property
     def is_file(self) -> bool:
         return False
-    
+
+    @property
     def is_dir(self) -> bool:
         return True
 
-    def items(self) -> list["Dir", files]:
-        """ Return items of the diroctory """
-        items_ = []    
-        filespaths = list(map(lambda i:i.path, files.query.filter(files.path.startswith(self.dir)).all()))
-        for path in filespaths:
-            if path.count("/") == self.dir.count("/"):
-                items_.append(files.by_path(path))
+    def items(self) -> List[Union["Dir", File]]:
+        """Return items of the directory"""
+        items_ = []
+        filepaths = map(lambda i:i.path, File.select().where(File.path.startswith(self.__dir)).order_by(File.path))
+        for path in filepaths:
+            if path.count("/") == self.__dir.count("/"):
+                items_.append(File.by_path(path))
             else:
-                path: str
-                dir = path[:path.find("/", len(self.dir))]
-                dir = Dir(dir)
+                _dir = path[:path.find("/", len(self.__dir))]
+                dir = Dir(_dir)
                 if dir not in items_:
                     items_.append(dir)
         return items_
+
+
+file_db.create_tables([File])

@@ -54,14 +54,6 @@ class Blob(Model, metaclass=BlobMeta):
     def __bool__(self):
         return bool(self.hash)
 
-    def __dict__(self):
-        return {
-            "hash": self.hash,
-            "size": self.size,
-            "type": self.type_s,
-            "content": self.get_base64
-        }
-
     def __len__(self):
         return self.size
 
@@ -83,7 +75,7 @@ class Blob(Model, metaclass=BlobMeta):
 
     @classmethod
     def by_hash(cls, hash: str) -> "Blob":
-        return cls.get_or_none(cls.hash.startswith(hash))
+        return cls.get_or_none(cls.hash == hash)
 
     @classmethod
     def from_base64(cls, data: str) -> "Blob":
@@ -136,7 +128,11 @@ class Blob(Model, metaclass=BlobMeta):
         if not blob.verify():
             return Blob()
 
-        blob.save()
+        blob = super().create(
+            hash = hash,
+            size = size,
+            type = type
+        )
         return blob
 
     def get_bytes(self) -> bytes:
@@ -173,6 +169,23 @@ class Blob(Model, metaclass=BlobMeta):
             content = file.read()
             content_hash = hash_sha256(content)
         return content_hash == self.hash
+
+    def to_bytes(self) -> bytes:
+        return self.get_bytes()
+
+    def to_str(self) -> str:
+        return self.get_str()
+
+    def to_base64(self) -> str:
+        return self.get_base64()
+
+    def to_dict(self) -> dict:
+        return {
+            "hash": self.hash,
+            "size": self.size,
+            "type": self.type_s,
+            "content": self.get_base64()
+        }
 
     @property
     def filepath(self) -> str:

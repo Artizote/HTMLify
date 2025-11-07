@@ -21,7 +21,6 @@ def git_clone(user, repo, dir="", mode='r', visibility='p', overwrite=True):
     paths = [Path(repopath)]
     for path in paths:
         for item in path.glob("*"):
-            print(item)
             if item.is_dir():
                 if str(item)[len(repopath):][0] == ".":
                     continue

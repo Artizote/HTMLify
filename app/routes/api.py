@@ -130,8 +130,6 @@ def paste():
             filetitle = path.split("/")[-1]
 
         if file := files.query.filter_by(path=path).first():
-            print(file.id)
-            print(file.path)
             return (json.dumps({"error": "File already exists at spasified path,\
                     use /api/edit if you want to edit content"}), 400,
                     {"Content-type": "text/json charset=utf-8"})
@@ -447,8 +445,6 @@ def _create_tmp_file():
         })
     tf.name = name or file.name or f"temp-file-{tf.code}"
     if expiry:
-        print("expiry:", expiry)
-        print("tf.expiry.timestamp", tf.expiry)
         if expiry < tf.expiry.timestamp():
             tf.expiry = datetime.utcfromtimestamp(expiry)
     tf.save()
@@ -494,11 +490,8 @@ def _create_tmp_folder():
 @api.post("/tmp-folder-add")
 def _add_to_tmp_folder():
     code = request.form.get("code", "")
-    print("code:", code)
     auth_code = request.form.get("auth-code", "")
-    print("auth_code:", auth_code)
     file_code = request.form.get("file-code", "")
-    print("file_code:", file_code)
     if not code or not auth_code or not file_code:
         return jsonify({
             "error": True,

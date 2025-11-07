@@ -2,7 +2,7 @@
 
 from flask import Blueprint, session, redirect, request
 
-from os import remove
+from os import remove, path
 from datetime import datetime
 
 from ..models import *

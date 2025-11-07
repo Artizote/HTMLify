@@ -22,6 +22,7 @@ instance/
 
 # Media files
 media/
+files/
 
 # Config files
 dev-config.json

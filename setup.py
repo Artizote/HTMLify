@@ -1,6 +1,7 @@
 import os
 import subprocess
 from random import randint
+from json import dumps
 
 
 # command checking
@@ -84,7 +85,7 @@ print()
 
 print("creating directories")
 
-for r_dir in ["media", "media/dp", "media/qr", "media/tmp", "instance"]:
+for r_dir in ["media", "media/dp", "media/qr", "media/tmp", "instance", "files", "files/blob"]:
     if not os.path.exists(r_dir):
         os.mkdir(r_dir)
         print("created directory", r_dir)
@@ -114,7 +115,10 @@ if not os.path.exists("dev-config.json"):
     print("dev-config not found")
     config_file = open("dev-config.json", "w")
     session_key = str(randint(100000, 999999))
-    config_str = "{\n\t\"SECRET_KEY\": \"" + session_key + "\"\n}"
+    config_dict = {
+        "SECRET_KEY": session_key,
+    }
+    config_str = dumps(config_dict, indent=4)
     config_file.write(config_str)
     config_file.close()
     print("\tdev-config.json generated")
@@ -126,8 +130,6 @@ print()
 
 print("The environment is ready for development")
 print("Press enter to exit, r for run the app")
-
-from app import run_app
 
 i = input("[enter/r]: ").lower()
 
