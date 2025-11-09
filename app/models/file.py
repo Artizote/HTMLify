@@ -181,6 +181,11 @@ class File(Model):
     def last_revision(self):
         return NotImplemented
 
+    def preview(self) -> str:
+        if self.is_locked:
+            return ""
+        return self.blob.get_str()[:128]
+
     def to_dict(self, password: str | None = None) -> dict:
         if password:
             self.unlock(password)
@@ -242,8 +247,12 @@ class File(Model):
         return True
 
     @property
-    def user(self):
-        return NotImplemented
+    def user(self) -> "User":
+        from .user import User
+        if self.as_guest:
+            return User.guest
+        user = User.by_id(self.user_id)
+        return user
 
     @property
     def comments(self):
@@ -370,7 +379,10 @@ class Dir:
 
     @property
     def name(self) -> str:
-        return self.__dir.split("/")[-1].replace("/", "")
+        parts = self.__dir.split("/")
+        if len(parts) > 1:
+            return parts[-2]
+        return ""
 
     @property
     def title(self) -> str:

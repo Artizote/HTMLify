@@ -1,9 +1,16 @@
-from peewee import Model, SqliteDatabase, AutoField, CharField
+from peewee import Model, SqliteDatabase, AutoField, CharField, BooleanField, IntegerField
+from werkzeug.security import generate_password_hash, check_password_hash
 
-from ..utils import randstr, hash_password
+from ..utils import randstr
 
 
 user_db = SqliteDatabase("instance/users.db")
+
+
+class UserRole:
+    USER = 1
+
+    user = 1
 
 
 class User(Model):
@@ -12,13 +19,62 @@ class User(Model):
     class Meta:
         database = user_db
 
-    id = AutoField()
-    name = CharField(64, default="")
-    bio = CharField(512, default="")
-    username = CharField(64, unique=True)
-    password_hash = CharField(64, null=True)
-    email = CharField(unique=True)
-    api_key = CharField(32, default=lambda:randstr(32))
+    guest : "User"
+
+    id : int | AutoField = AutoField()
+    name : str | CharField = CharField(64, default="")
+    bio : str | CharField = CharField(512, default="")
+    username : str | CharField = CharField(64, unique=True)
+    password_hash : str | CharField = CharField(255, null=True)
+    email : str | CharField = CharField(unique=True)
+    api_key : str | CharField = CharField(32, default=lambda:randstr(32))
+    active : bool | BooleanField = BooleanField(default=True)
+    verified : bool | BooleanField = BooleanField(default=False)
+    role : int | IntegerField  = IntegerField(default=UserRole.USER)
+
+    @staticmethod
+    def is_username_valid(username: str) -> bool: 
+        username_chars = set(username)
+        valid_charset = set("abcdefghijklmnopqrstuvwxyz_0123456789-")
+
+        for c in username_chars:
+            if c not in valid_charset:
+                return False
+
+        if username_chars == set("-") or username_chars == set("_") or username_chars == set("-_"):
+            return False
+        
+        if len(username) < 4:
+            return False
+
+        if len(username) > 64:
+            return False
+
+        return True
+
+    @classmethod
+    def is_username_available(cls, username: str) -> bool:
+        reserved_root_paths = {
+            "dashboard", "edit", "search",
+            "file-upload", "delete", "raw",
+            "registration", "action", "parse",
+            "render", "archive", "trending",
+            "api", "pygments.css", "map",
+            "src", "guest", "r",
+            "revision", "frames", "robots.txt",
+            "exec", "proc", "static",
+            "login", "logout", "print"
+            "clone", "tmp", "media"
+        }
+
+        if username in reserved_root_paths:
+            return False
+
+        user = cls.by_username(username)
+        if user:
+            return False
+
+        return True
 
     @classmethod
     def by_id(cls, id) -> "User":
@@ -29,15 +85,34 @@ class User(Model):
         return cls.get_or_none(cls.username==username)
 
     def set_password(self, password: str):
-        hash = hash_password(password)
+        hash = generate_password_hash(password)
         self.password_hash = hash
         self.save()
 
     def match_password(self, password: str):
-        return self.password_hash == hash_password(password)
+        return check_password_hash(self.password_hash, password)
+
+    def activate(self):
+        self.active = True
+        self.save()
+
+    def deactive(self):
+        self.active = False
+        self.save()
 
     def notify(self, msg):
         return NotImplemented
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "username": self.username,
+            "name": self.name,
+            "bio": self.bio,
+            "active": self.active,
+            "verified": self.verified,
+            "role": self.role_s,
+        }
 
     @property
     def files(self):
@@ -48,6 +123,22 @@ class User(Model):
     def dir(self):
         from .file import Dir
         return Dir("/"+self.username)
+
+    @property
+    def is_active(self) -> bool:
+        return bool(self.active)
+
+    @property
+    def is_verified(self) -> bool:
+        return bool(self.verified)
+
+    @property
+    def role_s(self) -> str:
+        match self.role:
+            case UserRole.USER:
+                return "user"
+            case _:
+                return ""
 
     @property
     def comments(self):

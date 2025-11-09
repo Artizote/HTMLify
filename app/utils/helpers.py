@@ -25,9 +25,6 @@ def hash_sha256(string: str | bytes) -> str:
         string = string.encode()
     return sha256(string).hexdigest()
 
-def hash_password(password: str):
-    return sha256(password.encode()).hexdigest()
-
 def file_path(*path) -> str:
     """Returns abslute path for file inside files dir"""
     return os.path.abspath((os.path.join("files", *path)))
