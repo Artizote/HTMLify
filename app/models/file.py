@@ -256,7 +256,8 @@ class File(Model):
 
     @property
     def comments(self):
-        return NotImplemented
+        from .comment import Comment
+        return Comment.select().where(Comment.file_id==self.id)
 
     @property
     def type(self):

@@ -100,8 +100,9 @@ class User(Model):
         self.active = False
         self.save()
 
-    def notify(self, msg):
-        return NotImplemented
+    def notify(self, msg, href="/notifications"):
+        from .notification import Notification
+        Notification.notify(self, msg, href)
 
     def to_dict(self) -> dict:
         return {
@@ -142,11 +143,13 @@ class User(Model):
 
     @property
     def comments(self):
-        return NotImplemented
+        from .comment import Comment
+        return Comment.select().where(Comment.user_id==self.id)
 
     @property
     def notifications(self):
-        return NotImplemented
+        from .notification import Notification
+        return Notification.select().where(Notification.user_id==self.id)
 
 
 User.guest = User(username="guest", id=0, name="Guest")
