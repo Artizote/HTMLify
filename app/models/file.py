@@ -1,9 +1,9 @@
-from peewee import Model, SqliteDatabase, AutoField, CharField, IntegerField, BooleanField, TimestampField
+from peewee import Model, SqliteDatabase, AutoField, CharField, IntegerField, BooleanField, DateTimeField
 from pygments import lexers, highlight
 from pygments.formatters import HtmlFormatter
 
 from typing import List, Union
-from time import time
+from datetime import datetime, UTC
 from mimetypes import guess_type
 
 from .blob import Blob
@@ -106,7 +106,7 @@ class File(Model):
     visibility : int | IntegerField = IntegerField(default=FileVisibility.PUBLIC)
     password : str | CharField = CharField(max_length=64, null=True, default="")
     as_guest : bool | BooleanField = BooleanField(default=False)
-    modified : int | TimestampField = TimestampField(utc=True)
+    modified : datetime | DateTimeField = DateTimeField(default=lambda:datetime.now(UTC))
 
     __unlocked : bool = False
 
@@ -128,7 +128,7 @@ class File(Model):
         return cls.get_or_none(cls.path==path)
 
     def save(self, *args, **kwargs):
-        self.modified = int(time())
+        self.modified = datetime.now(UTC)
         super().save(*args, **kwargs)
 
     def rename(self, new_path, force=False) -> bool:
@@ -176,10 +176,20 @@ class File(Model):
         self.save()
 
     def shortlink(self):
-        return NotImplemented
+        from .shortlink import ShortLink
+        return ShortLink.create(self.path)
+
+    def make_revision(self):
+        from .revision import Revision
+        return Revision.make_for(self)
 
     def last_revision(self):
-        return NotImplemented
+        from .revision import Revision
+        q = Revision.select().where(
+            Revision.file_id == self.id
+            ).order_by(Revision.id.desc())
+        if q.count():
+            return q.last()
 
     def preview(self) -> str:
         if self.is_locked:
@@ -210,9 +220,9 @@ class File(Model):
             "path": self.path,
             "user": user_id,
             "views": self.views,
-            "mode": self.mode,
-            "visibility": self.visibility,
-            "modified": self.modified,
+            "mode": self.mode_s,
+            "visibility": self.visibility_s,
+            "modified": self.modified.timestamp(),
             "blob_hash": blob_hash,
             "content": content
         }

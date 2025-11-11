@@ -1,8 +1,7 @@
 from peewee import SqliteDatabase, Model, AutoField, IntegerField, TextField, BooleanField, TimestampField
 
 from typing import Optional 
-from time import time
-from datetime import timedelta
+from datetime import timedelta, datetime, UTC
 
 
 notification_db = SqliteDatabase("notifications.db")
@@ -17,8 +16,8 @@ class Notification(Model):
     content : str | TextField = TextField()
     href : str | TextField = TextField()
     viewed : bool | BooleanField = BooleanField(default=False)
-    send_time : int | TimestampField = TimestampField(utc=True)
-    view_time : int | TimestampField = TimestampField(default=0)
+    send_time : datetime | TimestampField = TimestampField(utc=True)
+    view_time : datetime | TimestampField = TimestampField(default=0)
 
     @classmethod
     def by_id(cls, id) -> Optional["Notification"]:
@@ -76,14 +75,14 @@ class Notification(Model):
         ns = cls.select().where(cls.viewed==True)
         expiry_period = timedelta(days=28).seconds
         for n in ns:
-            if expiry_period > n.view_time - time():
+            if expiry_period > n.view_time - datetime.now(UTC):
                 n.delete_instance()
 
     def mark_viewed(self):
         if self.viewed:
             return
         self.viewed = True
-        self.view_time = int(time())
+        self.view_time = datetime.now(UTC)
         self.save()
 
     def to_dict(self) -> dict:
@@ -93,8 +92,8 @@ class Notification(Model):
             "content": self.content,
             "viewed": bool(self.viewed),
             "href": self.href,
-            "send_time": self.send_time,
-            "view_time": 0 if not self.view_time else self.view_time,
+            "send_time": self.send_time.timestamp(),
+            "view_time": 0 if not self.view_time else self.view_time.timestamp(),
         }
 
 

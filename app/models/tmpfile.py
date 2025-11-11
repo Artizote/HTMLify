@@ -1,7 +1,7 @@
 from peewee import Model, SqliteDatabase, AutoField, CharField, DateTimeField, TextField
 
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 
 from app.utils.helpers import randstr
 
@@ -15,7 +15,7 @@ class TmpFile(Model):
     name = CharField()
     code = CharField()
     password = CharField(default="")
-    expiry = DateTimeField(default=lambda:datetime.utcnow()+timedelta(days=1))
+    expiry = DateTimeField(default=lambda:datetime.now(UTC)+timedelta(days=1))
     
     @classmethod
     def by_code(cls, code: str) -> "TmpFile":
@@ -43,7 +43,7 @@ class TmpFile(Model):
 
     @classmethod
     def purge(cls):
-        cls.delete().where(cls.expiry < datetime.utcnow()).execute()
+        cls.delete().where(cls.expiry < datetime.now(UTC)).execute()
 
     def delete_instance(self, **kwargs):
         os.remove(self.filepath)
