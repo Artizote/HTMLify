@@ -1,14 +1,11 @@
 
 from .public import public
-from .user import user
-from .actions import action
+from .dashboard import dashboard
 from .api import api
-
 
 blueprints = [
     public,
-    user,
-    action,
+    dashboard,
     api,
 ]
 

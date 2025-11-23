@@ -27,7 +27,7 @@ class User(Model):
     username : str | CharField = CharField(64, unique=True)
     password_hash : str | CharField = CharField(255, null=True)
     email : str | CharField = CharField(unique=True)
-    api_key : str | CharField = CharField(32, default=lambda:randstr(32))
+    api_key : str | CharField = CharField(32, default=lambda:User.new_api_key(), unique=True)
     active : bool | BooleanField = BooleanField(default=True)
     verified : bool | BooleanField = BooleanField(default=False)
     role : int | IntegerField  = IntegerField(default=UserRole.USER)
@@ -77,8 +77,19 @@ class User(Model):
         return True
 
     @classmethod
+    def new_api_key(cls) -> str:
+        api_key = randstr(32)
+        while cls.by_api_key(api_key):
+            api_key = randstr(32)
+        return api_key
+
+    @classmethod
     def by_id(cls, id) -> "User":
         return cls.get_or_none(cls.id==id)
+
+    @classmethod
+    def by_api_key(cls, api_key) -> "User":
+        return cls.get_or_none(cls.api_key==api_key)
 
     @classmethod
     def by_username(cls, username) -> "User":
