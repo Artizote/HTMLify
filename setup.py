@@ -67,6 +67,7 @@ else:
 
 print()
 
+
 # requirements
 
 print("installing requirements")
@@ -111,20 +112,22 @@ print()
 
 print("checking config file")
 
-if not os.path.exists("dev-config.json"):
-    print("dev-config not found")
-    config_file = open("dev-config.json", "w")
+if not os.path.exists("config.json"):
+    print("config not found")
+    config_file = open("config.json", "w")
     session_key = str(randint(100000, 999999))
     config_dict = {
         "SECRET_KEY": session_key,
+        "SERVER_NAME": "localhost:5000",
     }
     config_str = dumps(config_dict, indent=4)
     config_file.write(config_str)
     config_file.close()
-    print("\tdev-config.json generated")
+    print("\tconfig.json generated")
     print()
 
 print()
+
 
 # end
 

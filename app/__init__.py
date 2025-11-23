@@ -11,12 +11,13 @@ from .search_engine import *
 from .utils.daemons import *
 from .config import *
 
-app = Flask(__name__)
+app = Flask(__name__, subdomain_matching=True)
 
 app.secret_key = SECRET_KEY
 
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=28)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
+app.config["SERVER_NAME"] = SERVER_NAME
 
 db.init_app(app)
 

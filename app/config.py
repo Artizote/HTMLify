@@ -10,6 +10,7 @@ GIT_COMMAND_PATH = "git"
 DOCKER_COMMAND_PATH = "docker"
 MAX_FILES_ON_HOME = 128
 SEARCH_INDEXING_TIME_DELAY = 5
+SERVER_NAME = "localhost:5000"
 
 config_vars = [
     ("SECRET_KEY", str),
@@ -19,25 +20,18 @@ config_vars = [
     ("DOCKER_COMMAND_PATH", str),
     ("MAX_FILES_ON_HOME", int),
     ("SEARCH_INDEXING_TIME_DELAY", int),
+    ("SERVER_NAME", str),
 ]
 
 # Config loading
 config = None
-if os.path.exists("dev-config.json"):
+if os.path.exists("config.json"):
     try:
-        config_file = open("dev-config.json")
+        config_file = open("config.json")
         config = json.load(config_file)
         config_file.close()
     except:
-        print(">>>  Faild to load config from dev-config.json")
-
-if os.path.exists("prod-config.json"):
-    try:
-        config_file = open("prod-config.json")
-        config = json.load(config_file)
-        config_file.close()
-    except:
-        print(">>>  Falid to load config from prod-config.json")
+        print(">>>  Faild to load config from config.json")
 
 if config:
     for var_and_type in config_vars:
