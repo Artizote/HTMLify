@@ -18,7 +18,7 @@
     background-color: #0056b3;
 }
 </style>
-{{ file.highlighted() | safe }}
+{{ file.highlighted_html() | safe }}
 {% if request.args.get("footer", "true") == "true" %}
 <div class="footer">
     Hosted on HTMLify, 

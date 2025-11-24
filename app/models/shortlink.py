@@ -1,6 +1,7 @@
 from peewee import Model, SqliteDatabase, AutoField, IntegerField, TextField, CharField
 
 from ..utils import randstr
+from ..config import SCHEME, SERVER_NAME
 
 shortlink_db = SqliteDatabase("instance/shortlinks.db")
 
@@ -17,7 +18,11 @@ class ShortLink(Model):
     visits : int | IntegerField = IntegerField(default=0)
 
     @classmethod
-    def by_short(cls, short):
+    def by_id(cls, id) -> "ShortLink":
+        return cls.get_or_none(cls.id==id)
+
+    @classmethod
+    def by_short(cls, short) -> "ShortLink":
         return cls.get_or_none(cls.short==short)
 
     @classmethod
@@ -38,6 +43,15 @@ class ShortLink(Model):
     def hit(self):
         self.visits += 1
         self.save()
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "href": self.href,
+            "short": self.short,
+            "hits": self.visits,
+            "url": f"{SCHEME}://{SERVER_NAME}/r/{self.short}"
+        }
 
 
 shortlink_db.create_tables([ShortLink])

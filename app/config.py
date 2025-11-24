@@ -11,6 +11,7 @@ DOCKER_COMMAND_PATH = "docker"
 MAX_FILES_ON_HOME = 128
 SEARCH_INDEXING_TIME_DELAY = 5
 SERVER_NAME = "localhost:5000"
+SCHEME = "http"
 
 config_vars = [
     ("SECRET_KEY", str),
@@ -21,6 +22,7 @@ config_vars = [
     ("MAX_FILES_ON_HOME", int),
     ("SEARCH_INDEXING_TIME_DELAY", int),
     ("SERVER_NAME", str),
+    ("SCHEME", str),
 ]
 
 # Config loading

@@ -4,6 +4,7 @@ import os
 from datetime import datetime, timedelta, UTC
 
 from app.utils.helpers import randstr
+from app.config import SCHEME, SERVER_NAME
 
 tmpfile_database = SqliteDatabase("instance/tmpfiles.db")
 
@@ -61,6 +62,7 @@ class TmpFile(Model):
             "name": self.name,
             "code": self.code,
             "expire": self.expiry,
+            "url": f"{SCHEME}://{SERVER_NAME}/tmp/{self.code}"
         }
 
     @property
@@ -113,6 +115,7 @@ class TmpFolder(Model):
             "name": self.name,
             "code": self.code,
             "files": [ file.to_dict() for file in self.files ],
+            "url": f"{SCHEME}://{SERVER_NAME}/tmp/f/{self.code}"
         }
 
     @property

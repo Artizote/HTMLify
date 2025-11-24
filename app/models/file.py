@@ -1,4 +1,4 @@
-from peewee import Model, SqliteDatabase, AutoField, CharField, IntegerField, BooleanField, DateTimeField
+from peewee import Model, SqliteDatabase, AutoField, CharField, IntegerField, BooleanField, TimestampField
 from pygments import lexers, highlight
 from pygments.formatters import HtmlFormatter
 
@@ -7,6 +7,8 @@ from datetime import datetime, UTC
 from mimetypes import guess_type
 
 from .blob import Blob
+from ..utils.helpers import randstr
+from ..config import SCHEME, SERVER_NAME
 
 
 file_db = SqliteDatabase("instance/files.db")
@@ -106,7 +108,7 @@ class File(Model):
     visibility : int | IntegerField = IntegerField(default=FileVisibility.PUBLIC)
     password : str | CharField = CharField(max_length=64, null=True, default="")
     as_guest : bool | BooleanField = BooleanField(default=False)
-    modified : datetime | DateTimeField = DateTimeField(default=lambda:datetime.now(UTC))
+    modified : datetime | TimestampField = TimestampField(default=datetime.now(UTC))
 
     __unlocked : bool = False
 
@@ -127,9 +129,15 @@ class File(Model):
     def by_path(cls, path):
         return cls.get_or_none(cls.path==path)
 
-    def save(self, *args, **kwargs):
-        self.modified = datetime.now(UTC)
-        super().save(*args, **kwargs)
+    @classmethod
+    def new_guest_path(cls, filename: str) -> str:
+        ext = filename.split(".")[-1]
+        if not ext:
+            ext = "txt"
+        path = f"/guest/{randstr(10)}.{ext}"
+        while cls.by_path(path):
+            path = f"/guest/{randstr(10)}.{ext}"
+        return path
 
     def rename(self, new_path, force=False) -> bool:
         if "/" not in new_path:
@@ -171,8 +179,15 @@ class File(Model):
             self.__unlocked = True
         return self.__unlocked
 
+    def unlock_without_password(self):
+        self.__unlocked = True
+
     def hit(self):
         self.views += 1
+        self.save()
+
+    def update_modified_time(self):
+        self.modified = datetime.now(UTC)
         self.save()
 
     def shortlink(self):
@@ -195,6 +210,32 @@ class File(Model):
         if self.is_locked:
             return ""
         return self.blob.get_str()[:128]
+
+    def set_password(self, password: str):
+        self.password = password[:64]
+        self.save()
+
+    def set_mode(self, mode: int | str):
+        if isinstance(mode, str):
+            mode = mode.casefold()
+        match mode:
+            case FileMode.RENDER | "render":
+                self.mode = FileMode.RENDER
+            case FileMode.SOURCE | "source":
+                self.mode = FileMode.SOURCE
+        self.save()
+
+    def set_visibility(self, visibility: int | str):
+        if isinstance(visibility, str):
+            visibility = visibility.casefold()
+        match visibility:
+            case FileVisibility.PUBLIC | "public":
+                self.visibility = FileVisibility.PUBLIC
+            case FileVisibility.HIDDEN | "hidden":
+                self.visibility = FileVisibility.HIDDEN
+            case FileVisibility.ONCE | "once":
+                self.visibility = FileVisibility.ONCE
+        self.save()
 
     def to_dict(self, password: str | None = None) -> dict:
         if password:
@@ -224,7 +265,8 @@ class File(Model):
             "visibility": self.visibility_s,
             "modified": self.modified.timestamp(),
             "blob_hash": blob_hash,
-            "content": content
+            "content": content,
+            "url": f"{SCHEME}://{SERVER_NAME}{self.path}",
         }
 
     @property

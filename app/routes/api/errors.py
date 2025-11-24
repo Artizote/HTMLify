@@ -44,6 +44,9 @@ class APIErrors:
     INVALID_PARAMETERS = APIError("general", 2, "Invalid paramaters")
     VALIDATION_FAILED  = APIError("general", 3, "Validation failed")
     MALFORMED_JSON     = APIError("general", 4, "Malformed JSON body")
+    MISSING_JSON       = APIError("general", 5, "JSON body missing")
+    INVALID_DATA       = APIError("general", 6, "Invalid data")
+    MISSING_DATA       = APIError("general", 7, "Missing data")
 
     # Auth Errors
     UNAUTHORIZED        = APIError("auth", 1, "Unauthorized")
@@ -77,4 +80,11 @@ class APIErrors:
             if error.code == code:
                 return error
 
+
+def error_respones_dict(error: APIError, **extra) -> dict:
+    return {
+        "success": False,
+        "error": error.to_dict(),
+        **extra
+    }
 
