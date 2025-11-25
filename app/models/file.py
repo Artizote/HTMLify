@@ -237,12 +237,15 @@ class File(Model):
                 self.visibility = FileVisibility.ONCE
         self.save()
 
-    def to_dict(self, password: str | None = None) -> dict:
+    def to_dict(self, password: str | None = None, show_content: bool = True) -> dict:
         if password:
             self.unlock(password)
 
         if self.is_unlocked:
-            content = self.blob.get_base64()
+            if show_content:
+                content = self.blob.get_base64()
+            else:
+                content = None
             blob_hash = self.blob.hash
         else:
             content = None
@@ -259,8 +262,10 @@ class File(Model):
             "id": self.id,
             "title": self.title,
             "path": self.path,
+            "size": self.size,
             "user": user_id,
             "views": self.views,
+            "type": self.type_s,
             "mode": self.mode_s,
             "visibility": self.visibility_s,
             "modified": self.modified.timestamp(),
@@ -310,6 +315,11 @@ class File(Model):
     def comments(self):
         from .comment import Comment
         return Comment.select().where(Comment.file_id==self.id)
+
+    @property
+    def revisions(self):
+        from .revision import Revision
+        return Revision.select().where(Revision.file_id==self.id)
 
     @property
     def type(self):
@@ -375,7 +385,7 @@ class File(Model):
             case FileType.TEXT:
                 return "text"
             case FileType.VIDEO:
-                return "unknown"
+                return "video"
             case _:
                 return "unknown"
 
@@ -438,6 +448,10 @@ class Dir:
         return ""
 
     @property
+    def path(self) -> str:
+        return self.__dir
+
+    @property
     def title(self) -> str:
         return self.name
 
@@ -453,6 +467,13 @@ class Dir:
     def is_dir(self) -> bool:
         return True
 
+    @property
+    def username(self) -> str:
+        path_part = self.__dir.split("/")
+        if len(path_part) < 2:
+            return ""
+        return path_part[1]
+
     def items(self) -> List[Union["Dir", File]]:
         """Return items of the directory"""
         items_ = []
@@ -466,6 +487,47 @@ class Dir:
                 if dir not in items_:
                     items_.append(dir)
         return items_
+
+    def items_count(self) -> int:
+        """Return numbres of items in the direttory"""
+        count = 0
+        seen_dirs = []
+        depth_count = self.__dir.count("/")
+        path_len = len(self.__dir)
+        filepaths = map(lambda i:i.path, File.select().where(File.path.startswith(self.__dir)).order_by(File.path))
+        for path in filepaths:
+            if path.count("/") == depth_count:
+                count += 1
+            else:
+                dir = path[:path.find("/", path_len)]
+                if dir not in seen_dirs:
+                    seen_dirs.append(dir)
+                    count += 1
+        return count
+
+    def to_dict(self, expand=True, expand_depth=1) -> dict:
+        if expand:
+            items = self.items()
+            for i, item in enumerate(items):
+                if item.is_file:
+                    items[i] = item.to_dict(show_content=False)
+                if item.is_dir:
+                    print("name:", self.name)
+                    print("expand_depth:", expand_depth)
+                    if expand_depth > 1:
+                        items[i] = item.to_dict(expand=True, expand_depth=expand_depth-1)
+                    else:
+                        items[i] = item.to_dict(expand=False)
+        else:
+            items = []
+        return {
+            "name": self.name,
+            "path": self.__dir,
+            "username": self.username,
+            "items": items,
+            "items_count": self.items_count(),
+            "url": f"{SCHEME}://{SERVER_NAME}{self.path}",
+        }
 
 
 file_db.create_tables([File])

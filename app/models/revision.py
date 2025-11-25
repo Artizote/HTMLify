@@ -1,4 +1,4 @@
-from peewee import SqliteDatabase, Model, AutoField, IntegerField, CharField, DateTimeField
+from peewee import SqliteDatabase, Model, AutoField, IntegerField, CharField, TimestampField
 
 from datetime import datetime, UTC
 
@@ -15,7 +15,7 @@ class Revision(Model):
     id = AutoField()
     file_id : int | IntegerField = IntegerField()
     blob_hash : str | CharField = CharField(64)
-    timestamp : datetime | DateTimeField = DateTimeField(default=lambda:datetime.now(UTC))
+    timestamp : datetime | TimestampField = TimestampField(default=lambda:datetime.now(UTC))
 
     @classmethod
     def by_id(cls, id):
@@ -35,6 +35,22 @@ class Revision(Model):
         )
         return revision
 
+    def to_dict(self, show_content: bool = True):
+        if show_content:
+            content = self.blob.get_base64()
+        else:
+            content = None
+        return {
+            "id": self.id,
+            "file": self.file_id,
+            "blob_hash": self.blob_hash,
+            "prev": self.prev.id if self.prev else None,
+            "next": self.next.id if self.next else None,
+            "timestamp": self.timestamp.timestamp(),
+            "content": content,
+        }
+
+    @property
     def prev(self):
         q = Revision.select().where(
             (Revision.file_id == self.file_id) &
@@ -43,6 +59,7 @@ class Revision(Model):
         if q.count():
             return q.first()
 
+    @property
     def next(self):
         q = Revision.select().where(
             (Revision.file_id == self.file_id) &
@@ -52,7 +69,7 @@ class Revision(Model):
             return q.first()
 
     @property
-    def blob(self):
+    def blob(self) -> "Blob":
         from .blob import Blob
         return Blob[self.blob_hash]
 
@@ -62,6 +79,12 @@ class Revision(Model):
         if blob:
             return blob.get_content()
         return None
+
+    @property
+    def file(self):
+        from .file import File
+        file = File.by_id(self.file_id)
+        return file
 
 
 revision_db.create_tables([Revision])

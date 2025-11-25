@@ -48,6 +48,17 @@ def _search():
         "results": results
     }
 
+@public_api.get("/blob")
+def _get_blob():
+    hash = request.args.get("hash", "")
+    blob = Blob[hash]
+    if not blob:
+        return error_respones_dict(APIErrors.NOT_FOUND), 404
+    return {
+        "success": True,
+        "blob": blob.to_dict()
+    }
+
 @public_api.get("/file")
 def _get_file():
     id = request.args.get("id")
@@ -163,7 +174,7 @@ def _update_file():
         return error_respones_dict(APIErrors.MISSING_JSON)
 
     path = json.get("path")
-    force_rename = json.get("force_rename", False)
+    overwrite = json.get("overwrite", False)
     title = json.get("title")
     password = json.get("password")
     mode = json.get("mode")
@@ -202,12 +213,14 @@ def _update_file():
             return error_respones_dict(APIErrors.FORBIDDEN), 403
 
         _file = File.by_path(path)
-        if _file and not force_rename:
+        if _file and not overwrite:
             return error_respones_dict(APIErrors.ALREADY_EXISTS), 409
-        if _file and force_rename:
+        if _file and overwrite:
             _file.delete_instance()
         file.path = path
         file.save()
+
+    file.update_modified_time()
 
     return {
         "success": True,
@@ -498,7 +511,7 @@ def _add_temp_folder_file():
     code = json.get("code")
     auth_code = json.get("auth_code", "")
     file_code = json.get("file_code", "")
-    if not code ro not auth_code or not file_code:
+    if not code or not auth_code or not file_code:
         return error_respones_dict(APIErrors.MISSING_PARAMETERS), 400
     tf = TmpFolder.by_code(code)
     if not tf:

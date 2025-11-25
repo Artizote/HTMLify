@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_jwt_extended import JWTManager
 
 from datetime import timedelta
 from threading import Thread
@@ -19,6 +20,7 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=28)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
 app.config["SERVER_NAME"] = SERVER_NAME
 
+jwt = JWTManager(app)
 db.init_app(app)
 
 register_blueprints(app)
