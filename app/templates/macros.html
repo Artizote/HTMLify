@@ -4,45 +4,44 @@
 {% macro file_card(file, hls=0, hle=0, custom_body=None) %}
 <div
     class="file-card
-    {% if file.password %} locked {% endif %}
-    {% if file.visibility == 'h' %} hidden {% endif %}
-    {% if file.visibility == 'o' %} once {% endif %}
-    {% if file.type != 'text' %} media {% endif %}
-    {# {% else %} normal {% endif %} #}
+    {% if file.is_locked %} locked {% endif %}
+    {% if file.visibility == FileVisibility.HIDDEN %} hidden {% endif %}
+    {% if file.visibility == FileVisibility.ONCE %} once {% endif %}
+    {% if file.blob.type == BlobType.TEXT %} media {% endif %}
     "
-    onclick="window.location.href='/{{ file.path }}'"
-    data-visibility="{{ file.visibility }}"
-    data-type="{{ file.type }}"
+    onclick="window.location.href='{{ file.path }}'"
+    data-visibility="{{ file.visibility_s }}"
+    data-type="{{ file.type_s }}"
     >
     <div class="file-card-header">
         <div>
-            <a href="/{{ file.owner }}">
-                <img class="profile-pic" src="/media/dp/{{ file.owner }}.jpg" title="{{ file.owner }}">
+            <a href="/{{ file.user.username }}">
+                <img class="profile-pic" src="/dp/{{ file.user.username }}" title="{{ file.user.username }}">
             </a>
         </div>
         <div class="file-info">
-            <b class="file-title">{{ file.name }}</b>
+            <b class="file-title">{{ file.title }}</b>
             <span class="file-path">{{ file.path }}</span>
         </div>
         <div class="meta">
             <div>{{ file.views }} Views</div>
-            <div>{{ file.comments | length }} Comments</div>
+            <div>{{ file.comments.count() }} Comments</div>
         </div>
     </div>
 
     {% if file.password -%}
         {% set custom_body = "<i style='color:blue;'>File is locked</i>" -%}
-    {% elif file.visibility == "h" -%}
+    {% elif file.visibility == FileVisibility.HIDDEN -%}
         {% set custom_body = "<i style='color:red;'>File is hidden</i>" -%}
-    {% elif file.visibility == "o" -%}
+    {% elif file.visibility == FileVisibility.ONCE -%}
         {% set custom_body = "<i style='color:gray;'>File can only seen once</i>" -%}
-    {% elif file.type != "text" -%}
+    {% elif file.blob.type != BlobType.TEXT -%}
         {% set custom_body = "<i style='color:purple;'>Media file</i>" -%}
     {% endif -%}
 
     <div class="file-card-body">
         {% if custom_body == None %}
-            {% for line in file.content[:512].split("\n")[:8] %}
+            {% for line in file.preview().split("\n")[:8] %}
                 {{ line }}<br>
             {% endfor %}
         {% else %}
@@ -50,18 +49,18 @@
         {% endif %}
     </div>
     <div class="action-buttons">
-        {% if session.get("user") and file.owner == session["user"]["username"] %}
-            <a href="/edit?filepath={{ file.path[file.owner|length + 1:] }}" title="Edit">
+        {% if g.user and file.user == g.user %}
+        <a href="{{ SCHEME }}://my.{{ SERVER_NAME }}/edit?path={{ file.path }}" title="Edit">
                 <button><img src="/static/svg/file-pen-line.svg"></button>
             </a>
         {% endif %}
-        <a href="/{{ file.path }}" title="View">
+        <a href="{{ file.path }}" title="View">
             <button><img src="/static/svg/eye.svg"></button>
         </a>
-        <a href="/src/{{ file.path }}" title="Source">
+        <a href="/src{{ file.path }}" title="Source">
             <button><img src="/static/svg/code.svg"></button>
         </a>
-        <a href="/{{ file.path }}#run-button" title="Run">
+        <a href="{{ file.path }}#run-button" title="Run">
             <button><img src="/static/svg/play.svg"></button>
         </a>
     </div>
@@ -72,20 +71,20 @@
 {% macro dir_card(dir) %}
 <div
     class="dir-card"
-    onclick="window.location.href = '/{{ dir.dir }}'"
+    onclick="window.location.href = '{{ dir.path }}'"
     >
     <div class="dir-card-header">
         <div>
-            <a href="/{{ dir.dir[:dir.dir.find("/")] }}">
-                <img class="profile-pic" src="/media/dp/{{ dir.dir[:dir.dir.find("/")] }}.jpg" title="{{ dir.dir[:dir.dir.find("/")] }}">
+            <a href="/{{ dir.username }}">
+                <img class="profile-pic" src="/dp/{{ dir.username }}" title="{{ dir.username }}">
             </a>
         </div>
         <div class="dir-info">
             <b class="dir-title">{{ dir.title }}</b>
-            <span class="dir-path">{{ dir.dir }}</span>
+            <span class="dir-path">{{ dir.path }}</span>
         </div>
         <div class="meta">
-            <div>{{ dir.items() | length }} Items</div>
+            <div>{{ dir.items_count() }} Items</div>
         </div>
     </div>
     <div class="dir-card-body">

@@ -1,23 +1,33 @@
 {# User Profile #}
 {% extends "base.html" %}
-{% from "macros.html" import file_card, dir_card %}
-{% block title %}{{ user.username }} | HTMLify profile{% endblock %}
+{% from "macros.html" import file_card, dir_card with context %}
+
+{% block title %}
+    {% if show_profile %}
+        {{ dir.username }} | HTMLify profile
+    {% else %}
+        {{ dir.path }}
+    {% endif %}
+{% endblock %}
+
 {% block head_content %}
     <link href="/static/css/file-card.css" rel="stylesheet">
     <link href="/static/css/dir-card.css" rel="stylesheet">
     <link href="/static/css/profile.css" rel="stylesheet">
 {% endblock %}
+
 {% block content %}
-<h1>{{ user.username }} - HTMLify profile</h1>
+<h1>{{ dir.username }} - HTMLify profile</h1>
 <main class="profile-container">
+    {% if show_profile %}
     <!-- Profile Card -->
     <section class="profile-card">
         <div class="profile-header">
-            <img src="/media/dp/{{ user.username }}.jpg" alt="{{ user.username }}'s Profile Picture" class="profile-picture">
+            <img src="/dp/{{ user.username }}" alt="{{ user.username }}'s Profile Picture" class="profile-picture">
             <div class="profile-info">
                 <h1 class="profile-name">{{ user.username }}</h1>
-                <p class="total-files">{{ user.file_count() }} Files</p>
-                <p class="total-views">{{ user.view_count() }} Views</p>
+                <p class="total-files">{{ user.files.count() }} Files</p>
+                <p class="total-views">{{ user }} Views</p>
             </div>
         </div>
 
@@ -38,16 +48,18 @@
     <section class="comments-activity-container">
         <h2>Recent Comments</h2>
         {% for comment in latest_comments %}
-        <span class="comment-activity">{{ user.username }} commented something <a href="/{{ comment["filepath"] }}#comment-{{ comment["id"] }}">@{{ comment["filepath"] }}</a></span>
+        <span class="comment-activity">{{ user.username }} commented something <a href="/src{{ comment.file.path }}#comment-{{ comment.id }}">@{{ comment.file.path }}</a></span>
         {% endfor %}
     </section>
     {% endif %}
 
+    {% endif %}
+
     <!-- Files -->
     <section style="max-width:100%">
-        <h2>Latest files of {{ request.path }}</h2>
-        {% for item in items %}
-        {% if item.is_file() and not item.as_guest %}
+                <h2 style="padding:4px;">files of <span style="font-family:monospace;">{{ dir.path }}</span></h2>
+        {% for item in dir.items() %}
+        {% if item.is_file and not item.as_guest %}
         {{ file_card(item) }}
         {% else %}
         {{ dir_card(item) }}

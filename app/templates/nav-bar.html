@@ -1,24 +1,11 @@
 {# navbar #}
 
 {% macro navbar_links() %}
-{% if not session.get("user") %}
-<a href="/login">Log in</a>
-<a href="/registration">Register</a>
-{% else %}
-<a href="/notifications">Notifications
-    {% if session["user"]["notifications"] > 0 %}
-    <sup style="color:white; background-color:#ff5511; border-radius:50%; padding:2px 5px;"> {{ session["user"]["notifications"] }} </sup>
-    {% endif %}
-</a>
-{% endif %}
 <a href="/dashboard">Dashboard</a>
 <a href="/tmp">Temp Share</a>
 <a href="/r">Shortlinks</a>
 <a href="/frames">Frames</a>
 <a href="/api">API</a>
-{% if session.get("user") %}
-<a href="/action/logout">Logout</a>
-{% endif %}
 {% endmacro %}
 
 <nav>
@@ -26,7 +13,7 @@
         <a href="/"><h1>HTMLify</h1></a>
 
         <form class="search-form" action="/search">
-            <input type="search" placeholder="Search..." name="q" value="{{ q }}">
+            <input type="search" placeholder="Search..." name="q" value="{{ g.q }}">
             <button type="submit" id="search-toggle"><img class="icon" src="/static/svg/search.svg"></button>
         </form>
     </div>

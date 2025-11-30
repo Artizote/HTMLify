@@ -1,6 +1,6 @@
 {# home.html #}
 {% extends "base.html" %}
-{% from "macros.html" import file_card %}
+{% from "macros.html" import file_card with context %}
 {% block title %}HTMLify your dreams{% endblock %}
 {% block head_content %}
     <link href="/static/css/file-card.css" rel="stylesheet">

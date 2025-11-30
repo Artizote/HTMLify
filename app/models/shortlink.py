@@ -50,8 +50,12 @@ class ShortLink(Model):
             "href": self.href,
             "short": self.short,
             "hits": self.visits,
-            "url": f"{SCHEME}://{SERVER_NAME}/r/{self.short}"
+            "url": self.url,
         }
+
+    @property
+    def url(self) -> str:
+        return f"{SCHEME}://{SERVER_NAME}/r/{self.short}"
 
 
 shortlink_db.create_tables([ShortLink])

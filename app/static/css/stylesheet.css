@@ -255,13 +255,18 @@ body {
 }
 .file-content {
     border: 1px solid #ccc;
-    padding: 10px;
     background-color: #f9f9f9;
     font-family: "Courier New", monospace;
-    white-space: pre-wrap;
     max-height: 499px;
     overflow: scroll;
     overflowx: scroll;
+}
+.highlighttable td.linenos {
+    padding-right: 10px;
+    border-right: 1px solid #ccc;
+}
+.highlighttable td.code {
+    padding-left: 10px;
 }
 .comment-section {
     margin-top: 20px;

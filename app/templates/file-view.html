@@ -48,15 +48,27 @@
         <div class="file-header">
             <div class="file-title" style="overflow:auto;">{{ file.name }}</div>
             <div class="file-info">
-                Views: {{ file.views }} <!-- imlement sooon | Stars: 50 -->| Author: {% if not file.as_guest %}<a href="/{{ file.owner }}" style="text-decoration: none;color: black;">{{ file.owner }}</a>{% else %}Unknown{%endif%}
+                Views: {{ file.views }} | Author: <a href="/{{ file.username }}" style="text-decoration: none;color: black;">{{ file.user.username }}</a>
             </div>
         </div>
-        <div class="file-content">{% if file.type == "text" %}{{ file.highlighted() | safe }}</div>
-        {% elif file.type == "image" %}<img src="/raw/{{ file.path }}" style="height:auto;width:100%;"></div>
-        {% elif file.type == "video" %}<video width="100%" style="height:auto;width:100%;" controls><source src="/raw/{{ file.path }}"></video></div>
-        {% elif file.type == "document" %}<iframe src="/raw/{{ file.path }}" width="100%"></iframe></div>
-        {% else %}<a href="/raw/{{ file.path }}" class="download-button" download>Download File<span class="file-size">({{ file.sizef() }})</span></a></div>
-        {% endif %}
+        <div class="file-content">
+
+            {% if file.type == FileType.TEXT -%}
+                {{ file.highlighted_html(linenos=True) | safe }}
+            {% elif file.type == FileType.IMAGE %}
+                <img src="/raw{{ file.path }}" style="max-width:100%;height:auto" alt="{{ file.title }}">
+            {% elif file.type == FileType.VIDEO %}
+                <video src="/raw{{ file.path }}" style="max-width:100%" controls></video>
+            {% elif file.type == FileType.AUDIO %}
+                <audio src="/raw{{ file.path }}" controls></audio>
+            {% elif file.type == FileType.APPLICATION and file.ext == "pdf" %}
+                <iframe src="/raw{{ file.path }}" style="width:100%;height:100%;"></iframe> 
+            {% else %}
+                <a href="/raw{{ file.path }}" class="download-button" download>Download File<span class="file-size">({{ file.sizef() }})</a>
+            {% endif %}
+
+        </div>
+
         <div>
             <button id="run-button" onclick="run()">Run &gt;</button>
             <select id="executor-selector">
@@ -80,9 +92,11 @@
             <button>Clone</button>
         </form>
         </div>
+
+        <!-- New comment method will be intrduce
         <h3>Comments</h3>
         
-        {% for comment in file.comments %}
+        {% for comment in [] %}
         <div class="comment-card" id="comment-{{ comment.id }}">
         <div class="comment-header">
         <span class="comment-author"><img src="/media/dp/{{ comment.author }}.jpg"><a href="/{{ comment.author }}">{{ comment.author }}</a></span>
@@ -94,7 +108,6 @@
         </div>
         <div class="comment-actions">
             <a href="#comment-text-field" onclick="add_mention('{{ comment.author }}')">Reply(Mention)</a>
-        <!--<a href="#">Like</a>-->
         </div>
         </div>
         {% endfor %}
@@ -109,6 +122,7 @@ use '@' for mention users." maxlength="1024" required></textarea>
             <button>Comment</button>
             </form>
         </div>
+        -->
     </div>
 
 <script>
@@ -124,15 +138,14 @@ function embedcode() {
 }
 
 function shortlink(){
-    //document.getElemenetById("shortlinkbutton").outerHTML = ``;
-    document.getElementById("shortlinkbutton").outerHTML = `<input type="text" id="shortlink" value="{{ request.scheme + "://" + request.host + "/r/" + file.shortlink() }}" readonly><button onclick="copycontent('shortlink')">Copy</button>`;
+    document.getElementById("shortlinkbutton").outerHTML = `<input type="text" id="shortlink" value="{{ file.shortlink().url }}" readonly><button onclick="copycontent('shortlink')">Copy</button>`;
 }
 
 function add_mention(username){
     var comment_field = document.getElementById("comment-text-field");
     comment_field.value = "@"+username + " " + comment_field.value;
 }
-
+// TODO: Make a terminal module/library
 // Treminal emulator stuffus
 const terminal = document.getElementById('terminal');
 const terminalInput = document.getElementById("terminal-input");

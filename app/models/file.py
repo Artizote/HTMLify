@@ -5,6 +5,7 @@ from pygments.formatters import HtmlFormatter
 from typing import List, Union
 from datetime import datetime, UTC
 from mimetypes import guess_type
+from random import randint
 
 from .blob import Blob
 from ..utils.helpers import randstr
@@ -126,8 +127,17 @@ class File(Model):
         return cls.get_or_none(cls.id==id)
     
     @classmethod
-    def by_path(cls, path):
+    def by_path(cls, path) -> "File":
         return cls.get_or_none(cls.path==path)
+
+    @classmethod
+    def random(cls, as_guest=False, mode=[].copy()):
+        files = cls.select().where(cls.as_guest==as_guest)
+        files = files.where(cls.mode.in_(mode))
+        files_count = files.count()
+        if not files_count:
+            return None
+        return files[randint(0, files_count-1)]
 
     @classmethod
     def new_guest_path(cls, filename: str) -> str:
@@ -184,6 +194,8 @@ class File(Model):
 
     def hit(self):
         self.views += 1
+        if self.visibility == FileVisibility.ONCE:
+            self.visibility = FileVisibility.HIDDEN
         self.save()
 
     def update_modified_time(self):
@@ -326,6 +338,10 @@ class File(Model):
         return FileType.filetype(self.name)
 
     @property
+    def mimetype(self):
+        return FileType.mimetype(self.name)
+
+    @property
     def is_file(self) -> bool:
         return True
 
@@ -438,7 +454,7 @@ class Dir:
         return self.__dir == other.__dir
 
     def __len__(self) -> int:
-        return self.items.__len__()
+        return self.items().__len__()
 
     @property
     def name(self) -> str:

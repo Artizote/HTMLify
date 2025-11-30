@@ -1,6 +1,8 @@
 from peewee import Model, SqliteDatabase, AutoField, CharField, BooleanField, IntegerField
 from werkzeug.security import generate_password_hash, check_password_hash
 
+from functools import lru_cache
+
 from ..utils import randstr
 
 
@@ -135,6 +137,14 @@ class User(Model):
     def dir(self):
         from .file import Dir
         return Dir("/"+self.username)
+
+    @property
+    @lru_cache
+    def total_views(self):
+        total = 0
+        for file in self.files:
+            total += file.views
+        return total
 
     @property
     def is_active(self) -> bool:

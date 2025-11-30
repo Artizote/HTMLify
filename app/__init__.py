@@ -7,7 +7,7 @@ from threading import Thread
 from .routes import register_blueprints
 from .routes.public import PROCESS_POOL
 from .executors import *
-from .models import db, TmpFile, TmpFolder
+from .models import TmpFile, TmpFolder, FileMode, FileType, FileVisibility, BlobType
 from .search_engine import *
 from .utils.daemons import *
 from .config import *
@@ -21,12 +21,23 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
 app.config["SERVER_NAME"] = SERVER_NAME
 
 jwt = JWTManager(app)
-db.init_app(app)
+
+@app.context_processor
+def context_processor():
+    return {
+        "SCHEME": SCHEME,
+        "SERVER_NAME": SERVER_NAME,
+        "FileType": FileType,
+        "FileMode": FileMode,
+        "FileVisibility": FileVisibility,
+        "BlobType": BlobType,
+    }
 
 register_blueprints(app)
 
 def run_daemons():
-    Thread(target=search_indexing_daemon,   args=(TermFrequency, app, files),   daemon=True).start()
+    # TODO: update/rewrote search engine
+    # Thread(target=search_indexing_daemon,   args=(TermFrequency, app, files),   daemon=True).start()
     Thread(target=process_pool_purger,      args=(PROCESS_POOL,),               daemon=True).start()
     Thread(target=tmp_file_purger,          args=(TmpFile,),                    daemon=True).start()
     Thread(target=tmp_folder_purger,        args=(TmpFolder,),                  daemon=True).start()
