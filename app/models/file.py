@@ -122,6 +122,26 @@ class File(Model):
             return path_parts[1]
         return ""
 
+    @staticmethod
+    def is_valid_filename(filename: str) -> bool:
+        return filename not in {".", ".."}
+
+    @staticmethod
+    def is_valid_filepath(path: str) -> bool:
+        if not path:
+            return False
+        if not path.startswith("/"):
+            return False
+        if path.endswith("/"):
+            return False
+        path_parts = path.split("/")[1:]
+        if len(path_parts) == 0:
+            return False
+        for part in path_parts:
+            if part in {".", ".."}:
+                return False
+        return True
+
     @classmethod
     def by_id(cls, id) -> "File":
         return cls.get_or_none(cls.id==id)
@@ -230,6 +250,8 @@ class File(Model):
     def set_mode(self, mode: int | str):
         if isinstance(mode, str):
             mode = mode.casefold()
+            if mode.isnumeric():
+                mode = int(mode)
         match mode:
             case FileMode.RENDER | "render":
                 self.mode = FileMode.RENDER
@@ -240,6 +262,8 @@ class File(Model):
     def set_visibility(self, visibility: int | str):
         if isinstance(visibility, str):
             visibility = visibility.casefold()
+            if visibility.isnumeric():
+                visibility = int(visibility)
         match visibility:
             case FileVisibility.PUBLIC | "public":
                 self.visibility = FileVisibility.PUBLIC
@@ -283,7 +307,8 @@ class File(Model):
             "modified": self.modified.timestamp(),
             "blob_hash": blob_hash,
             "content": content,
-            "url": f"{SCHEME}://{SERVER_NAME}{self.path}",
+            "url": self.url,
+            "username": self.username,
         }
 
     @property
@@ -410,6 +435,13 @@ class File(Model):
         return Dir(self)
 
     @property
+    def username(self) -> str:
+        path_parts = self.path.split("/")
+        if len(path_parts) < 2:
+            return ""
+        return path_parts[1]
+
+    @property
     def blob(self) -> Blob:
         blob = Blob.by_hash(self.blob_hash)
         return blob
@@ -425,6 +457,10 @@ class File(Model):
     @property
     def size(self) -> int:
         return self.blob.size
+
+    @property
+    def url(self) -> str:
+        return f"{SCHEME}://{SERVER_NAME}{self.path}"
 
 
 class Dir:
@@ -490,6 +526,10 @@ class Dir:
             return ""
         return path_part[1]
 
+    @property
+    def url(self) -> str:
+        return f"{SCHEME}://{SERVER_NAME}{self.path}"
+
     def items(self) -> List[Union["Dir", File]]:
         """Return items of the directory"""
         items_ = []
@@ -542,7 +582,7 @@ class Dir:
             "username": self.username,
             "items": items,
             "items_count": self.items_count(),
-            "url": f"{SCHEME}://{SERVER_NAME}{self.path}",
+            "url": self.url,
         }
 
 

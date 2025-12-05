@@ -110,27 +110,17 @@
 {% macro files_grid_view(items) %}
 <div class="files-grid">
     {% for item in items %}
-    {% if item.is_file() %}
+    {% if item.is_file %}
     <div
         class="item"
-        onclick="window.location.href = '/edit?filepath={{ item.path[item.path.find('/')+1:] }}'"
+        onclick="window.location.href = '/edit?path={{ item.path }}'"
         data-title="{{ item.name }}"
         data-path="{{ item.path }}"
         data-visibility="{{ item.visibility }}"
         data-type="{{ item.type }}"
         >
         <div class="item-icon">
-            {% if item.type == "text" %}
-            <img src="/static/svg/file-code.svg" alt="Thumbnail" class="item-thumbnail">
-            {% elif item.type == "image" %}
-            <img src="/static/svg/file-image.svg" alt="Thumbnail" class="item-thumbnail">
-            {% elif item.type == "audio" %}
-            <img src="/static/svg/file-audio.svg" alt="Thumbnail" class="item-thumbnail">
-            {% elif item.type == "video" %}
-            <img src="/static/svg/file-video.svg" alt="Thumbnail" class="item-thumbnail">
-            {% else %}
-            <img src="/static/svg/file-question.svg" alt="Thumbnail" class="item-thumbnail">
-            {% endif %}
+            <img src="/static/svg/{{ self.type_s }}.svg" alt="Thumbnail" class="item-thumbnail">
         </div>
 
         <div class="item-details">
@@ -144,16 +134,15 @@
                 <button title="View"><img src="/static/svg/eye.svg"></button>
             </a>
             
-            <form action="/delete" method="POST" style="display:inline;">
-                <input type="hidden" name="path" value="{{ item.path }}">
+            <a href="/delete?path={{ item.path }}">
                 <button class="delete" title="Delete"><img src="/static/svg/trash.svg"></button>
-            </form>
+            </a>
         </div>
     </div>
     {% else %}
     <div
         class="item"
-        onclick="window.location.href = '/dashboard?dir={{ item.dir[item.dir.find("/")+1:] }}'"
+        onclick="window.location.href = '/?dir={{ item.dir.path }}'"
         data-title="{{ item.title }}"
         data-path="{{ item.dir }}"
         >
@@ -168,7 +157,7 @@
         </div>
 
         <div class="item-actions">
-            <a href="/dashboard?dir={{ item.dir[item.dir.find("/")+1:] }}" title="Open">
+            <a href="/?dir={{ item.dir[item.dir.find("/")+1:] }}" title="Open">
                 <button><img src="/static/svg/folder-open.svg"></button>
             </a>
         </div>
@@ -182,23 +171,13 @@
 {% macro files_list_view(items) %}
 <div class="files-list">
     {% for item in items %}
-    {% if item.is_file() %}
+    {% if item.is_file%}
     <div
-        class="item" onclick="window.location.href = '/edit?filepath={{ item.path[item.path.find('/')+1:] }}'"
+        class="item" onclick="window.location.href = '/edit?path={{ item.path }}'"
         data-title="{{ item.name }}"
         data-path="{{ item.path }}"
         >
-        {% if item.type == "text" %}
-        <img src="/static/svg/file-code.svg" alt="Thumbnail" class="item-thumbnail">
-        {% elif item.type == "image" %}
-        <img src="/static/svg/file-image.svg" alt="Thumbnail" class="item-thumbnail">
-        {% elif item.type == "audio" %}
-        <img src="/static/svg/file-audio.svg" alt="Thumbnail" class="item-thumbnail">
-        {% elif item.type == "video" %}
-        <img src="/static/svg/file-video.svg" alt="Thumbnail" class="item-thumbnail">
-        {% else %}
-        <img src="/static/svg/file-question.svg" alt="Thumbnail" class="item-thumbnail">
-        {% endif %}
+        <img src="/static/svg/filetype/{{ item.type_s }}.svg" alt="Thumbnail" class="item-thumbnail">
 
         <div class="item-info">
             <h3 class="item-name">{{ item.name or item.path[item.path.rfind("/"):] }}</h3>
@@ -207,22 +186,21 @@
         </div>
 
         <div class="item-actions">
-            <a href="{{ item.path }}">
+            <a href="{{ item.url }}">
                 <button title="View"><img src="/static/svg/eye.svg"></button>
             </a>
-            <a href="/edit?filepath={{ item.path[item.path.find("/")+1:] }}">
+            <a href="/edit?path={{ item.path }}">
                 <button title="Edit"><img src="/static/svg/file-pen-line.svg"></button>
             </a>
-            <form action="/delete" method="POST" style="display:inline;">
-                <input type="hidden" name="path" value="{{ item.path }}">
+            <a href="/delete?path={{ item.path }}">
                 <button class="delete" title="Delete"><img src="/static/svg/trash.svg"></button>
-            </form>
+            </a>
         </div>
     </div>
     {% else %} 
     <div
         class="item"
-        onclick="window.location.href = '/dashboard?dir={{ item.dir[item.dir.find("/")+1:] }}'"
+        onclick="window.location.href = '/?dir={{ item.path }}'"
         data-title="{{ item.title }}"
         data-path="{{ item.dir }}"
         >
@@ -235,7 +213,7 @@
         </div>
 
         <div class="item-actions">
-            <a href="/dashboard?dir={{ item.dir[item.dir.find("/")+1:] }}">
+            <a href="/?dir={{ item.path }}">
                 <button><img src="/static/svg/folder-open.svg"></button>
             </a>
         </div>

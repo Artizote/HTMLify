@@ -30,3 +30,24 @@ function copyToClipboard(text, notify = true) {
             if (notify) alert("Failed to copy automaticly, please copy manualy:\n\n" + text);
         });
 }
+
+/**
+ * Show Toast Notification
+ */
+function showToast(message, type = "info", duration = 2500) {
+    const container = document.getElementById("toast-container");
+
+    const toast = document.createElement("div");
+    toast.className = `toast ${type}`;
+    toast.innerText = message;
+
+    container.appendChild(toast);
+
+    setTimeout(() => toast.classList.add("show"), 10);
+
+    setTimeout(() => {
+        toast.classList.remove("show");
+        setTimeout(() => toast.remove(), 300);
+    }, duration);
+}
+

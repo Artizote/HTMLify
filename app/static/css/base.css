@@ -1,0 +1,35 @@
+/* Base Variables */
+
+:root {
+    /* Primary Colors */
+    --primary: #007BFF;
+    --primary-hover: #0056b3;
+    --secondary: #2196f3;
+    --secondary-hover: #2197ff;
+
+    /* Backgrounds */
+    --bg: #ffffff;
+    --bg-soft: #e2e1e4;
+    --bg-light: #f9f9f9;
+
+    /* Borders */
+    --border: #ccc;
+    --border-light: #ddd;
+    --border-error: red;
+
+    /* Text */
+    --text: #333;
+    --text-muted: #777;
+    --link: #007BFF;
+    --link-hover: #0056b3;
+
+    /* Radius and Shadow */
+    --radius: 5px;
+    --shadow: 0 0 10px rgba(0,0,0,0.1);
+    --shadow-soft: 0 2px 5px rgba(0,0,0,0.1);
+
+    /* Fonts */
+    --font-base: Arial, sans-serif;
+    --font-mono: "Courier New", monospace;
+}
+

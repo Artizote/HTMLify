@@ -51,8 +51,17 @@ const privateApi = {
             return json.success;
         },
 
-        async get(fileId) {
-            return await privateApi.fetchJson("/file?id=" + fileId);
+        async get(fileId=0, filePath="", showContent=false) {
+            let params = new URLSearchParams();
+            if (fileId) {
+                params.append("id", fileId);
+            } else {
+                params.append("path", filePath);
+            }
+            if (showContent) {
+                params.append("show-content", "true");
+            }
+            return await privateApi.fetchJson(`/file?${params.toString()}`);
         },
 
         async create(fields) {
@@ -65,8 +74,14 @@ const privateApi = {
             });
         },
 
-        async delete(fileId) {
-            return await privateApi.fetchJson("/file?id=" + fileId, {
+        async delete(fileId=0, filePath="") {
+            let params = new URLSearchParams();
+            if (fileId) {
+                params.append("id", fileId);
+            } else {
+                params.append("path", filePath);
+            }
+            return await privateApi.fetchJson(`/file?${params.toString()}`, {
                 method: "DELETE"
             });
         },

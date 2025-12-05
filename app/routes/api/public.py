@@ -95,7 +95,7 @@ def _get_file():
     }
 
 @public_api.post("/file")
-def _create_file():
+def create_file():
     if not g.auth_user:
         return error_respones_dict(APIErrors.UNAUTHORIZED), 401
 
@@ -123,6 +123,15 @@ def _create_file():
             return error_respones_dict(APIErrors.INVALID_PARAMETERS)
         if path_parts[1] != g.auth_user.username:
             return error_respones_dict(APIErrors.FORBIDDEN), 403
+
+    if path.endswith("/"):
+        path = path[:-1]
+
+    if not path.startswith("/"):
+        path = "/" + path
+
+    if not File.is_valid_filepath(path):
+        return error_respones_dict(APIErrors.INVALID_PARAMETERS)
 
     _file = File.by_path(path)
     if _file:
@@ -156,7 +165,7 @@ def _create_file():
     }
 
 @public_api.patch("/file")
-def _update_file():
+def update_file():
     if not g.auth_user:
         return error_respones_dict(APIErrors.UNAUTHORIZED), 401
 
@@ -176,7 +185,7 @@ def _update_file():
     path = json.get("path")
     overwrite = json.get("overwrite", False)
     title = json.get("title")
-    password = json.get("password")
+    password = json.get("password", "")
     mode = json.get("mode")
     visibility = json.get("visibility")
     encoded_content = json.get("content")
@@ -198,8 +207,7 @@ def _update_file():
     if mode:
         file.set_mode(mode)
 
-    if password:
-        file.set_password(password)
+    file.set_password(password)
 
     if title:
         file.title = title

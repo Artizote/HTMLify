@@ -74,3 +74,13 @@
     border-radius: 0px 0px 6px 6px;
     text-align: center;
 }
+
+.main-container {
+    width: 90%;
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 30px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+}

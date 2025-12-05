@@ -1,0 +1,34 @@
+{# File Upload #}
+
+{% extends "dashboard/base.html" %}
+
+{% block title %}File Upload{% endblock %}
+
+{% block content %}
+<div class="card-center">
+    <h1>File Upload</h1>
+
+    <div class="card card-half">
+        <div class="form-group">
+            <input id="file-upload-field" type="file" class="form-file" multiple>
+        </div>
+        <div class="form-group">
+            <label>Upload dir</label>
+            <input id="upload-dir" type="text" value="{{ request.args.get("dir") or "/" + g.user.username + "/" }}" class="form-file" >
+        </div>
+        <label for="overwrite">Overwrite files?</label>
+        <input id="overwrite" type="checkbox" class="form-check">
+        <br>
+        <div class="form-group">
+            <button class="btn btn-primary" onclick="upload()">Upload</button>
+        </div>
+        <div id="logs" class="card card-scroll">
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block after_body %}
+    <script src="/static/js/private-api.js"></script>
+    <script src="/static/js/pages/dashboard/file-upload.js"></script>
+{% endblock %}

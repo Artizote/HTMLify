@@ -3,14 +3,22 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="/static/css/base.css" rel="stylesheet">
+        <link href="/static/css/components/card.css" rel="stylesheet" />
+        <link href="/static/css/components/form.css" rel="stylesheet" />
+        <link href="/static/css/components/button.css" rel="stylesheet" />
+        <link href="/static/css/components/toast.css" rel="stylesheet" />
+
         <link href="/static/css/stylesheet.css" rel="stylesheet">
         <link href="/static/css/nav-bar.css" rel="stylesheet">
+        <link href="/static/css/dashboard.css" rel="stylesheet">
         <script src="/static/js/utils.js"></script>
         {% block head_content %}{% endblock %}
         <title>{% block title %}HTMLify{% endblock %}</title>
     </head>
     <body>
-        {% include "nav-bar.html" %}
+        <div id="toast-container"></div>
+        {% include "dashboard/nav-bar.html" %}
         <main>
             {% block content %}{% endblock %}
         </main>

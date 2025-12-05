@@ -1,7 +1,7 @@
 {# Dashboard #}
-{% extends "base.html" %}
+{% extends "dashboard/base.html" %}
 {% from "macros.html" import files_list_view, files_grid_view %}
-{% block title %}Dashboard - {{ session["user"]["username"] }}{% endblock %}
+{% block title %}Dashboard - {{ g.user.username }}{% endblock %}
 {% block head_content %}
     <link href="/static/css/dashboard.css" rel="stylesheet">
     <link href="/static/css/files-view.css" rel="stylesheet">
@@ -10,23 +10,12 @@
     <h1>Dashboard</h1>
 
     {% set files_view = session.get("dashboard-files-view", "list") %}
+    {# TODO: add view switch button #}
 
-    <div class="dashboard-links">
-        <a href="/edit?filepath={{ dir }}">Make new file</a>
-        <a href="/file-upload?dir={{ dir }}">Upload File</a>
-        <a href="/git?dir={{ dir }}">Git Clone</a>
-        {% if files_view == "grid" %}
-        <a href="/dashboard?files-view=list">List View</a>
-        {% else %}
-        <a href="/dashboard?files-view=grid">Grid View</a>
-        {% endif %}
-    </div>
-
-    {% set dirs = dir.split("/") %}
+    {% set dirs = dir.path.split("/")[1:] %}
     <div class="dir-nav">
-        <a href="/dashboard">{{ session["user"]["username"] }}</a>
         {% for d_path in dirs %}
-        /<a href="/dashboard?dir={{ "/".join(dirs[:loop.index]) }}"
+        /<a href="/?dir=/{{ "/".join(dirs[:loop.index]) }}"
             {% if loop.index == dirs|length %}
             class="current"
             {% endif %}
@@ -42,9 +31,9 @@
     </div>
 
     {% if files_view == "list" %}
-    {{ files_list_view(items) }}
+    {{ files_list_view(dir.items()) }}
     {% else %}
-    {{ files_grid_view(items) }}
+    {{ files_grid_view(dir.items()) }}
     {% endif %}
 
 {% endblock %}

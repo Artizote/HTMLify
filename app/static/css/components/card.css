@@ -1,0 +1,116 @@
+/* CARD Styles */
+
+/* Basic Card */
+.card {
+    background-color: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 20px;
+    margin-bottom: 20px;
+    transition: all 0.2s ease;
+}
+
+/* Card Header */
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    font-weight: 600;
+    font-size: 18px;
+    color: var(--text);
+}
+
+/* Card Title */
+.card-title {
+    font-size: 20px;
+    font-weight: bold;
+    margin: 0;
+    color: var(--text);
+}
+
+/* Card Body */
+.card-body {
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.5;
+}
+
+/* Card Footer */
+.card-footer {
+    margin-top: 15px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+/* Card Hover */
+.card:hover {
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+}
+
+/* Small Card */
+.card-sm {
+    padding: 10px;
+    font-size: 13px;
+}
+
+/* Large Card */
+.card-lg {
+    padding: 30px;
+    font-size: 16px;
+}
+
+/* Card Half Width */
+.card-half {
+    max-width: 50%;
+    min-width: 300px;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 20px, auto;
+}
+
+/* Card Full Width */
+.card-full {
+    width: 100%;
+}
+
+/* Card with border */
+.card-accent {
+    border-left: 4px solid var(--primary);
+}
+
+/* Image inside card */
+.card img {
+    max-width: 100%;
+    border-radius: var(--radius);
+    display: block;
+    margin-bottom: 10px;
+}
+
+/* Scrollable content inside card */
+.card-scroll {
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+/* Centered content */
+.card-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Card light shadow */
+.card-shadow-light {
+    box-shadow: var(--shadow-soft);
+}
+
+/* Card heavy shadow */
+.card-shadow-heavy {
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+

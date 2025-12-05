@@ -1,0 +1,55 @@
+{# Delete File #}
+
+{% extends "dashboard/base.html" %}
+
+{% block title %}Deleting File{% endblock %}
+
+{% block content %}
+<div class="card-center">
+    <h1>Deleting filie</h1>
+    <div class="card card-half">
+        <h1 class="card-title">Do you really want to delete this file?</h1>
+        <div class="form-group">
+            <label>Filename</label>
+            <input value="{{ file.name }}" class="form-input" disabled>
+        </div>
+        <div class="form-group">
+            <label>Filepath</label>
+            <input value="{{ file.path }}" class="form-input" disabled>
+        </div>
+        <div class="form-group">
+            <iframe src="{{ SCHEME }}://{{ SERVER_NAME }}/raw{{ file.path }}" style="width:90%;margin:auto;"></iframe>
+        </div>
+        <div>
+            <button onclick="delete_file()" class="btn btn-primary" style="background-color:#ff3333;">Delete</button>
+            <button onclick="go_back()" class="btn btn-primary">Go Back</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block after_body %}
+<script src="/static/js/private-api.js"></script>
+<script>
+const file_id = {{ file.id }};
+
+function delete_file() {
+    if (!confirm("Delete this file?")) {
+        return;
+    }
+    privateApi.file.delete(file_id)
+        .then(res => {
+            if (res.success) {
+                showToast("File Deleted", "success");
+                setTimeout(go_back, 3000);
+            } else {
+                showToast(`File not deleted: [${res.error.code}]`, "error");
+            }
+        });
+}
+
+function go_back() {
+    window.location.href = "/";
+}
+</script>
+{% endblock %}

@@ -1,0 +1,33 @@
+{# Login #}
+
+{% extends "dashboard/base.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="card-center">
+	<h1>HTMLify</h1>
+    <div class="card card-half">
+        <h1 class="card-title">Login</h1>
+        {% if error %}
+        <div class="error-msg">
+        	{{ error }}
+        </div>
+        {% endif %}
+        <form method="POST">
+            <div class="form-group">
+                <label>Username</label>
+                <input class="form-input" type="text" name="username" placeholder="Username" required /><br>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input class="form-input" type="password" name="password" placeholder="Password" required /><br>
+            </div>
+            <div class="form-group">
+                <button class="btn btn-primary">Login</button>
+                <p>New here? <a href="/register">Register</a>.</p>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

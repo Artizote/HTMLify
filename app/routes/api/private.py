@@ -28,7 +28,7 @@ def before_requesn():
 
 
 @private_api.get("/items")
-def _list_dir_items():
+def list_dir_items():
     dir = request.args.get("dir", request.args.get("user", ""))
     dir = Dir(dir)
     if dir.username != g.auth_user.username:
@@ -36,9 +36,13 @@ def _list_dir_items():
     return dir.to_dict()
 
 @private_api.get("/file")
-def _get_file():
+def get_file():
     id = request.args.get("id", 0)
+    path = request.args.get("path", "")
+    show_content = request.args.get("show-content", "false") == "true"
     file = File.by_id(id)
+    if not file and path:
+        file = File.by_path(path)
     if not file:
         return error_respones_dict(APIErrors.NOT_FOUND), 404
     if file.user != g.auth_user:
@@ -47,11 +51,11 @@ def _get_file():
         file.unlock_without_password()
     return {
         "success": True,
-        "file": file.to_dict()
+        "file": file.to_dict(show_content=show_content)
     }
 
 @private_api.post("/file")
-def _create_file():
+def create_file():
     # can accept application/json and multipart/form-data
     json = request.get_json() or {}
 
@@ -67,7 +71,7 @@ def _create_file():
     overwrite = json.get("overwrite", request.form.get("overwrite", "false") == "true")
 
 
-    if not (_file or encoded_content):
+    if not _file and not encoded_content:
         return error_respones_dict(APIErrors.MISSING_DATA), 400
 
     if as_guest and _file:
@@ -79,8 +83,14 @@ def _create_file():
         if File.username_from_path(path) != g.auth_user.username:
             return error_respones_dict(APIErrors.FORBIDDEN), 403
 
+    if path.endswith("/"):
+        path = path[:-1]
+
     if not path.startswith("/"):
         path = "/" + path
+
+    if not File.is_valid_filepath(path):
+        return error_respones_dict(APIErrors.INVALID_PARAMETERS), 400
 
     if _file:
         try:
@@ -122,18 +132,21 @@ def _create_file():
     file.set_mode(mode)
 
     return {
-        "succsess": True,
+        "success": True,
         "file": file.to_dict()
     }
 
 @private_api.patch("/file")
-def _update_file():
+def update_file():
     json = request.get_json()
     if not json:
         return error_respones_dict(APIErrors.MISSING_JSON), 400
 
     id = request.args.get("id", 0, int)
+    path = request.args.get("path", "")
     file = File.by_id(id)
+    if not file and path:
+        file = File.by_path(path)
     if not file:
         return error_respones_dict(APIErrors.NOT_FOUND), 404
     if file.user != g.auth_user:
@@ -142,7 +155,7 @@ def _update_file():
     path = json.get("path")
     overwrite = json.get("overwrite", False)
     title = json.get("title")
-    password = json.get("password")
+    password = json.get("password", "")
     mode = json.get("mode")
     visibility = json.get("visibility")
     encoded_content = json.get("content")
@@ -150,7 +163,7 @@ def _update_file():
     if path:
         if not path.startswith("/"):
             path = "/" + path
-        if File.username_from_path(path) != g.auth_user:
+        if File.username_from_path(path) != g.auth_user.username:
             return error_respones_dict(APIErrors.FORBIDDEN), 403
         _file = File.by_path(path)
         if _file:
@@ -165,8 +178,7 @@ def _update_file():
         file.title = title
         file.save()
 
-    if password:
-        file.set_password(password)
+    file.set_password(password)
 
     if mode:
         file.set_mode(mode)
@@ -188,14 +200,17 @@ def _update_file():
     file.update_modified_time()
 
     return {
-        "succsess": True,
+        "success": True,
         "file": file.to_dict()
     }
 
 @private_api.delete("/file")
-def _delete_file():
+def delete_file():
     id = request.args.get("id", 0, int)
+    path = request.args.get("path", "")
     file = File.by_id(id)
+    if not file and path:
+        file = File.by_path(path)
     if not file:
         return error_respones_dict(APIErrors.NOT_FOUND), 404
     if file.user != g.auth_user:
@@ -206,7 +221,7 @@ def _delete_file():
     }
 
 @private_api.get("/revision")
-def _get_revision():
+def get_revision():
     id = request.args.get("id", 0, int)
     revision: Revision = Revision.by_id(id)
     if not revision:
@@ -219,7 +234,7 @@ def _get_revision():
     }
 
 @private_api.get("/revisions")
-def _get_revisions():
+def get_revisions():
     id = request.args.get("id", 0, int)
     file = File.by_id(id)
     if not file:

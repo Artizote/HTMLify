@@ -1,0 +1,96 @@
+/* BUTTON Styles */
+
+/* Base button style */
+.btn {
+    display: inline-block;
+    padding: 10px 20px;
+    font-family: var(--font-base);
+    font-size: 16px;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* Primary button */
+.btn-primary {
+    background-color: var(--primary);
+    color: var(--bg);
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+}
+
+.btn-primary:active {
+    transform: scale(0.98);
+}
+
+/* Secondary button */
+.btn-secondary {
+    background-color: var(--secondary);
+    color: var(--bg);
+}
+
+.btn-secondary:hover {
+    background-color: var(--secondary-hover);
+}
+
+.btn-secondary:active {
+    transform: scale(0.98);
+}
+
+/* Outline button */
+.btn-outline {
+    background-color: transparent;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+}
+
+.btn-outline:hover {
+    background-color: var(--primary);
+    color: var(--bg);
+}
+
+.btn-outline:active {
+    transform: scale(0.98);
+}
+
+/* Small button */
+.btn-sm {
+    padding: 5px 10px;
+    font-size: 14px;
+}
+
+/* Large button */
+.btn-lg {
+    padding: 15px 25px;
+    font-size: 18px;
+}
+
+/* Full-width button */
+.btn-block {
+    display: block;
+    width: 100%;
+}
+
+/* Disabled button */
+.btn:disabled,
+.btn-disabled {
+    background-color: #ccc;
+    color: #666;
+    cursor: not-allowed;
+    border: none;
+}
+
+/* Icon butto */
+.btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+

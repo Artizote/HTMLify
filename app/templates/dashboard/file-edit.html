@@ -1,0 +1,80 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Editing - {{ request.args.get("path") }} {% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="form-group">
+    <label>File Path</label>
+    <input type="text" id="path" value="{{ file.path if file else "/" + g.user.username + "/" }}" class="form-input" placeholder="File Path">
+</div>
+
+<div class="form-froup">
+    <label>Title</label>
+    <input type="text" id="title" value="{{ file.title if file else "" }}" class="form-input" placeholder="File Title">
+</div>
+
+<details>
+    <summary>Protaction</summary>
+    <label>Set password</label>
+    <input type="password" style="display: none;"> <!-- Fake Password Field -->
+    <input type="password" id="password" value="{{ file.password }}" class="form-input form-inline" placeholder="Password" autocomplete="new-password">
+    <button id="password-toggle-button" onclick="toggle_password()" class="form-inline btn">Show</a>
+</details>
+
+<div class="form-group">
+    <label>File Mode</label>
+    <select id="mode" class="form-select">
+        <option value="{{ FileMode.SOURCE }}" {% if file and file.mode == FileMode.SOURCE %}selected{% endif %}>Source</option>
+        <option value="{{ FileMode.RENDER }}" {% if file and file.mode == FileMode.RENDER %}selected{% endif %}>Render</option>
+    </select>
+</div>
+
+<div class="form-group">
+    <label>File Visibility</label>
+    <select id="visibility" class="form-select">
+        <option value="{{ FileVisibility.PUBLIC }}" {% if file and file.visibility == FileVisibility.PUBLIC %}selected{% endif %}>Public</option>
+        <option value="{{ FileVisibility.HIDDEN }}" {% if file and file.visibility == FileVisibility.HIDDEn %}selected{% endif %}>Hidden</option>
+        <option value="{{ FileVisibility.ONCE }}" {% if file and file.visibility == FileVisibility.ONCE %}selected{% endif %}>Once</option>
+    </select>
+</div>
+
+{% if not file %}
+<div class="form-group">
+    <label>As Guest</label>
+    <input id="as-guest" type="checkbox">
+</div>
+
+<div id="file-extention-selector" class="form-group" style="display: none;">
+    <label>File Extension:</label>
+    <input id="ext" type="text">
+</div>
+{% endif %}
+
+<button id="switch-text-editor-button" onclick="switch_to_text_editor()" class="btn">Text Mode</button>
+<button id="switch-hex-editor-button" onclick="switch_to_hex_editor()" class="btn">Hex Mode</button>
+<button id="switch-binary-editor-button" onclick="switch_to_binary_editor()" class="btn">Binary Mode</button>
+
+
+<div class="form-group">
+    <div id="editor-container" class="card-scroll">
+        <textarea id="editor" class="form-textarea" style="width: 100%;" rows="20"></textarea>
+    </div>
+</div>
+
+<div class="form-group">
+    <button class="btn btn-primary" onclick="save()">Save</button>
+</div>
+
+</div>
+{% endblock %}
+
+{% block after_body %}
+<script>
+window.file_id = {{ file.id if file else 0 }};
+window.file_type = "{{ file.type_s if file else "" }}";
+window.file_path = "{{ file.path if file else "" }}";
+</script>
+<script src="/static/js/private-api.js"></script>
+<script src="/static/js/pages/dashboard/file-edit.js"></script>
+{% endblock %}
