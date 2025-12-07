@@ -8,22 +8,20 @@
 {% endblock %}
 {% block content %}
     <h1>HTMLify your dreams</h1>
-    <form id="filter-form" class="filter-form" action="" method="POST">
-    <div class="filter-label">Filter Options:</div>
-    <label class="filter-option">
-    <input type="checkbox" name="file-modes" value="s" {% if 's' in session["filter-file-modes"] %}checked{% endif %}> Source
-    </label>
-    <label class="filter-option">
-    <input type="checkbox" name="file-modes" value="r" {% if 'r' in session["filter-file-modes"] %}checked{% endif %}> Render
-    </label>
-    <select name="filter-order">
-        <option value="r" {% if session.get("filter-file-order", "r") == "r"%}selected{% endif %}>Random</option>
-        <option value="n" {% if session.get("filter-file-order", "r") == "n"%}selected{% endif %}>Newest</option>
-    </select>
-    <button class="filter-button" type="submit">Filter</button>
+    <form id="filter-form" method="POST">
+        <input id="file-mode-source-checkbox" type="checkbox" name="file-modes" value="{{ FileMode.SOURCE }}" {% if FileMode.SOURCE in session["fileter-file-modes"] %}checked{% endif %}>
+        <label for="file-mode-source-checkbox">Source</label>
+        <input id="file-mode-render-checkbox" type="checkbox" name="file-modes" value="{{ FileMode.RENDER }}" {% if FileMode.RENDER in session["fileter-file-modes"] %}checked{% endif %}>
+        <label for="file-mode-render-checkbox">Render</label>
+        <select name="filter-order">
+            <option value="r" {% if session.get("filter-file-order", "r") == "r"%}selected{% endif %}>Random</option>
+            <option value="n" {% if session.get("filter-file-order", "r") == "n"%}selected{% endif %}>Newest</option>
+        </select>
+        <button class="btn btn-primary">Filter</button>
     </form>
+    <hr>
     {% for file in files %}
-        {{ file_card(file) }}
+    {{ file_card(file) }}
     {% endfor %}
     <script>
         // to prevent the Document expire worning on bact-to-home after filter

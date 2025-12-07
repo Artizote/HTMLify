@@ -15,6 +15,12 @@ public = Blueprint("public", __name__)
 
 pygments_css = HtmlFormatter().get_style_defs()
 
+
+@public.before_request
+def before_request():
+    g.user = None # No login check till now
+
+
 @public.route("/dp/<username>")
 def user_dp(username):
     username = username.lower()
@@ -42,7 +48,9 @@ def serve_pygments_css():
 def home():
     if request.method == "POST":
         session["filter-file-modes"]=request.form.getlist("file-modes")
+        # print("session[filter-file-modes]:", session["filter-file-modes"])
         session["filter-file-order"]=request.form.get("filter-order", "r")
+        # print("session[filter-file-order]:", session["filter-file-order"])
 
     files = File.select().where(File.as_guest==False)
     files_count = files.count()
@@ -50,16 +58,29 @@ def home():
         return render_template("home.html", files=[])
 
     filter_modes = session.setdefault("filter-file-modes", [FileMode.SOURCE, FileMode.RENDER])
+    print("filter_modes:", filter_modes)
     filter_order = session.setdefault("filter-file-order", "r")
+    print("filter_order:", filter_order)
+
+    if len(filter_modes) == 2:
+        pass
+    if len(filter_modes) == 1:
+        files = files.where(File.mode == filter_modes[0])
+    if len(filter_modes) == 0:
+        return render_template("home.html", files=[])
+
+    files_count = files.count()
+    print("files_count:", files_count)
+    if not files_count:
+        return render_template("home.html", files=[])
+
+    if filter_order == "n":
+        return render_template("home.html", files=files.order_by(File.id.desc()).limit(MAX_FILES_ON_HOME))
 
     _files = []
 
-    if filter_order == "r":
-        for _ in range(MAX_FILES_ON_HOME):
-            f = File.random(mode=filter_modes)
-            if f: _files.append(f)
-    else:
-        _files = File.select().order_by(File.id.desc()).limit(MAX_FILES_ON_HOME)
+    for _ in range(MAX_FILES_ON_HOME):
+        _files.append(files[randint(0, files_count-1)])
 
     return render_template("home.html", files=_files) 
 
@@ -89,9 +110,9 @@ def user_file(username, path):
 
     if file.visibility == FileVisibility.HIDDEN:
         if not g.user:
-            return "This file is hidden, please <a href=\"/login\">login</a> if you are owner of this file.", 403
+            return render_template("hidden-file.html"), 403
         elif file.user != g.user:
-            return "This file is hidden.", 403
+            return render_template("hidden-file.html"), 403
 
     if file.password:
         passwords = session.setdefault("passwords", {})
@@ -167,7 +188,7 @@ def file_src(path):
 
     if file.visibility == FileVisibility.HIDDEN:
         if not g.user or g.usel != file.user:
-            return "File is hidden", 403
+            return render_template("hidden-file.html"), 403
 
     if file.password:
         passwords = session.setdefault("passwords", {})

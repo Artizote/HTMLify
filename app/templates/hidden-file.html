@@ -1,0 +1,11 @@
+{# Locked File #}
+{% extends "base.html" %}
+{% block title %}File is locked{% endblock %}
+{% block content %}
+<div class="card-center">
+    <h1>File is Hidden</h1>
+    <h4>If you are the owner, login to viwe the file</h4>
+    <br><br>
+    <button class="btn btn-primary" onclick="window.location.href = '{{ SCHEME }}://my.{{ SERVER_NAME }}/login'">Login</button>
+</div>
+{% endblock %}

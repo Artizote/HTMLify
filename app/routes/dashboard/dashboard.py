@@ -71,7 +71,7 @@ def register():
         return render_template("register.html", error="Fill required fields")
 
     if not User.is_username_valid(username):
-        return render_template("register.html", error="Username is nat valid")
+        return render_template("register.html", error="Username is not valid")
 
     if not User.is_username_available(username):
         return render_template("register.html", error="Username is not available")
