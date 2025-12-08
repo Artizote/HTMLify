@@ -3,6 +3,7 @@ from peewee import SqliteDatabase, Model, AutoField, IntegerField, TextField, Ti
 import re
 
 from ..utils import escape_html
+from ..config import SCHEME, SERVER_NAME
 
 
 comment_db = SqliteDatabase("instance/comments.db")
@@ -83,7 +84,7 @@ class Comment(Model):
         for mention in mentions:
             Notification.notify(mention, "<b>" + user.username + "</b> mentioned you in the comment", "/src/"+file.path + "#comment-" + str(comment.id))
         if file.user.username != user.username:
-            Notification.notify(file.user.username, "<b>" + user.username + "</b> comment something on " + file.name, "/src/"+file.path + "#comment-" + str(comment.id))
+            Notification.notify(file.user.username, "<b>" + user.username + "</b> comment something on " + file.name, SCHEME + "://" + SERVER_NAME + "/src/"+file.path + "#comment-" + str(comment.id))
 
         return comment
 

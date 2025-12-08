@@ -1,7 +1,7 @@
 from flask import Blueprint, session, request, render_template, redirect, g
 from flask_jwt_extended import create_access_token
 
-from app.models import User, Dir, File
+from app.models import User, Dir, File, Notification
 
 
 dashboard = Blueprint(
@@ -113,4 +113,18 @@ def file_delete():
     if file.user != g.user:
         return redirect("/")
     return render_template("file-delete.html", file=file)
+
+@dashboard.route("/notifications")
+def veiw_notifications():
+    notifications = g.user.notifications
+    return render_template("notifications.html", notifications=notifications)
+
+@dashboard.route("/notifications/<int:id>")
+def notification_redirect(id):
+    notification = Notification.by_id(id)
+    if not notification:
+        return redirect("/notifications")
+    if notification.user_id != g.user.id:
+        return redirect("/")
+    return redirect(notification.href)
 
