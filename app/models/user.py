@@ -173,6 +173,6 @@ class User(Model):
         return Notification.select().where(Notification.user_id==self.id)
 
 
-User.guest = User(username="guest", id=0, name="Guest")
-
 user_db.create_tables([User])
+
+User.guest = User(username="guest", id=0, name="Guest")

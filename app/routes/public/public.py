@@ -3,6 +3,7 @@ from flask import Blueprint, render_template, send_file, session, g, redirect, j
 from pygments.formatters import HtmlFormatter
 
 from hashlib import md5
+from random import shuffle
 
 from app.models import *
 from app.executors import suggest_executors, executors
@@ -263,31 +264,27 @@ def tmp_folder_(code):
 
 # TODO: Make Frames API
 @public.route("/frames")
-def _frames():
+def frames():
     return render_template("frames.html")
 
 @public.route("/frames/feed")
-def _frame_feed():
-    _files = list(filter(lambda f:f.ext in {"html", "htm"},
-                    files.query
-                  .filter_by(mode="r")
-                  .filter_by(password="")
-                  .filter_by(as_guest=False)
-                  .order_by(files.views).all()))
-    l = len(_files)
-    shuffle(_files)
-    feed = []
-    server = request.scheme + "://" + request.host
-    for file in _files[:128]:
-        feed.append({
-            "id": file.id,
-            "url": "/" + file.path,
-            "owner": file.owner,
-            "title": file.name,
-            "shortlink": server + "/r/" + file.shortlink(),
-            "viewcount": file.views,
-            "commentcount": len(file.comments),
-        })
+def frame_feed():
+    files = File.select().where(
+            File.mode == FileMode.RENDER
+            ).where(
+            File.visibility == FileVisibility.PUBLIC
+            ).where(
+            File.as_guest == False
+            ).where(
+            File.password == ""
+            )
+            #.where(
+            #(
+                # File.path.endswith(".html") | File.path.endswith(".htm")
+            # ))
+    l = len(files)
+    feed = [file.to_dict(show_content=False) for file in files]
+    shuffle(feed)
     return json.dumps({"feed": feed, "error": (len(feed)==0)}), 200, {"Content-type": "text/json"}
 
 @public.route("/frames/default")

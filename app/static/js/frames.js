@@ -8,19 +8,19 @@ function setframe(){
     if (currentframe==undefined)
         currentframe = frames[current+1];
     frame.setAttribute("src", currentframe.url);
-    document.getElementById("user-dp").setAttribute("src", "/media/dp/"+currentframe.owner+".jpg");
-    document.getElementById("user-dp").setAttribute("title", currentframe.owner);
-    document.getElementById("user-dp").setAttribute("alt", currentframe.owner);
-    document.getElementById("profile-link").setAttribute("href", "/"+currentframe.owner);
-    document.getElementById("profile-link").innerText = currentframe.owner;
+    document.getElementById("user-dp").setAttribute("src", "/dp/"+currentframe.username);
+    document.getElementById("user-dp").setAttribute("title", currentframe.username);
+    document.getElementById("user-dp").setAttribute("alt", currentframe.username);
+    document.getElementById("profile-link").setAttribute("href", "/"+currentframe.username);
+    document.getElementById("profile-link").innerText = currentframe.username;
     document.getElementById("title").textContent = currentframe.title;
-    document.getElementById("view-count").innerHTML = currentframe.viewcount;
-    document.getElementById("comment-count").innerHTML = currentframe.commentcount;
+    document.getElementById("view-count").innerHTML = currentframe.views;
+    document.getElementById("comment-count").innerHTML = currentframe.comments;
 }
 
 function showcomments(){
     currentframe = frames[current];
-    frame.setAttribute("src", "/src/"+currentframe.url+"#comment-text-field");
+    frame.setAttribute("src", "/src"+currentframe.path+"#comment-text-field");
 }
 
 function frameup(){
@@ -62,14 +62,21 @@ function fetchframes() {
 }
 
 function share(){
-    let shortlink = frames[current].shortlink;
-    navigator.clipboard.writeText(shortlink)
-      .then(() => {
-                alert("Link copied to clipboard!");
-            })
-      .catch((error) => {
-              alert("Unable to copy text to clipboard:\nPlease mannualy copy link: " + shortlink, error);
-            });
+    fetch(`http://api.${window.location.host}/shortlink?url=${frames[current].path}`)
+        .then(res => res.json())
+        .then(data => {
+            if (!data.success) {
+                alert("Errer in creating shortlink");
+            } else {
+                navigator.clipboard.writeText(data.shortlink.url)
+                    .then(() => {
+                        alert("Link copied to clipboard!");
+                    })
+                    .catch((error) => {
+                        alert("Unable to copy text to clipboard:\nPlease mannualy copy link: " + shortlink, error);
+                    });
+            }
+        });
 }
 
 function openframeexternal() {
