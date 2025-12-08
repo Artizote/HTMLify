@@ -31,10 +31,16 @@ function frameup(){
 }
 
 function framedown(){
-    if (current === frames.length - 1)
+    if (current === frames.length - 1) {
         fetchframes();
-    current += 1;
-    setframe();
+        setTimeout(() => {
+            current += 1;
+            setframe();
+        }, 1000);
+    } else {
+        current += 1;
+        setframe();
+    }
 }
 
 function fetchframes() {
@@ -84,6 +90,6 @@ function openframeexternal() {
     window.open(url).focus();
 }
 
-fetchframes();
-setTimeout(setframe, 200);
+setTimeout(fetchframes, 200);
+setTimeout(setframe, 1000);
 
