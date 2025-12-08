@@ -5,7 +5,7 @@ import os
 import binascii
 
 from app.models import *
-from app.utils import randstr, file_path
+from app.utils import randstr, file_path, git_clone
 from .errors import error_respones_dict, APIErrors
 
 
@@ -218,6 +218,29 @@ def delete_file():
     file.delete_instance()
     return {
         "success": True
+    }
+
+@private_api.post("/git-clone")
+def git_clone_():
+    json = request.get_json()
+    if not json:
+        return error_respones_dict(APIErrors.MISSING_JSON), 400
+    repo = json.get("repo")
+    dir = json.get("dir", "")
+    mode = json.get("mode", FileMode.SOURCE)
+    visibility = json.get("visibility", FileVisibility.PUBLIC)
+    overwrite = json.get("overwrite", "true") == "true"
+
+    if not repo:
+        return error_respones_dict(APIErrors.MISSING_DATA), 400
+    try:
+        cloned = git_clone(g.auth_user, repo, dir, mode, visibility, overwrite)
+    except Exception as e:
+        print("e:", e)
+        return error_respones_dict(APIErrors.INTERNAL_ERROR), 505
+
+    return {
+        "success": bool(cloned)
     }
 
 @private_api.get("/revision")

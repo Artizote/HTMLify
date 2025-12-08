@@ -5,7 +5,7 @@
 <a href="/">Files</a>
 <a href="/edit">New File</a>
 <a href="/upload?dir={{ request.args.get("dir", "") }}">Upload</a>
-<a href="/git-clone">Git Clone</a>
+<a href="/git-clone?dir={{ request.args.get("dir", "") }}">Git Clone</a>
 <a href="/notifications">Notifications</a>
 <a href="/logout">Logout</a>
 {% else %}

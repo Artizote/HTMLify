@@ -1,31 +1,80 @@
 {# Git Clone #}
-{% extends "base.html" %}
+{% extends "dashboard/base.html" %}
 {% block title %}Git Clone{% endblock %}
 {% block content %}
-    <h1>HTMLify</h1>
-    <form class="git-clone" action="/action/git-clone" method="post">
-        {% if request.args.get("msg") %}
-            <div class="error-msg">
-            {{ request.args.get("msg") }}
-            </div>
-        {% endif %}
-        git clone <input type="text" id="repo" name="repo" placeholder="http://yourgit.host/path-to-your/repo.git" required><br><br>
-        <label for="directory">Directory (where to clone the repo):</label>
-        {{ session["user"]["username"] }}/<input type="text" id="directory" name="directory" placeholder="my-repo" value="{{ request.args.get("dir", "") if request.args.get("dir", " ")[-1] != "/" else request.args.get("dir", "")[:-1] }}"><br><br>
-        Display Mode: 
-        <select id="mode" name="mode">
-            <option value='s'>Source</option>
-            <option value='r'>Render</option>
-        </select>
-        Visibility: 
-        <select id="visibility" name="visibility">
-            <option value='p'>Public</option>
-            <option value='h'>Hidden</option>
-        </select>
-        <br><br>
-        <input type="submit" value="Clone Repository">
-        <br><br>
-        Note: this git clone will ingnore hidden files and directories<br>
-        and ovewrite existing files.
-    </form>
+<div class="card-center">
+    <h1>Git Clone</h1>
+    <div class="card card-center">
+        <div>
+            <code>git clone </code><input type="text" id="repo" placeholder="http://yourgit.host/path-to-your/repo.git" required=""><br><br>
+        </div>
+        <div>
+            <label>Directory (where to clone the repo):</label><br><br>
+            /{{ g.user.username }}/<input type="text" id="dir" placeholder="my-repo" value="{{ dir.path[dir.username.__len__()+2:] }}"><br><br>
+        </div>
+        <table>
+            <tbody><tr>
+                <td>Display Mode:</td>
+                <td>
+                    <select id="mode" name="mode">
+                        <option value="{{ FileMode.SOURCE }}">Source</option>
+                        <option value="{{ FileMode.RENDER }}">Render</option>
+                    </select>
+                </td>
+            </tr>
+            <tr><td>Visibility:</td>
+                <td>
+                    <select id="visibility" name="visibility">
+                            <option value="{{ FileVisibility.PUBLIC }}">Public</option>
+                            <option value="{{ FileVisibility.HIDDEN }}">Hidden</option>
+                    </select>
+                </td>
+            </tr>
+            <tr><td>Overwrite:</td>
+                <td>
+                    <input id="overwrite-checkbox" type="checkbox" checked="">
+                </td>
+            </tr>
+        </tbody></table>
+
+        <div>
+            <br><br>
+            <button class="btn btn-primary" onclick="clone()">Clone Repository</button>
+            <br><br>
+        </div>
+        <div>
+            <b>Note:</b> this git clone will ingnore .git directory and hidden files.
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block after_body %}
+<script src="/static/js/private-api.js"></script>
+<script>
+const repo_field = document.getElementById("repo")
+const dir_field = document.getElementById("dir")
+const mode_select = document.getElementById("mode")
+const visibility_seloct = document.getElementById("visibility")
+const overwrite_chekc = document.getElementById("overwrite-checkbox")
+
+async function clone() {
+    let fields = {
+        repo: repo_field.value,
+        dir: dir_field.value,
+        mode: mode_select.value,
+        visibility: visibility_seloct.value,
+        overwrite: overwrite_chekc.checked
+    }
+    console.log("fields:", fields);
+    privateApi.git.clone(fields)
+        .then(res => {
+            if (!res.success) {
+                showToast("Some error happend, please check your inputs.", "error");
+            } else {
+                showToast("Repo cloned", "success");
+            }
+        });
+}
+</script>
 {% endblock %}

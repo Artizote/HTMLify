@@ -114,6 +114,11 @@ def file_delete():
         return redirect("/")
     return render_template("file-delete.html", file=file)
 
+@dashboard.route("/git-clone")
+def git_clone():
+    dir = Dir(request.args.get("dir", g.user.username))
+    return render_template("git-clone.html", dir=dir)
+
 @dashboard.route("/notifications")
 def veiw_notifications():
     notifications = g.user.notifications

@@ -97,6 +97,18 @@ const privateApi = {
         },
     },
 
+    git: {
+        async clone(fields) {
+            return await privateApi.fetchJson("/git-clone", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(fields)
+            });
+        }
+    },
+
     revision: {
         async get(revisionId) {
             return await privateApi.fetchJson("/revision?id=" + revisionId);
