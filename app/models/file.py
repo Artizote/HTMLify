@@ -72,10 +72,38 @@ class FileType:
         "video"         : 9,
     }
 
+    ext_map = {}
+
+    glob_paths = [
+        "/usr/share/mime/globs",
+        "/usr/share/mime/globs2"
+    ]
+    for glob_path in glob_paths:
+        try:
+            with open(glob_path, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if not line or ":" not in line:
+                        continue
+
+                    mime, pattern = line.split(":", 1)
+
+                    if pattern.startswith("*."):
+                        ext = pattern[2:]
+                        ext_map[ext] = mime
+        except:
+            pass
+
     @staticmethod
     def mimetype(filename: str) -> str:
         mime = str(guess_type(filename)[0])
-        return mime
+        if mime != "None":
+            return mime
+        ext = filename.split(".")[-1]
+        mime = FileType.ext_map.get(ext)
+        if mime:
+            return mime
+        return "unknown/unknown"
 
     @staticmethod
     def mime_type(filename: str) -> str:
