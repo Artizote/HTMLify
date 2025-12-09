@@ -4,7 +4,6 @@ from qrcode import make as make_qr
 
 import binascii
 
-from app.search_engine import query
 from app.executors import execute
 from app.utils import hash_sha256, file_path
 from app.models import *

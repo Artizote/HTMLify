@@ -8,7 +8,6 @@ from .routes import register_blueprints
 from .routes.public import PROCESS_POOL
 from .executors import *
 from .models import TmpFile, TmpFolder, FileMode, FileType, FileVisibility, BlobType
-from .search_engine import *
 from .utils.daemons import *
 from .config import *
 

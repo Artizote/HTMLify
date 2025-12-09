@@ -1,5 +1,3 @@
-from .models import *
-
 from .blob import Blob, BlobType
 from .comment import Comment
 from .file import File, FileMode, FileType, FileVisibility, Dir

@@ -1,13 +1,12 @@
 import requests
-from flask import Blueprint, render_template, send_file, session, g, redirect, jsonify
+from flask import Blueprint, render_template, send_file, session, g, redirect, jsonify, request
 from pygments.formatters import HtmlFormatter
 
 from hashlib import md5
-from random import shuffle
+from random import shuffle, randint
 
 from app.models import *
 from app.executors import suggest_executors, executors
-from app.search_engine import query
 from app.utils import file_path, pastebin_fetch
 from app.config import *
 
