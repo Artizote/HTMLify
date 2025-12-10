@@ -179,12 +179,12 @@ class Blob(Model, metaclass=BlobMeta):
     def to_base64(self) -> str:
         return self.get_base64()
 
-    def to_dict(self) -> dict:
+    def to_dict(self, show_content=True) -> dict:
         return {
             "hash": self.hash,
             "size": self.size,
             "type": self.type_s,
-            "content": self.get_base64()
+            "content": self.get_base64() if show_content else None
         }
 
     @property
