@@ -41,13 +41,15 @@
 
 {% if not file %}
 <div class="form-group">
-    <label>As Guest</label>
-    <input id="as-guest" type="checkbox">
+    <div>
+        <label>As Guest</label>
+        <input id="as-guest" type="checkbox">
+    </div>
 </div>
 
-<div id="file-extention-selector" class="form-group" style="display: none;">
+<div id="ext-field-container" class="form-group" style="display: none;">
     <label>File Extension:</label>
-    <input id="ext" type="text">
+    <input id="ext" type="text" class="form-input" value="txt">
 </div>
 {% endif %}
 

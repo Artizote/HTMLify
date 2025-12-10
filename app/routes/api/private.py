@@ -1,4 +1,4 @@
-from flask import Blueprint, g
+from flask import Blueprint, g, request
 from flask_jwt_extended import get_jwt_identity, verify_jwt_in_request
 
 import os

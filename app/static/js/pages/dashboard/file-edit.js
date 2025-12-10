@@ -7,6 +7,7 @@ const password_toggle_button = document.getElementById("password-toggle-button")
 const mode_selector = document.getElementById("mode");
 const visibility_selector = document.getElementById("visibility");
 const as_guest_check = document.getElementById("as-guest");
+const ext_field_container = document.getElementById("ext-field-container");
 const ext_field = document.getElementById("ext");
 const editor_container = document.getElementById("editor-container");
 const editor = document.getElementById("editor");
@@ -211,10 +212,10 @@ async function save() {
         content: content,
         overwrite: false
     }
-    console.log("data:", data);
     
-    if (as_guest_check && as_guest_check.chekced) {
-        data.path = "file" + ext_field.value;
+    if (as_guest_check && as_guest_check.checked) {
+        data.path = "file." + ext_field.value;
+        data["as_guest"] = true;
     }
 
     let new_file = file_id == 0;
@@ -240,6 +241,11 @@ async function save() {
         } else {
             showToast("File created", "success");
             file_id = res.file.id;
+            file_path = res.file.path;
+            if (!res.file.user) {
+                showToast("Redirecting to file..")
+                window.location.replace(res.file.url);
+            }
         }
     } else {
         if (data.path === file_path) {
@@ -295,3 +301,13 @@ editor.addEventListener("input", () => {
         }
     }
 });
+
+if (as_guest_check) {
+    as_guest_check.addEventListener("change", () => {
+        if (as_guest_check.checked) {
+            ext_field_container.style.display = "flex";
+        } else {
+            ext_field_container.style.display = "none";
+        }
+    });
+}
