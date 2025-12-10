@@ -53,7 +53,7 @@
         </div>
         <div class="file-content">
 
-            {% if file.type == FileType.TEXT -%}
+            {% if file.type == FileType.TEXT or file.blob.type == BlobType.TEXT -%}
                 {{ file.highlighted_html(linenos=True) | safe }}
             {% elif file.type == FileType.IMAGE %}
                 <img src="/raw{{ file.path }}" style="max-width:100%;height:auto" alt="{{ file.title }}">

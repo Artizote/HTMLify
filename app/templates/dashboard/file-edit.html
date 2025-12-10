@@ -74,7 +74,14 @@
 {% block after_body %}
 <script>
 window.file_id = {{ file.id if file else 0 }};
-window.file_type = "{{ file.type_s if file else "" }}";
+window.file_type = "";
+{% if file %}
+{% if file.blob.type == BlobType.TEXT %}
+window.file_type = "text";
+{% else %}
+window.file_type = "{{ file.type_s }}";
+{% endif %}
+{% endif %}
 window.file_path = "{{ file.path if file else "" }}";
 </script>
 <script src="/static/js/private-api.js"></script>

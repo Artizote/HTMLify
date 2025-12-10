@@ -8,8 +8,8 @@
             <input id="url-input" type="text" class="form-input" placeholder="Enter your long URL here">
         </div>
         <div id="shortlink-container" class="card card-center" style="display:none;">
-            <input id="shortlink-input" type="text" class="form-input" onclick="copy_link()" disabled>
-            <img id="qr-code" src="http://api.localhost:5000/qr?url=tets" alt="QR Code"><br>
+            <code id="shortlink" class="form-input" onclick="copy_link()"></code>
+            <img id="qr-code" alt="QR Code"><br>
             <a class="btn" download>Download QR Code</a><br>
             <h3 id="hit-count"></h3><br>
             <h3>Comment mention: <span id="mention"></span></h3><br>
@@ -25,7 +25,7 @@
 <script>
 const url_input = document.getElementById("url-input");
 const shortlink_container = document.getElementById("shortlink-container");
-const shortlink_input = document.getElementById("shortlink-input");
+const shortlink = document.getElementById("shortlink");
 const qr_image = document.getElementById("qr-code");
 const hit_count = document.getElementById("hit-count");
 const mention = document.getElementById("mention");
@@ -36,7 +36,7 @@ function short() {
             if (!res.success) {
                 showToast("Some Error happned", "error");
             } else {
-                shortlink_input.value = res.shortlink.url;
+                shortlink.innerText = res.shortlink.url;
                 qr_image.src = publicApi.qr.get_url(res.shortlink.url);
                 hit_count.innerText = `Total hits: ${res.shortlink.hits}`;
                 mention.innerText = `@r/${res.shortlink.short}`;
@@ -47,7 +47,7 @@ function short() {
 }
 
 function copy_link() {
-    copyToClipboard(shortlink_input.value);
+    copyToClipboard(shortlink.innerText);
 }
 </script>
 {% endblock %}
