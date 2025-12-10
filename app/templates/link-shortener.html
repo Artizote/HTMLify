@@ -1,157 +1,53 @@
 {% extends "base.html" %}
-{% block head_content %}
-<style>
-.container {
-    max-width: 600px;
-    margin: 60px auto;
-    padding: 24px;
-    background-color: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-}
-
-#shortenForm input[type="text"] {
-    width: 100%;
-    padding: 12px;
-    margin-bottom: 16px;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    font-size: 16px;
-    transition: border-color 0.2s;
-}
-#shortenForm input[type="text"]:focus {
-    outline: none;
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37,99,235,0.2);
-}
-
-#shortenForm input[type="submit"] {
-    width: 100%;
-    padding: 12px;
-    background-color: #2563eb;
-    border: none;
-    color: #fff;
-    font-size: 16px;
-    cursor: pointer;
-    border-radius: 8px;
-    transition: background-color 0.2s;
-}
-#shortenForm input[type="submit"]:hover {
-    background-color: #1e40af;
-}
-
-.short-link {
-    text-align: center;
-    margin-top: 28px;
-    padding: 16px;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    background: #f3f4f6;
-}
-
-.short-link h3 {
-    margin-bottom: 12px;
-    font-size: 18px;
-    color: #374151;
-}
-
-.short-link input[type="text"] {
-    width: 70%;
-    padding: 10px;
-    border: 1px solid #2563eb;
-    border-radius: 6px;
-    font-size: 16px;
-    text-align: center;
-    margin-bottom: 12px;
-}
-
-#short-link-copy-button {
-    padding: 10px 14px;
-    background-color: #2563eb;
-    border: none;
-    color: #fff;
-    cursor: pointer;
-    border-radius: 6px;
-    font-size: 14px;
-    transition: background-color 0.2s;
-}
-#short-link-copy-button:hover {
-    background-color: #1e40af;
-}
-
-#qr-code {
-    margin-top: 16px;
-    padding: 8px;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    background: #fff;
-}
-
-#qr-download-button {
-    display: inline-block;
-    margin-top: 12px;
-    width: 100%;
-    padding: 12px;
-    background-color: #2563eb;
-    border: none;
-    color: #fff;
-    cursor: pointer;
-    border-radius: 8px;
-    text-decoration: none;
-    font-size: 16px;
-    transition: background-color 0.2s;
-}
-#qr-download-button:hover {
-    background-color: #1e40af;
-}
-
-#hit-count {
-    margin-top: 20px;
-    width: inline;
-}
-
-#mention {
-    width: block;
-    font-family: monospace;
-}
-
-</style>
-{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h1>Link Shortener</h1>
-    <form id="shortenForm" action="" method="POST">
-        <input type="text" id="originalUrl" placeholder="Enter your long URL here" value="{% if url %}{{ url }}{% endif %}" name="url" required>
-        <input type="submit" value="Shorten URL">
-    </form>
-
-    {% if shorted %}
-    {% set shortlink = request.scheme + "://" + request.host + "/r/" + shorted %}
-    <div class="short-link" id="shortLinkArea">
-        <h3>Shortened URL:</h3>
-        <input type="text" id="shortUrl" value="{{ shortlink }}" readonly>
-        <button id="short-link-copy-button" onclick="copy_link()">Copy</button>
-        <br>
-        <img id="qr-code" src="/api/qr?url={{ shortlink }}" alt="QR Code">
-        <a id="qr-download-button" href="/api/qr?url={{ shortlink }}" download>Download QR Code</a>
+<div class="card-center">
+    <h1>Link Shortner</h1>
+    <div class="card card-half">
+        <div class="form-group">
+            <input id="url-input" type="text" class="form-input" placeholder="Enter your long URL here">
+        </div>
+        <div id="shortlink-container" class="card card-center" style="display:none;">
+            <input id="shortlink-input" type="text" class="form-input" onclick="copy_link()" disabled>
+            <img id="qr-code" src="http://api.localhost:5000/qr?url=tets" alt="QR Code"><br>
+            <a class="btn" download>Download QR Code</a><br>
+            <h3 id="hit-count"></h3><br>
+            <h3>Comment mention: <span id="mention"></span></h3><br>
+        </div>
+        <div class="form-group">
+            <button onclick="short()" class="btn btn-primary">Shorten URL</button>
+        </div>
     </div>
-    <h3 id="hit-count">Total hits: {{ hits }}</h3>
-    <h3>Comment mention: <span id="mention">@r/{{ shorted }}</span></h3>
-    {% endif %}
 </div>
 {% endblock %}
 
 {% block after_body %}
 <script>
-    function copy_link() {
-        const shortUrl = document.getElementById("shortUrl");
-        shortUrl.select();
-        shortUrl.setSelectionRange(0, 999);
-        navigator.clipboard.writeText(shortUrl.value).then(() => {
-            alert("Copied to clipboard: " + shortUrl.value);
+const url_input = document.getElementById("url-input");
+const shortlink_container = document.getElementById("shortlink-container");
+const shortlink_input = document.getElementById("shortlink-input");
+const qr_image = document.getElementById("qr-code");
+const hit_count = document.getElementById("hit-count");
+const mention = document.getElementById("mention");
+
+function short() {
+    publicApi.shortlink.create(url_input.value)
+        .then(res => {
+            if (!res.success) {
+                showToast("Some Error happned", "error");
+            } else {
+                shortlink_input.value = res.shortlink.url;
+                qr_image.src = publicApi.qr.get_url(res.shortlink.url);
+                hit_count.innerText = `Total hits: ${res.shortlink.hits}`;
+                mention.innerText = `@r/${res.shortlink.short}`;
+                shortlink_container.style.display = "flex";
+                showToast("ShortLink Created", "success");
+            }
         });
-    }
+}
+
+function copy_link() {
+    copyToClipboard(shortlink_input.value);
+}
 </script>
 {% endblock %}
-

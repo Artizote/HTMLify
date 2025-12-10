@@ -13,10 +13,12 @@
         <link href="/static/css/stylesheet.css" rel="stylesheet">
         <link href="/static/css/nav-bar.css" rel="stylesheet">
         <script src="/static/js/utils.js"></script>
+        <script src="/static/js/public-api.js"></script>
         {% block head_content %}{% endblock %}
         <title>{% block title %}HTMLify{% endblock %}</title>
     </head>
     <body>
+        <div id="toast-container"></div>
         {% include "nav-bar.html" %}
         <main>
             {% block content %}{% endblock %}
