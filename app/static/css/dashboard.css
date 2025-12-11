@@ -30,9 +30,10 @@
 
 .dir-nav {
     width: 90%;
-    overflow: scroll;
+    overflow: hidden;
     margin: 10px auto;
     font-size: 17px;
+    font-family: monospace;
     padding: 4px 8px;
 }
 
@@ -48,6 +49,7 @@
 }
 
 .dir-nav a.current {
+    background-color: #ddeeff;
     text-decoration: underline;
 }
 

@@ -7,6 +7,7 @@
 <a href="/upload?dir={{ request.args.get("dir", "") }}">Upload</a>
 <a href="/git-clone?dir={{ request.args.get("dir", "") }}">Git Clone</a>
 <a href="/notifications">Notifications</a>
+<a href="{{ SCHEME }}://{{ SERVER_NAME }}/">Home</a>
 <a href="/logout">Logout</a>
 {% else %}
 <a href="/login">Login</a>

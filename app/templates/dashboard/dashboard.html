@@ -16,7 +16,7 @@
     <div class="dir-nav">
         {% for d_path in dirs %}
         /<a href="/?dir=/{{ "/".join(dirs[:loop.index]) }}"
-            {% if loop.index == dirs|length %}
+            {% if loop.index == dirs.__len__() - 1 %}
             class="current"
             {% endif %}
             >

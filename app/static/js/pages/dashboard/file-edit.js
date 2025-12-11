@@ -2,6 +2,7 @@
 
 const path_field = document.getElementById("path");
 const title_field = document.getElementById("title");
+const password_field_container = document.getElementById("password-field-container");
 const password_field = document.getElementById("password");
 const password_toggle_button = document.getElementById("password-toggle-button");
 const mode_selector = document.getElementById("mode");
@@ -23,6 +24,13 @@ var editor_mode = "text";
 var content;
 var content_loaded = false;
 
+function password_field_toggle() { // hide/unhide whole pasword input container
+    if (password_field_container.style.display == "none") {
+        password_field_container.style.display = "flex";
+    } else {
+        password_field_container.style.display = "none";
+    }
+}
 
 function toggle_password() {
     if (password_field.type == "text") {
@@ -269,6 +277,7 @@ async function save() {
                 }
             }
         } else {
+            file_path = res.file.path;
             showToast("File updated", "success");
         }
     }

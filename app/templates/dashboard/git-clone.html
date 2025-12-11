@@ -66,7 +66,7 @@ async function clone() {
         visibility: visibility_seloct.value,
         overwrite: overwrite_chekc.checked
     }
-    console.log("fields:", fields);
+    showToast("Cloaning Repo");
     privateApi.git.clone(fields)
         .then(res => {
             if (!res.success) {

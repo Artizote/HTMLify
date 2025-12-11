@@ -5,9 +5,11 @@
         <title>HTMLify Frames</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="/static/css/frames.css">
+        <link rel="stylesheet" href="/static/css/components/toast.css">
         {% include "extras.html" %}
     </head>
     <body>
+        <div id="toast-container"></div>
         <main>
             <div class="grid">
 
@@ -42,6 +44,7 @@
             </div>
         </main>
     </body>
-
-<script src="/static/js/frames.js"></script>
+<script src="/static/js/utils.js"></script>
+<script src="/static/js/public-api.js"></script>
+<script src="/static/js/pages/frames.js"></script>
 </html>

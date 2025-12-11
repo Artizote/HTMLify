@@ -7,7 +7,7 @@ from random import shuffle, randint
 
 from app.models import *
 from app.executors import suggest_executors, executors
-from app.utils import file_path, pastebin_fetch
+from app.utils import file_path, pastebin_fetch, escape_html
 from app.config import *
 
 
@@ -47,10 +47,9 @@ def serve_pygments_css():
 @public.route("/", methods=["GET", "POST"])
 def home():
     if request.method == "POST":
-        session["filter-file-modes"]=request.form.getlist("file-modes")
-        # print("session[filter-file-modes]:", session["filter-file-modes"])
+        session["filter-file-modes"]=list(map(int, request.form.getlist("file-modes")))
+        print("session:", session["filter-file-modes"])
         session["filter-file-order"]=request.form.get("filter-order", "r")
-        # print("session[filter-file-order]:", session["filter-file-order"])
 
     files = File.select().where(File.as_guest==False)
     files_count = files.count()
@@ -367,25 +366,25 @@ def sitemap():
 
 @public.route("/map/xml")
 def xml_sitemap():
-    site = request.scheme + "://" + request.host
+    site = SCHEME + "://" + SERVER_NAME
     xml = """<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n"""
     for user in User.select():
         xml += "<url>\n    <loc>" + site +"/"+ user.username + "</loc>\n</url>\n"
     for file in File.select():
-        xml += "<url>\n    <loc>" + site +"/"+ escape_html(file.path) + "</loc>\n</url>\n"
+        xml += "<url>\n    <loc>" + site + escape_html(file.path) + "</loc>\n</url>\n"
     xml += "</urlset>"
     return xml, { "Content-Type": "text/xml" }
 
 @public.route("/map/txt")
 def txt_sitemap():
-    site = request.scheme + "://" + request.host
+    site = SCHEME + "://" + SERVER_NAME
     txt = ""
     for user in User.select():
         txt += site + "/" + user.username + "\n"
     for file in File.select():
-        txt += site + "/" + file.path + "\n"
-    if txt[-1] == "\n":
+        txt += site + file.path + "\n"
+    if txt and txt[-1] == "\n":
         txt = txt[:-1]
     return txt, { "Content-Type": "text/txt" }
 
@@ -396,6 +395,6 @@ def html_sitemap():
     for user in User.select():
         html += "<a href=\"" + site + "/" + user.username + "\">" + site + "/" + user.username + "</a><br>"
     for file in File.select():
-        html += "<a href=\"" + site + "/" + file.path + "\">" + site + "/" + file.path + "</a><br>"
+        html += "<a href=\"" + site + file.path + "\">" + site + file.path + "</a><br>"
     return html
 

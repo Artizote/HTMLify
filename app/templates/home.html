@@ -9,9 +9,9 @@
 {% block content %}
     <h1>HTMLify your dreams</h1>
     <form id="filter-form" method="POST">
-        <input id="file-mode-source-checkbox" type="checkbox" name="file-modes" value="{{ FileMode.SOURCE }}" {% if FileMode.SOURCE in session["fileter-file-modes"] %}checked{% endif %}>
+        <input id="file-mode-source-checkbox" type="checkbox" name="file-modes" value="{{ FileMode.SOURCE }}" {% if FileMode.SOURCE in session["filter-file-modes"] %}checked{% endif %}>
         <label for="file-mode-source-checkbox">Source</label>
-        <input id="file-mode-render-checkbox" type="checkbox" name="file-modes" value="{{ FileMode.RENDER }}" {% if FileMode.RENDER in session["fileter-file-modes"] %}checked{% endif %}>
+        <input id="file-mode-render-checkbox" type="checkbox" name="file-modes" value="{{ FileMode.RENDER }}" {% if FileMode.RENDER in session["filter-file-modes"] %}checked{% endif %}>
         <label for="file-mode-render-checkbox">Render</label>
         <select name="filter-order">
             <option value="r" {% if session.get("filter-file-order", "r") == "r"%}selected{% endif %}>Random</option>

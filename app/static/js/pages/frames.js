@@ -67,20 +67,13 @@ function fetchframes() {
             });
 }
 
-function share(){
-    fetch(`http://api.${window.location.host}/shortlink?url=${frames[current].path}`)
-        .then(res => res.json())
-        .then(data => {
-            if (!data.success) {
-                alert("Errer in creating shortlink");
+function share() {
+    publicApi.shortlink.create(frames[current].path)
+        .then(res => {
+            if (res.success) {
+                copyToClipboard(res.shortlink.url);
             } else {
-                navigator.clipboard.writeText(data.shortlink.url)
-                    .then(() => {
-                        alert("Link copied to clipboard!");
-                    })
-                    .catch((error) => {
-                        alert("Unable to copy text to clipboard:\nPlease mannualy copy link: " + shortlink, error);
-                    });
+                showToast("Unable to create link", "error");
             }
         });
 }
