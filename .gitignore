@@ -20,8 +20,7 @@ instance/
 # Database file
 *.db
 
-# Media files
-media/
+# App files
 files/
 
 # Config files
@@ -29,3 +28,6 @@ config.json
 
 # Shared Objects
 *.so
+
+# 3rd Party Vendors
+app/static/vendor/
