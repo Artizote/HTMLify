@@ -2,6 +2,10 @@
 
 {% block title %}Editing - {{ request.args.get("path") }} {% endblock %}
 
+{% block head_content %}
+    <link rel="stylesheet" href="/static/vendor/codemirror/lib/codemirror.css">
+{% endblock %}
+
 {% block content %}
 <div class="card">
     <div class="form-group">
@@ -62,12 +66,17 @@
         <button id="switch-text-editor-button" onclick="switch_to_text_editor()" class="btn">Text Mode</button>
         <button id="switch-hex-editor-button" onclick="switch_to_hex_editor()" class="btn">Hex Mode</button>
         <button id="switch-binary-editor-button" onclick="switch_to_binary_editor()" class="btn">Binary Mode</button>
+        <button id="line-number-toggle-button" onclick="toggle_editor_linenos()" class="btn">Line Numbers</button>
+        <select id="indent-unit-selector" onchange="update_editor_indent_unit()"></select>
+        <button id="indent-with-tabs-toggle-button" onclick="toggle_editor_indent_with_tabs()" class="btn">Spaces</button>
+        <select id="tab-size-selector" onchange="update_editor_tab_size()"></select>
+        <select id="theme-selector" onchange="update_editor_theme()"></select>
     </div>
 </div>
 
 <div class="form-group">
-    <div id="editor-container" class="card-scroll">
-        <textarea id="editor" class="form-textarea" style="width: 100%;" rows="20"></textarea>
+    <div id="editor-container">
+        <textarea id="editor" class="form-textarea" style="width: 100%;"></textarea>
     </div>
 </div>
 
@@ -92,5 +101,8 @@ window.file_type = "{{ file.type_s }}";
 window.file_path = "{{ file.path if file else "" }}";
 </script>
 <script src="/static/js/private-api.js"></script>
+<script src="/static/js/codemirror.js"></script>
+<script src="/static/vendor/codemirror/lib/codemirror.js"></script>
+<script src="/static/vendor/codemirror/mode/meta.js"></script>
 <script src="/static/js/pages/dashboard/file-edit.js"></script>
 {% endblock %}

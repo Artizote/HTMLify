@@ -51,3 +51,46 @@ function showToast(message, type = "info", duration = 2500) {
     }, duration);
 }
 
+/*
+ * load Script
+ */
+function loadScript(url) {
+    return new Promise((resolve, reject) => {
+        // resolve if already loaded
+        if (document.querySelector(`script[src="${url}"]`)) {
+            resolve();
+            return;
+        }
+
+        const s = document.createElement("script");
+        s.src = url;
+        s.async = true;
+        s.onload = () => resolve();
+        s.onerror = () => reject(new Error(`Failed to load ${url}`));
+
+        document.head.appendChild(s);
+    });
+}
+
+/*
+ * load CSS
+ */
+function loadCSS(url) {
+    return new Promise((resolve, reject) => {
+        // resolve if already loaded
+        if (document.querySelector(`link[href="${url}"]`)) {
+            resolve();
+            return;
+        }
+
+        const link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = url;
+
+        link.onload = () => resolve();
+        link.onerror = () => reject(new Error(`Failed to load CSS: ${url}`));
+
+        document.head.appendChild(link);
+    });
+}
+

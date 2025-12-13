@@ -10,8 +10,12 @@ const visibility_selector = document.getElementById("visibility");
 const as_guest_check = document.getElementById("as-guest");
 const ext_field_container = document.getElementById("ext-field-container");
 const ext_field = document.getElementById("ext");
+const line_number_toggle_button = document.getElementById("line-number-toggle-button");
+const indent_unit_selector = document.getElementById("indent-unit-selector");
+const indent_with_tabs_toggle_button = document.getElementById("indent-with-tabs-toggle-button");
+const tab_size_selector = document.getElementById("tab-size-selector");
+const theme_selector = document.getElementById("theme-selector");
 const editor_container = document.getElementById("editor-container");
-const editor = document.getElementById("editor");
 
 const hex_regex = /^[0-9A-Fa-f \n]*$/;
 const binary_regex = /^[01 \n]*$/;
@@ -20,9 +24,10 @@ const binary_regex = /^[01 \n]*$/;
 var file_id = window.file_id;
 var file_type = window.file_type;
 var file_path = window.file_path;
-var editor_mode = "text";
-var content;
+var editing_mode = "text";
 var content_loaded = false;
+var content;
+var editor;
 
 function password_field_toggle() { // hide/unhide whole pasword input container
     if (password_field_container.style.display == "none") {
@@ -144,28 +149,28 @@ function dump_content() {
     if (!content_loaded) {
         return;
     }
-    if (editor_mode === "text") {
-        content = text_to_base64(editor.value);
+    if (editing_mode === "text") {
+        content = text_to_base64(editor.getValue());
     }
-    if (editor_mode === "hex") {
-        content = hex_to_base64(editor.value);
+    if (editing_mode === "hex") {
+        content = hex_to_base64(editor.getValue());
     }
-    if (editor_mode === "binary") {
-        content = binary_to_base64(editor.value);
+    if (editing_mode === "binary") {
+        content = binary_to_base64(editor.getValue());
     }
 }
 
 function load_content() {
-    if (editor_mode === "text") {
-        editor.value = base64_to_text(content);
+    if (editing_mode === "text") {
+        editor.setValue(base64_to_text(content));
         content_loaded = true;
     }
-    if (editor_mode === "hex") {
-        editor.value = base64_to_hex(content);
+    if (editing_mode === "hex") {
+        editor.setValue(base64_to_hex(content));
         content_loaded = true;
     }
-    if (editor_mode === "binary") {
-        editor.value = base64_to_binary(content);
+    if (editing_mode === "binary") {
+        editor.setValue(base64_to_binary(content));
         content_loaded = true;
     }
 }
@@ -178,33 +183,144 @@ async function fetch_content() {
 }
 
 function switch_to_text_editor() {
-    console.log("switching mode to text");
     if (file_type !== "text") {
         editor_container.style.display = "none";
         return;
     }
     dump_content();
-    editor.style.borderColor = "gray";
-    editor_mode = "text";
+    editing_mode = "text";
     load_content();
 }
 
 function switch_to_hex_editor() {
-    console.log("switching mode to hex");
     editor_container.style.display = "block";
     dump_content();
-    editor.style.borderColor = "gray";
-    editor_mode = "hex";
+    editing_mode = "hex";
     load_content();
 }
 
 function switch_to_binary_editor() {
-    console.log("switching mode to binary");
     editor_container.style.display = "block";
     dump_content();
-    editor.style.borderColor = "gray";
-    editor_mode = "binary";
+    editing_mode = "binary";
     load_content();
+}
+
+function update_editor_mode() {
+    if (editing_mode != "text") {
+        editor.setOption("mode", "text");
+        return;
+    }
+    let info = CodeMirror.findModeByFileName(path_field.value);
+    if (!info) return;
+    load_codemirror_mode(info.mode)
+        .then(() => {
+        editor.setOption("mode", info.mode);
+    });
+}
+
+function update_editor_theme() {
+    let theme = theme_selector.value;
+    load_codemirror_theme(theme)
+        .then(() => {
+        editor.setOption("theme", theme);
+        localStorage.setItem("file-editor-theme", theme);
+    });
+}
+
+function toggle_editor_linenos() {
+    if (editor.getOption("lineNumbers")) {
+        editor.setOption("lineNumbers", false);
+        localStorage.setItem("file-editor-line-numbers", false);
+        line_number_toggle_button.innerText = "No Line Numbers";
+    } else {
+        editor.setOption("lineNumbers", true);
+        localStorage.setItem("file-editor-line-numbers", true);
+        line_number_toggle_button.innerText = "Line Numbers";
+    }
+}
+
+function toggle_editor_indent_with_tabs() {
+    if (editor.getOption("indentWithTabs")) {
+        editor.setOption("indentWithTabs", false);
+        localStorage.setItem("file-editor-indent-with-tabs", false);
+        indent_with_tabs_toggle_button.innerText = "Spaces";
+    } else {
+        editor.setOption("indentWithTabs", true);
+        localStorage.setItem("file-editor-indent-with-tabs", true);
+        indent_with_tabs_toggle_button.innerText = "Tabs";
+    }
+}
+
+function update_editor_tab_size() {
+    let tab_size = parseInt(tab_size_selector.value);
+    editor.setOption("tabSize", tab_size);
+    localStorage.setItem("file-editor-tab-size", tab_size);
+}
+
+function update_editor_indent_unit() {
+    let indent_unit = parseInt(indent_unit_selector.value);
+    editor.setOption("indentUnit", indent_unit);
+    localStorage.setItem("file-editor-indent-unit", indent_unit);
+}
+
+async function init_editor() {
+    let config = {};
+
+    let theme = localStorage.getItem("file-editor-theme");
+    if (theme) {
+        await load_codemirror_theme(theme);
+        config.theme = theme;
+    }
+    for (let theme_name of CODE_MIRROR_THEMES) {
+        let option = document.createElement("option");
+        option.innerText = theme_name;
+        option.value = theme_name;
+        if (theme == theme_name)
+            option.selected = true;
+        theme_selector.appendChild(option);
+    }
+
+    let lineNumbers = localStorage.getItem("file-editor-line-numbers") == "true";
+    if (lineNumbers) {
+        line_number_toggle_button.innerText = "Line Numbers";
+    } else {
+        line_number_toggle_button.innerText = "No Line Numbers";
+    }
+    config.lineNumbers = lineNumbers;
+
+    let tabSize = parseInt(localStorage.getItem("file-editor-tab-size")) || 4;
+    for (let i=1; i<10; i++) {
+        let option = document.createElement("option");
+        option.innerText = "Tab Size " + i;
+        option.value = i;
+        if (i == tabSize)
+            option.selected = true;
+        tab_size_selector.appendChild(option);
+    }
+    config.tabSize = tabSize;
+
+    let indentUnit = parseInt(localStorage.getItem("file-editor-indent-unit")) || 4;
+    for (let i=1; i<10; i++) {
+        let option = document.createElement("option");
+        option.innerText = "Indent " + i;
+        option.value = i;
+        if (i == indentUnit)
+            option.selected = true;
+        indent_unit_selector.appendChild(option);
+    }
+    config.indentUnit = indentUnit;
+
+    let indentWithTabs = localStorage.getItem("file-editor-indent-with-tabs") == "true";
+    if (indentWithTabs) {
+        indent_with_tabs_toggle_button.innerText = "Tabs";
+    } else {
+        indent_with_tabs_toggle_button.innerText = "Spaces";
+    }
+    config.indentWithTabs = indentWithTabs;
+
+
+    editor = CodeMirror.fromTextArea(document.getElementById("editor"), config);
 }
 
 async function save() {
@@ -283,33 +399,10 @@ async function save() {
     }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-    fetch_content().then(() => {
-        if (file_type === "text") {
-            switch_to_text_editor();
-        }
-    });
-});
 
-editor.addEventListener("input", () => {
-    if (editor_mode === "text") {
-        return;
-    }
-    if (editor_mode === "hex") {
-        if (hex_regex.test(editor.value)) {
-            editor.style.borderColor = "#4CAF50";
-        } else {
-            editor.style.borderColor = "red";
-        }
-    }
-    if (editor_mode === "binary") {
-        if (binary_regex.test(editor.value)) {
-            editor.style.borderColor = "#4CAF50";
-        } else {
-            editor.style.borderColor = "red";
-        }
-    }
-});
+// EventListeners
+
+path_field.addEventListener("input", update_editor_mode);
 
 if (as_guest_check) {
     as_guest_check.addEventListener("change", () => {
@@ -320,3 +413,15 @@ if (as_guest_check) {
         }
     });
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+    fetch_content().then(() => {
+        if (file_type === "text") {
+            init_editor().then(() => {
+                switch_to_text_editor();
+                update_editor_mode();
+            });
+        }
+    });
+});
+
