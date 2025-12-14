@@ -4,6 +4,12 @@
 
 {% block head_content %}
     <link rel="stylesheet" href="/static/vendor/codemirror/lib/codemirror.css">
+    <style>
+        .CodeMirror {
+            height: 60vh;
+            min-height: 300px;
+        }
+    </style>
 {% endblock %}
 
 {% block content %}
@@ -71,6 +77,7 @@
         <button id="indent-with-tabs-toggle-button" onclick="toggle_editor_indent_with_tabs()" class="btn">Spaces</button>
         <select id="tab-size-selector" onchange="update_editor_tab_size()"></select>
         <select id="theme-selector" onchange="update_editor_theme()"></select>
+        <select id="font-size-selector" onchange="update_editor_font_size()"></select>
     </div>
 </div>
 

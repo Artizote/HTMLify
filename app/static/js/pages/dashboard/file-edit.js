@@ -15,6 +15,7 @@ const indent_unit_selector = document.getElementById("indent-unit-selector");
 const indent_with_tabs_toggle_button = document.getElementById("indent-with-tabs-toggle-button");
 const tab_size_selector = document.getElementById("tab-size-selector");
 const theme_selector = document.getElementById("theme-selector");
+const font_size_selector = document.getElementById("font-size-selector");
 const editor_container = document.getElementById("editor-container");
 
 const hex_regex = /^[0-9A-Fa-f \n]*$/;
@@ -264,6 +265,13 @@ function update_editor_indent_unit() {
     localStorage.setItem("file-editor-indent-unit", indent_unit);
 }
 
+function update_editor_font_size() {
+    let font_size = parseInt(font_size_selector.value);
+    editor.getWrapperElement().style.fontSize = font_size + "px";
+    editor.refresh();
+    localStorage.setItem("file-editor-font-size", font_size);
+}
+
 async function init_editor() {
     let config = {};
 
@@ -319,8 +327,22 @@ async function init_editor() {
     }
     config.indentWithTabs = indentWithTabs;
 
-
     editor = CodeMirror.fromTextArea(document.getElementById("editor"), config);
+
+    // post creation
+    let fontSize = parseInt(localStorage.getItem("file-editor-font-size")) || 14;
+    for (let i=2; i<26; i+=2) {
+        let option = document.createElement("option");
+        option.innerText = "Font size " + i;
+        option.value = i;
+        if (i == fontSize)
+            option.selected = true;
+        font_size_selector.appendChild(option);
+    }
+    fontSize = fontSize + "px";
+    editor.getWrapperElement().style.fontSize = fontSize;
+    editor.refresh();
+    
 }
 
 async function save() {
@@ -414,14 +436,12 @@ if (as_guest_check) {
     });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-    fetch_content().then(() => {
-        if (file_type === "text") {
-            init_editor().then(() => {
-                switch_to_text_editor();
-                update_editor_mode();
-            });
-        }
-    });
+document.addEventListener("DOMContentLoaded", async () => {
+    await fetch_content();
+    await init_editor();
+    if (file_type === "text") {
+        switch_to_text_editor();
+        update_editor_mode();
+    }
 });
 
