@@ -76,9 +76,45 @@ const publicApi = {
     tmpfolder: {
         async get(code) {
             return await publicApi.fetchJson("/tmpfolder?code=" + code);
-        }
+        },
 
-        // TODO: create, add, delete function, after API change
+        async create(name) {
+            return await publicApi.fetchJson("/tmpfolder", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({name: name})
+            });
+        },
+
+        async add(code, file_code, auth_code) {
+            return await publicApi.fetchJson("/tmpfolder", {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    code: code,
+                    file_code: file_code,
+                    auth_code: auth_code
+                })
+            });
+        },
+
+        async remove(code, file_code, auth_code) {
+            return await publicApi.fetchJson("/tmpfolder", {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    code: code,
+                    file_code: file_code,
+                    auth_code: auth_code
+                })
+            });
+        }
     },
 
     qr: {

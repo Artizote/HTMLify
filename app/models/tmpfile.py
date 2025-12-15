@@ -3,7 +3,7 @@ from peewee import Model, SqliteDatabase, AutoField, CharField, DateTimeField, T
 import os
 from datetime import datetime, timedelta, UTC
 
-from app.utils.helpers import randstr
+from app.utils.helpers import randstr, file_path
 from app.config import SCHEME, SERVER_NAME
 
 tmpfile_database = SqliteDatabase("instance/tmpfiles.db")
@@ -67,7 +67,7 @@ class TmpFile(Model):
 
     @property
     def filepath(self) -> str:
-        return os.path.abspath(os.path.join("media", "tmp", "tmp-file-" + str(self.id)))
+        return file_path("tmp", f"tmp-file-{self.id}")
 
 
 class TmpFolder(Model):
@@ -110,12 +110,13 @@ class TmpFolder(Model):
             self.file_codes = " ".join(codes)
             self.save()
 
-    def to_dict(self) -> dict:
+    def to_dict(self, show_auth_code=False) -> dict:
         return {
             "name": self.name,
             "code": self.code,
             "files": [ file.to_dict() for file in self.files ],
-            "url": f"{SCHEME}://{SERVER_NAME}/tmp/f/{self.code}"
+            "url": f"{SCHEME}://{SERVER_NAME}/tmp/f/{self.code}",
+            "auth_code": self.auth_code if show_auth_code else None,
         }
 
     @property

@@ -3,6 +3,7 @@ from pygments.formatters import HtmlFormatter
 from qrcode import make as make_qr
 
 import binascii
+from datetime import datetime
 
 from app.executors import execute
 from app.utils import hash_sha256, file_path
@@ -462,8 +463,8 @@ def _get_temp_file():
 
 @public_api.post("/tmp")
 @public_api.post("/tmpfile")
-def _create_temp_file():
-    file = request.form.get("file")
+def create_temp_file():
+    file = request.files.get("file")
     name = request.form.get("name", "")
     expiry = request.form.get("expiry", 0, int)
     if not file:
@@ -482,7 +483,7 @@ def _create_temp_file():
     }
 
 @public_api.get("/tmpfolder")
-def _get_temp_folder():
+def get_temp_folder():
     code = request.args.get("code", "")
     if not code:
         return error_respones_dict(APIErrors.MISSING_PARAMETERS), 400
@@ -490,26 +491,29 @@ def _get_temp_folder():
     if not tf:
         return error_respones_dict(APIErrors.NOT_FOUND), 404
     json = tf.to_dict()
-    if auth_code := session.get("tmp-folder-auth-codes-"+tf.code):
-        json["auth-code"] = auth_code
-    return json
+    auth_codes = session.setdefault("tmpfolder-auth-codes", {});
+    # no auth_code retriving for now
+    # TODO: CORS weth credentials
+    return {
+        "success": True,
+        "tmpfolder": json
+    }
 
 @public_api.post("/tmpfolder")
-def _create_temp_folder():
+def create_temp_folder():
     json = request.get_json()
     if not json:
         return error_respones_dict(APIErrors.MISSING_JSON), 400
-    name = json.get("name", "")
+    name = json.get("name") or "Folder Name"
     tf = TmpFolder.create(name=name)
     if not tf:
         return error_respones_dict(APIErrors.INTERNAL_ERROR), 500
-    # comment is from old code
-    session["tmp-folder-auth-codes-"+tf.code] = tf.auth_code # don't know why dict approach is not working
+    # no auth_code saving for now 
+    # TODO: CORS weth credentials
     return {
         "success": True,
-        "tmpfolder": tf.to_dict()
+        "tmpfolder": tf.to_dict(show_auth_code=True)
     }
-
 
 @public_api.put("/tmpfolder")
 def _add_temp_folder_file():

@@ -162,15 +162,16 @@ function upload_tmp_file() {
     const expiry = parseInt(expiry_selector.value) + Math.floor(Date.now()/1000);
 
     if (!file) {
-        alert("Please Select a File");
-        return
+        showToast("Please Select a File", "error");
+        return;
     }
 
     progress_bar.style.display = "block";
     form_data.append("file", file);
+    console.log("file:", file);
     form_data.append("name", filename);
     form_data.append("expiry", expiry);
-    request.open("POST", "/api/tmp");
+    request.open("POST", publicApi._base + "/tmp");
 
     request.upload.addEventListener("progress", function(e) {
         let progress_percent = (e.loaded / e.total) * 100;
@@ -180,16 +181,32 @@ function upload_tmp_file() {
 
     request.addEventListener("load", function() {
         let response = JSON.parse(request.response);
-        let url = response.url; 
+        if (!response.success) {
+            showToast("[ERROR]: " + response.error.message, "error");
+            return;
+        }
+        let url = response.tmpfile.url; 
         progress_bar.setAttribute("value", "100");
         progress_bar.innerText = "100%";
         download_url_container.style.display = "block";
         download_url.innerText = url;
-        qr_code_img.src = "/api/qr?url=" + url;
-        qr_download_button.href = "/api/qr?url=" + url;
+        qr_code_img.src = publicApi.qr.get_url(url);
+        qr_download_button.href = publicApi.qr.get_url(url);
+        showToast("File uploaded", "success");
+    });
+
+    request.addEventListener("error", function () {
+        progress_bar.style.display = "none";
+        showToast("Network error during upload", "error");
+    });
+
+    request.addEventListener("abort", function () {
+        progress_bar.style.display = "none";
+        showToast("Upload aborted");
     });
 
     request.send(form_data);
+    showToast("Uploading file");
 }
 
 function copy_link() {
