@@ -49,7 +49,7 @@ function delete_file() {
 }
 
 function go_back() {
-    window.location.href = "/";
+    window.location.href = "/files?dir={{ file.dir.path }}";
 }
 </script>
 {% endblock %}

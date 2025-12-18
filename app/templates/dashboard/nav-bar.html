@@ -2,10 +2,10 @@
 
 {% macro navbar_links() %}
 {% if g.user %}
-<a href="/">Files</a>
-<a href="/edit">New File</a>
-<a href="/upload?dir={{ request.args.get("dir", "") }}">Upload</a>
-<a href="/git-clone?dir={{ request.args.get("dir", "") }}">Git Clone</a>
+<a href="/files">Files</a>
+<a href="/files/edit">New File</a>
+<a href="/files/upload?dir={{ request.args.get("dir", "") }}">Upload</a>
+<a href="/files/git-clone?dir={{ request.args.get("dir", "") }}">Git Clone</a>
 <a href="/notifications">Notifications</a>
 <a href="{{ SCHEME }}://{{ SERVER_NAME }}/">Home</a>
 <a href="/logout">Logout</a>

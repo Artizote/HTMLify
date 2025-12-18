@@ -50,7 +50,7 @@
     </div>
     <div class="action-buttons">
         {% if g.user and file.user == g.user %}
-        <a href="{{ SCHEME }}://my.{{ SERVER_NAME }}/edit?path={{ file.path }}" title="Edit">
+        <a href="{{ SCHEME }}://my.{{ SERVER_NAME }}/files/edit?path={{ file.path }}" title="Edit">
                 <button><img src="/static/svg/file-pen-line.svg"></button>
             </a>
         {% endif %}
@@ -113,7 +113,7 @@
     {% if item.is_file %}
     <div
         class="item"
-        onclick="window.location.href = '/edit?path={{ item.path }}'"
+        onclick="window.location.href = '/files/edit?path={{ item.path }}'"
         data-title="{{ item.name }}"
         data-path="{{ item.path }}"
         data-visibility="{{ item.visibility }}"
@@ -134,7 +134,7 @@
                 <button title="View"><img src="/static/svg/eye.svg"></button>
             </a>
             
-            <a href="/delete?path={{ item.path }}">
+            <a href="/files/delete?path={{ item.path }}">
                 <button class="delete" title="Delete"><img src="/static/svg/trash.svg"></button>
             </a>
         </div>
@@ -142,7 +142,7 @@
     {% else %}
     <div
         class="item"
-        onclick="window.location.href = '/?dir={{ item.dir.path }}'"
+        onclick="window.location.href = '/files?dir={{ item.dir.path }}'"
         data-title="{{ item.title }}"
         data-path="{{ item.dir }}"
         >
@@ -157,7 +157,7 @@
         </div>
 
         <div class="item-actions">
-            <a href="/?dir={{ item.dir[item.dir.find("/")+1:] }}" title="Open">
+            <a href="/files?dir={{ item.dir[item.dir.find("/")+1:] }}" title="Open">
                 <button><img src="/static/svg/folder-open.svg"></button>
             </a>
         </div>
@@ -173,7 +173,7 @@
     {% for item in items %}
     {% if item.is_file%}
     <div
-        class="item" onclick="window.location.href = '/edit?path={{ item.path }}'"
+        class="item" onclick="window.location.href = '/files/edit?path={{ item.path }}'"
         data-title="{{ item.name }}"
         data-path="{{ item.path }}"
         >
@@ -189,10 +189,10 @@
             <a href="{{ item.url }}">
                 <button title="View"><img src="/static/svg/eye.svg"></button>
             </a>
-            <a href="/edit?path={{ item.path }}">
+            <a href="/files/edit?path={{ item.path }}">
                 <button title="Edit"><img src="/static/svg/file-pen-line.svg"></button>
             </a>
-            <a href="/delete?path={{ item.path }}">
+            <a href="/files/delete?path={{ item.path }}">
                 <button class="delete" title="Delete"><img src="/static/svg/trash.svg"></button>
             </a>
         </div>
@@ -200,7 +200,7 @@
     {% else %} 
     <div
         class="item"
-        onclick="window.location.href = '/?dir={{ item.path }}'"
+        onclick="window.location.href = '/files?dir={{ item.path }}'"
         data-title="{{ item.title }}"
         data-path="{{ item.dir }}"
         >
@@ -213,7 +213,7 @@
         </div>
 
         <div class="item-actions">
-            <a href="/?dir={{ item.path }}">
+            <a href="/files?dir={{ item.path }}">
                 <button><img src="/static/svg/folder-open.svg"></button>
             </a>
         </div>

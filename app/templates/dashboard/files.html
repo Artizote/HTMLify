@@ -7,7 +7,7 @@
     <link href="/static/css/files-view.css" rel="stylesheet">
 {% endblock %}
 {% block content %}
-    <h1>Dashboard</h1>
+    <h1>Files</h1>
 
     {% set files_view = session.get("dashboard-files-view", "list") %}
     {# TODO: add view switch button #}
@@ -15,7 +15,7 @@
     {% set dirs = dir.path.split("/")[1:] %}
     <div class="dir-nav">
         {% for d_path in dirs %}
-        /<a href="/?dir=/{{ "/".join(dirs[:loop.index]) }}"
+        /<a href="/files?dir=/{{ "/".join(dirs[:loop.index]) }}"
             {% if loop.index == dirs.__len__() - 1 %}
             class="current"
             {% endif %}
