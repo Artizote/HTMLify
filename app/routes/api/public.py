@@ -451,6 +451,7 @@ def _create_qr():
 @public_api.get("/tmpfile")
 def _get_temp_file():
     code = request.args.get("code")
+    show_content = request.args.get("show_content", "false") == "true"
     if not code:
         return error_respones_dict(APIErrors.MISSING_PARAMETERS)
     tf = TmpFile.by_code(code)
@@ -458,24 +459,45 @@ def _get_temp_file():
         return error_respones_dict(APIErrors.NOT_FOUND), 404
     return {
         "success": True,
-        "tmpfile": tf.to_dict()
+        "tmpfile": tf.to_dict(show_content=show_content)
     }
 
 @public_api.post("/tmp")
 @public_api.post("/tmpfile")
 def create_temp_file():
+    if request.is_json:
+        json = request.get_json()
+    else:
+        json = {}
     file = request.files.get("file")
-    name = request.form.get("name", "")
-    expiry = request.form.get("expiry", 0, int)
-    if not file:
+    name = request.form.get("name", json.get("name", ""))
+    encoded_content = json.get("content")
+    expiry = request.form.get("expiry", 0, int) or int(json.get("expiry", 0))
+
+    if not file and not encoded_content:
         return error_respones_dict(APIErrors.MISSING_DATA), 400
-    tf = TmpFile.create_with_buffer(file)
+
+    if file:
+        tf = TmpFile.create_with_buffer(file)
+
+    if encoded_content:
+        try:
+            blob = Blob.from_base64(encoded_content)
+        except binascii.Error:
+            return error_respones_dict(APIErrors.INVALID_DATA), 400
+        except:
+            return error_respones_dict(APIErrors.INTERNAL_ERROR), 500
+        tf = TmpFile.create_with_blob(blob)
+
     if not tf:
         return error_respones_dict(APIErrors.INTERNAL_ERROR), 500
-    tf.name = name or file.name or f"temp-file-{tf.code}"
+
+    tf.name = name or f"temp-file-{tf.code}"
+
     if expiry:
         if expiry < tf.expiry.timestamp():
             tf.expiry = datetime.utcfromtimestamp(expiry)
+
     tf.save()
     return {
         "success": True,

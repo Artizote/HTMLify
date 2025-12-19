@@ -1,9 +1,10 @@
 from peewee import Model, SqliteDatabase, AutoField, CharField, DateTimeField, TextField
 
-import os
 from datetime import datetime, timedelta, UTC
+from io import BytesIO
 
-from app.utils.helpers import randstr, file_path
+from .blob import Blob
+from app.utils.helpers import randstr
 from app.config import SCHEME, SERVER_NAME
 
 tmpfile_database = SqliteDatabase("instance/tmpfiles.db")
@@ -12,10 +13,10 @@ class TmpFile(Model):
     class Meta:
         database = tmpfile_database
 
-    id = AutoField
-    name = CharField()
-    code = CharField()
-    password = CharField(default="")
+    name : str | CharField = CharField()
+    code : str | CharField = CharField(unique=True, index=True, default=lambda:TmpFile.new_code())
+    blob_hash : str | CharField = CharField(64)
+    password : str | CharField = CharField(default="")
     expiry = DateTimeField(default=lambda:datetime.now(UTC)+timedelta(days=1))
     
     @classmethod
@@ -24,31 +25,38 @@ class TmpFile(Model):
 
     @classmethod
     def create_with_buffer(cls, buffer) -> "TmpFile":
-        code = randstr(5)
-        while cls.by_code(code):
-            code = randstr(5)
-         
-        tf = TmpFile.create(
-            name = buffer.name,
-            code = code,
-        )
-         
+        name = buffer.name if buffer.name else "TmpFile"
+        tb = BytesIO()
+        
         if buffer.__class__.__name__ == "FileStorage": # werkzeug's datastructer
-            buffer.save(tf.filepath)
+            buffer.save(tb)
         else:
-            f = open(tf.filepath, "wb")
-            f.write(buffer.getvalue())
-            f.close()
+            tb.write(buffer.getvalue())
 
+        blob = Blob.create(tb.getvalue())
+        tf = cls.create_with_blob(blob, name)
         return tf
+
+    @classmethod
+    def create_with_blob(cls, blob: Blob, name: str = "Temp File") -> "TmpFile":
+        tf = cls.create(
+            name = name,
+            blob_hash = blob.hash
+        )
+        return tf
+
+    @classmethod
+    def new_code(cls) -> str:
+        d = 5
+        code = randstr(d)
+        while cls.by_code(code):
+            code = randstr(d)
+            d += 1
+        return code
 
     @classmethod
     def purge(cls):
         cls.delete().where(cls.expiry < datetime.now(UTC)).execute()
-
-    def delete_instance(self, **kwargs):
-        os.remove(self.filepath)
-        return super().delete_instance(**kwargs)
 
     def get_file(self):
         try:
@@ -57,17 +65,31 @@ class TmpFile(Model):
         except:
             return None
 
-    def to_dict(self):
+    def to_dict(self, show_content=False) -> dict:
         return {
             "name": self.name,
             "code": self.code,
+            "blob_hash": self.blob_hash,
+            "content": self.blob.get_base64() if show_content else None,
             "expire": self.expiry,
             "url": f"{SCHEME}://{SERVER_NAME}/tmp/{self.code}"
         }
 
     @property
+    def blob(self) -> Blob:
+        return Blob.by_hash(self.blob_hash)
+
+    @property
     def filepath(self) -> str:
-        return file_path("tmp", f"tmp-file-{self.id}")
+        return self.blob.filepath
+
+    @property
+    def path(self) -> str:
+        return f"/tmp/{self.code}"
+
+    @property
+    def url(self) -> str:
+        return f"{SCHEME}://{SERVER_NAME}{self.path}"
 
 
 class TmpFolder(Model):
