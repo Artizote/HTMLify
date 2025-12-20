@@ -1,0 +1,130 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}{{ "Editing - " + pen.id if pen else "New Pen" }}{% endblock %}
+
+{% block head_content %}
+<link rel="stylesheet" href="/static/vendor/codemirror/lib/codemirror.css">
+<style>
+.CodeMirror {
+    outline: 2px solid  #000000;
+}
+#output-container {
+    resize: vertical;
+}
+#output-iframe {
+    width: 100%;
+    height: 100%;
+    min-height: 300px;
+}
+.overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(0,0,0,0.4);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="form-group">
+        <input id="title-input" type="text" class="form-input" placeholder="Pen Title" value="{{ pen.title if pen else "Untitled Pen" }}"><br>
+    </div>
+
+    <div class="form-group">
+        <div class="form-inline">
+            <div style="flex:1;">
+                <button id="body-editor-toggle-button"  onclick="toggle_body_editor()"  style="margin:2px;" class="btn btn-primary">HTML</button>
+                <button id="css-editor-toggle-button"   onclick="toggle_css_editor()"   style="margin:2px;" class="btn btn-primary">CSS</button>
+                <button id="js-editor-toggle-button"    onclick="toggle_js_editor()"    style="margin:2px;" class="btn btn-primary">JS</button>
+                <button id="output-toggle-button"       onclick="toggle_output()"       style="margin:2px;" class="btn btn-primary">Output</button>
+            </div>
+            <div>
+                <button onclick="update_output()"   style="margin:2px;" class="btn">Run</button>
+                <button onclick="save()"            style="margin:2px;" class="btn">Save</button>
+                <button onclick="toggle_settings()" style="margin:2px;" class="btn">Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="form-inline">
+            <fieldset style="flex:1;min-width: 0;">
+                <legend>HTML</legend>
+                <textarea id="body-editor"  cols="30" rows="10">{{ pen.body_content  if pen else "" }}</textarea>
+            </fieldset>
+            <fieldset style="flex:1;min-width: 0;">
+                <legend>CSS</legend>
+                <textarea id="css-editor"   cols="30" rows="10">{{ pen.css_content   if pen else "" }}</textarea>
+            </fieldset>
+            <fieldset style="flex:1;min-width: 0;">
+                <legend>JS</legend>
+                <textarea id="js-editor"    cols="30" rows="10">{{ pen.js_content    if pen else "" }}</textarea>
+            </fieldset>
+        </div>
+    </div>
+
+    <div id="output-container" class="">
+        <iframe
+            id="output-iframe"
+            src="{{ pen.url if pen else "" }}"
+            allow="camera *; display-capture *; geolocation *; microphone *; web-share *"
+            allowfullscreen="true"
+            allowpaymentrequest="true"
+            allowtransparency="true"
+            sandbox="
+            allow-downloads
+            allow-forms
+            allow-modals
+            allow-pointer-lock
+            allow-popups
+            allow-popups-to-escape-sandbox
+            allow-presentation
+            allow-same-origin
+            allow-scripts
+            allow-top-navigation-by-user-activation
+            "
+            loading="lazy"></iframe>
+    </div>
+</div>
+
+<div id="settings-container" class="overlay" style="display:none;">
+    <div class="card card-half">
+        <div class="form-inline">
+            <div style="flex:1;">
+                <button id="linenos-toggle-button" onclick="toggle_editor_linenos()" class="btn btn-primary">Line Numbers</button>
+            </div>
+            <div>
+                <button onclick="toggle_settings()" class="btn">Close</button>
+            </div>
+        </div>
+        <br>
+        <select id="theme-selector" onchange="update_editor_theme()" class="form-select"></select>
+        <h2 class="card-headling">Head Content</h2>
+        <fieldset style="flex:1;min-width:0;">
+            <legend>Head Content</legend>
+            <textarea id="head-editor">{{ pen.head_content if pen else "" }}</textarea>
+        </fieldset>
+    </div>
+</div>
+{% endblock %}
+
+{% block after_body %}
+<script>
+window.pen_id = "{{ pen.id if pen else "" }}";
+</script>
+<script src="/static/js/public-api.js"></script>
+<script src="/static/js/private-api.js"></script>
+<script src="/static/js/codemirror.js"></script>
+<script src="/static/vendor/codemirror/lib/codemirror.js"></script>
+<script src="/static/vendor/codemirror/mode/meta.js"></script>
+<script src="/static/vendor/codemirror/mode/htmlmixed/htmlmixed.js"></script>
+<script src="/static/vendor/codemirror/mode/xml/xml.js"></script>
+<script src="/static/vendor/codemirror/mode/javascript/javascript.js"></script>
+<script src="/static/vendor/codemirror/mode/css/css.js"></script>
+<script src="/static/js/pages/dashboard/pen-edit.js"></script>
+{% endblock %}

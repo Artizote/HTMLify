@@ -1,0 +1,12 @@
+{% extends "dashboard/base.html" %}
+{% from "macros.html" import pens_list_view %}
+
+{% block head_content %}
+    <link href="/static/css/files-view.css" rel="stylesheet">
+{% endblock %}
+
+
+{% block content %}
+<h1>Pens</h1>
+{{ pens_list_view(pens) }}
+{% endblock %}

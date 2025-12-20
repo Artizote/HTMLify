@@ -117,5 +117,33 @@ const privateApi = {
         async forFile(fileId) {
             return await privateApi.fetchJson("/revisions?id=" + fileId);
         }
+    },
+
+    pen: {
+        async create(fields) {
+            return await privateApi.fetchJson("/pen", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(fields)
+            });
+        },
+
+        async update(fields) {
+            return await privateApi.fetchJson("/pen", {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(fields)
+            });
+        },
+
+        async delete(pen_id) {
+            return await privateApi.fetchJson("/pen?id="+pen_id, {
+                method: "DELETE"
+            });
+        }
     }
 }

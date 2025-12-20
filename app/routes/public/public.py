@@ -1,5 +1,5 @@
 import requests
-from flask import Blueprint, render_template, send_file, session, g, redirect, jsonify, request
+from flask import Blueprint, render_template, send_file, session, g, redirect, jsonify, request, abort
 from pygments.formatters import HtmlFormatter
 
 from hashlib import md5
@@ -211,6 +211,13 @@ def file_src(path):
             _executors.append(e)
 
     return render_template("file-view.html", file=file, executors=_executors)
+
+@public.route("/pen/<id>")
+def pen_(id):
+    pen = Pen.by_id(id)
+    if not pen:
+        abort(404)
+    return render_template("pen.html", pen=pen)
 
 # TODO: Impliment new Search Engine
 @public.route("/search", methods=["GET", "POST"])

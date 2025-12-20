@@ -167,7 +167,7 @@
 </div>
 {% endmacro %}
 
-{# Fils List View #}
+{# Files List View #}
 {% macro files_list_view(items) %}
 <div class="files-list">
     {% for item in items %}
@@ -219,6 +219,38 @@
         </div>
     </div>
     {% endif %}
+    {% endfor %}
+</div>
+{% endmacro %}
+
+{# Pens List View #}
+{% macro pens_list_view(pens) %}
+<div class="files-list">
+    {% for pen in pens %}
+    <div
+        class="item" onclick="window.location.href = '/pens/edit?id={{ pen.id }}'"
+        data-title="{{ pen.title }}"
+        data-path="{{ pen.path }}"
+        >
+        <img src="/static/svg/file-code-corner.svg" alt="Thumbnail" class="item-thumbnail">
+
+        <div class="item-info">
+            <h3 class="item-name">{{ pen.title or pen.id }}</h3>
+            <h5 class="item-path">{{ pen.path }}</h5>
+        </div>
+
+        <div class="item-actions">
+            <a href="{{ pen.url }}">
+                <button title="View"><img src="/static/svg/eye.svg"></button>
+            </a>
+            <a href="/pens/edit?id={{ pen.id }}">
+                <button title="Edit"><img src="/static/svg/file-pen-line.svg"></button>
+            </a>
+            <a href="/pens/delete?id={{ pen.id }}">
+                <button class="delete" title="Delete"><img src="/static/svg/trash.svg"></button>
+            </a>
+        </div>
+    </div>
     {% endfor %}
 </div>
 {% endmacro %}

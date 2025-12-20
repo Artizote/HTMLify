@@ -1,8 +1,17 @@
 /* Public API */
 
 
+function getGetApiRoot() {
+    if (location.host.startsWith("my.")) {
+        return `${location.protocol}//api.${location.host.substring(3)}`;
+    } else {
+        return `${location.protocol}//api.${location.host}`;
+    }
+}
+
+
 const publicApi = {
-    _base: `${window.location.protocol}//api.${window.location.host}`,
+    _base: getGetApiRoot(),
 
     async fetch(endpoint, options = {}) {
         let url = publicApi._base + endpoint;
@@ -65,12 +74,25 @@ const publicApi = {
         }
     },
 
-    tpmfile: {
-        async get(code) {
-            return await publicApi.fetchJson("/tmpfile?code=" + code);
-        }
+    tmpfile: {
+        async exists(code) {
+            let res = await publicApi.fetchJson("/tmpfile?code=" + code);
+            return res.success;
+        },
 
-        // TODO: create function, after API change
+        async get(code, show_content = false) {
+            return await publicApi.fetchJson(`/tmpfile?code=${code}&show_content=${show_content}`);
+        },
+
+        async create(fields) {
+            return await publicApi.fetchJson("/tmpfile", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(fields)
+            });
+        }
     },
 
     tmpfolder: {

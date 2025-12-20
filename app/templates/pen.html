@@ -3,15 +3,15 @@
     <head>
         <meta charset="UTF-8">
         <title>{{ pen.title }}</title>
-        {{ pen.head_content }}
+        {{ pen.head_content | safe }}
         <style>
-        {{ pen.css_content }}
+        {{ pen.css_content | safe }}
         </style>
     </head>
     <body>
-        {{ pen.html_content }}
+        {{ pen.body_content | safe }}
         <script>
-        {{ pen.js_content }}
+        {{ pen.js_content | safe }}
         </script>
     </body>
 </html>
