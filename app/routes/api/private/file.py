@@ -1,30 +1,11 @@
-from flask import Blueprint, g, request
-from flask_jwt_extended import get_jwt_identity, verify_jwt_in_request
+from flask import request, g
 
-import os
 import binascii
+import os
 
-from app.models import *
-from app.utils import randstr, file_path, git_clone
-from .errors import error_respones_dict, APIErrors
-
-
-private_api = Blueprint("private", __name__, url_prefix="/private")
-
-
-@private_api.before_request
-def before_requesn():
-    if request.method == "OPTIONS":
-        return None
-    # checking authorized user with JWT
-    g.auth_user = None
-    verify_jwt_in_request()
-    username = get_jwt_identity()
-    if username:
-        g.auth_user = User.by_username(username)
-
-    if not g.auth_user:
-        return error_respones_dict(APIErrors.UNAUTHORIZED), 401
+from app.utils.helpers import randstr, file_path
+from app.models import Blob, File, FileMode, FileVisibility, Dir
+from .api import *
 
 
 @private_api.get("/items")
@@ -34,6 +15,7 @@ def list_dir_items():
     if dir.username != g.auth_user.username:
         return error_respones_dict(APIErrors.FORBIDDEN), 403
     return dir.to_dict()
+
 
 @private_api.get("/file")
 def get_file():
@@ -53,6 +35,7 @@ def get_file():
         "success": True,
         "file": file.to_dict(show_content=show_content)
     }
+
 
 @private_api.post("/file")
 def create_file():
@@ -136,6 +119,7 @@ def create_file():
         "file": file.to_dict()
     }
 
+
 @private_api.patch("/file")
 def update_file():
     json = request.get_json()
@@ -204,6 +188,7 @@ def update_file():
         "file": file.to_dict()
     }
 
+
 @private_api.delete("/file")
 def delete_file():
     id = request.args.get("id", 0, int)
@@ -219,6 +204,7 @@ def delete_file():
     return {
         "success": True
     }
+
 
 @private_api.post("/git-clone")
 def git_clone_():
@@ -242,168 +228,3 @@ def git_clone_():
     return {
         "success": bool(cloned)
     }
-
-@private_api.get("/revision")
-def get_revision():
-    id = request.args.get("id", 0, int)
-    revision: Revision = Revision.by_id(id)
-    if not revision:
-        return error_respones_dict(APIErrors.NOT_FOUND), 404
-    if revision.file.user != g.auth_user:
-        return error_respones_dict(APIErrors.FORBIDDEN), 403
-    return {
-        "success": True,
-        "revision": revision.to_dict(show_content=True)
-    }
-
-@private_api.get("/revisions")
-def get_revisions():
-    id = request.args.get("id", 0, int)
-    file = File.by_id(id)
-    if not file:
-        return error_respones_dict(APIErrors.NOT_FOUND), 404
-    if file.user != g.auth_user:
-        return error_respones_dict(APIErrors.FORBIDDEN), 403
-    revisions = [revision.to_dict(show_content=False) for revision in file.revisions]
-    return {
-        "success": True,
-        "revisions": revisions
-    }
-
-@private_api.get("/pen")
-def get_pen():
-    id = request.args.get("id", "")
-    pen = Pen.by_id(id)
-    if not pen:
-        return error_respones_dict(APIErrors.NOT_FOUND), 404
-    opts = {
-        "show_head_content": request.args.get("show_head_content", "false") == "true",
-        "show_body_content": request.args.get("show_body_content", "false") == "true",
-        "show_css_content": request.args.get("show_css_content", "false") == "true",
-        "show_js_content": request.args.get("show_js_content", "false") == "true"
-    }
-    return {
-        "success": True,
-        "pen": pen.to_dict(**opts)
-    }
-
-@private_api.post("/pen")
-def create_pen():
-    json = request.get_json() or {}
-    if not json:
-        return error_respones_dict(APIErrors.MISSING_JSON), 400
-
-    title = json.get("title", "Untitled Pen")
-    encoded_head_content = json.get("head_content", "")
-    encoded_body_content = json.get("body_content", "")
-    encoded_css_content = json.get("css_content", "")
-    encoded_js_content = json.get("js_content", "")
-
-    try:
-        head_blob = Blob.from_base64(encoded_head_content)
-        body_blob = Blob.from_base64(encoded_body_content)
-        css_blob = Blob.from_base64(encoded_css_content)
-        js_blob = Blob.from_base64(encoded_js_content)
-    except binascii.Error:
-        return error_respones_dict(APIErrors.INVALID_DATA), 400
-    except:
-        return error_respones_dict(APIErrors.INTERNAL_ERROR), 500
-
-    pen = Pen.create(
-        title = title[:255],
-        user_id = g.auth_user.id,
-        head_blob_hash = head_blob.hash,
-        body_blob_hash = body_blob.hash,
-        css_blob_hash = css_blob.hash,
-        js_blob_hash = js_blob.hash
-    )
-
-    if not pen:
-        return error_respones_dict(APIErrors.INTERNAL_ERROR), 500
-
-    return {
-        "success": True,
-        "pen": pen.to_dict()
-    }
-
-@private_api.patch("pen")
-def update_pen():
-    json = request.get_json()
-    if not json:
-        return error_respones_dict(APIErrors.MISSING_JSON), 400
-
-    id = json.get("id", "")
-
-    pen = Pen.by_id(id)
-    if not pen:
-        return error_respones_dict(APIErrors.NOT_FOUND), 404
-
-    if pen.user_id != g.auth_user.id:
-        return error_respones_dict(APIErrors.FORBIDDEN), 403
-
-    title = json.get("title")
-    encoded_head_content = json.get("head_content")
-    encoded_body_content = json.get("body_content")
-    encoded_css_content = json.get("css_content")
-    encoded_js_content = json.get("js_content")
-
-    if title:
-        pen.title = title[:255]
-
-    if encoded_head_content:
-        try:
-            blob = Blob.from_base64(encoded_head_content)
-        except binascii.Error:
-            return error_respones_dict(APIErrors.INVALID_DATA)
-        except:
-            return error_respones_dict(APIErrors.INTERNAL_ERROR)
-        pen.head_blob_hash = blob.hash
-
-    if encoded_body_content:
-        try:
-            blob = Blob.from_base64(encoded_body_content)
-        except binascii.Error:
-            return error_respones_dict(APIErrors.INVALID_DATA)
-        except:
-            return error_respones_dict(APIErrors.INTERNAL_ERROR)
-        pen.body_blob_hash = blob.hash
-
-    if encoded_css_content:
-        try:
-            blob = Blob.from_base64(encoded_css_content)
-        except binascii.Error:
-            return error_respones_dict(APIErrors.INVALID_DATA)
-        except:
-            return error_respones_dict(APIErrors.INTERNAL_ERROR)
-        pen.css_blob_hash = blob.hash
-
-    if encoded_js_content:
-        try:
-            blob = Blob.from_base64(encoded_js_content)
-        except binascii.Error:
-            return error_respones_dict(APIErrors.INVALID_DATA)
-        except:
-            return error_respones_dict(APIErrors.INTERNAL_ERROR)
-        pen.js_blob_hash = blob.hash
-
-    pen.save()
-    pen.update_modified_time()
-
-    return {
-        "success": True,
-        "pen": pen.to_dict()
-    }
-
-@private_api.delete("/pen")
-def delete_pen():
-    id = request.args.get("id", "")
-    pen = Pen.by_id(id)
-    if not pen:
-        return error_respones_dict(APIErrors.NOT_FOUND), 404
-    if pen.user != g.auth_user:
-        return error_respones_dict(APIErrors.FORBIDDEN), 403
-    deleted = bool(pen.delete_instance())
-    return {
-        "success": deleted
-    }
-
