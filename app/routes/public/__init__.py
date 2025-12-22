@@ -3,4 +3,11 @@
 
 from .public import public
 
-PROCESS_POOL = {} # for patching
+
+from .file import *
+from .frames import *
+from .pen import *
+from .proc import *
+from .shortlink import *
+from .sitemap import *
+from .tmpfile import *
