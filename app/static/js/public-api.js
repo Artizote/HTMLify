@@ -29,12 +29,18 @@ const publicApi = {
 
     blob: {
         async exists(hash) {
-            let json = await publicApi.fetchJson("/blob?hash=" + hash + "&show-content=false");
+            let params = new URLSearchParams();
+            params.append("hash", hash);
+            params.append("show_content", false);
+            let json = await publicApi.fetchJson(`/blob?${params.toString()}`);
             return json.success;
         },
 
-        async get(hash) {
-            return await publicApi.fetchJson("/blob?hash=" + hash);
+        async get(hash, showContent=true) {
+            let params = new URLSearchParams();
+            params.append("hash", hash);
+            params.append("show_content", showContent);
+            return await publicApi.fetchJson(`/blob?${params.toString()}`);
         }
     },
 
@@ -57,9 +63,7 @@ const publicApi = {
             } else {
                 params.append("path", filePath);
             }
-            if (showContent) {
-                params.append("show-content", "true");
-            }
+            params.append("show_content", showContent);
             return await publicApi.fetchJson(`/file?${params.toString()}`);
         }
     },
@@ -80,8 +84,11 @@ const publicApi = {
             return res.success;
         },
 
-        async get(code, show_content = false) {
-            return await publicApi.fetchJson(`/tmpfile?code=${code}&show_content=${show_content}`);
+        async get(code, showContent = false) {
+            let param = new URLSearchParams();
+            params.append("code", code);
+            params.append("show_content", showContent);
+            return await publicApi.fetchJson(`/tmpfile?code=${params.toString()}`);
         },
 
         async create(fields) {
@@ -110,7 +117,7 @@ const publicApi = {
             });
         },
 
-        async add(code, file_code, auth_code) {
+        async add(code, fileCode, authCode) {
             return await publicApi.fetchJson("/tmpfolder", {
                 method: "PUT",
                 headers: {
@@ -118,13 +125,13 @@ const publicApi = {
                 },
                 body: JSON.stringify({
                     code: code,
-                    file_code: file_code,
-                    auth_code: auth_code
+                    file_code: fileCode,
+                    auth_code: authCode
                 })
             });
         },
 
-        async remove(code, file_code, auth_code) {
+        async remove(code, fileCode, authCode) {
             return await publicApi.fetchJson("/tmpfolder", {
                 method: "DELETE",
                 headers: {
@@ -132,8 +139,8 @@ const publicApi = {
                 },
                 body: JSON.stringify({
                     code: code,
-                    file_code: file_code,
-                    auth_code: auth_code
+                    file_code: fileCode,
+                    auth_code: authCode
                 })
             });
         }
