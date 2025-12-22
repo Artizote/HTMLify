@@ -262,18 +262,22 @@ function run() {
     }
 
     let file_id = {{ file.id }};
+    let encoded_data;
     let raw_code;
 
-    fetch(`/api/file?id=${file_id}`)
-        .then(response => response.json())
+    publicApi.file.get(file_id, "", true)
         .then(data => {
-            raw_code = data["content"];
+            console.log("data", data);
+            encoded_data = data.file.content; 
+            console.log("encoded data", encoded_data);
+            raw_code = atob(encoded_data);
+            console.log("raw code", raw_code);
 
             const formdata = new FormData();
             formdata.append("code", raw_code);
             formdata.append("executor", executor);
 
-            fetch("/api/exec", {
+            fetch("/exec", {
                 method: "POST",
                 body: formdata
             })

@@ -1,4 +1,4 @@
-from flask import request, render_template, session, redirect
+from flask import request, render_template, session, redirect, g
 
 from app.models import User
 from .dashboard import dashboard
@@ -48,11 +48,14 @@ def register():
     user.set_password(password)
 
     session["username"] = user.username
-    
-    return redirect("/")
+    redirect_path = session.get("redirect-after-login", "/")
+    return redirect(redirect_path)
 
 @dashboard.route("/logout")
 def logout():
     session.clear()
     return redirect("/login")
 
+@dashboard.route("/api-key")
+def api_key():
+    return g.user.api_key, {"Content-Type": "text/text"}

@@ -2,18 +2,22 @@ from random import randint
 from hashlib import sha256
 import os
 
-def randstr(n):
+def randstr(n: int) -> str:
+    """Returns an alphanumaric string of length `n`"""
     s = ""
     chars = "qwertyuiopasdfghjklzxcvbnm1234567890"
     for _ in range(n):
         s += chars[randint(0, 35)]
     return s
 
-def escape_html(code) -> str:
+def escape_html(code: str) -> str:
+    """Returns HTML rander safe code"""
     entitys = {
         "&": "&amp;",
         "<": "&lt;",
-        ">": "&gt;"
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
     }
     for e in entitys.keys():
         code = code.replace(e, entitys[e])

@@ -130,7 +130,7 @@
         </div>
 
         <div class="item-actions">
-            <a href="{{ item.path }}">
+            <a href="{{ item.url }}" target="_blank">
                 <button title="View"><img src="/static/svg/eye.svg"></button>
             </a>
             
@@ -186,7 +186,7 @@
         </div>
 
         <div class="item-actions">
-            <a href="{{ item.url }}">
+            <a href="{{ item.url }}" target="_blank" onclick="event.stopPropagation()">
                 <button title="View"><img src="/static/svg/eye.svg"></button>
             </a>
             <a href="/files/edit?path={{ item.path }}">
@@ -240,7 +240,7 @@
         </div>
 
         <div class="item-actions">
-            <a href="{{ pen.url }}">
+            <a href="{{ pen.url }}" target="_blank" onclick="event.stopPropagation()">
                 <button title="View"><img src="/static/svg/eye.svg"></button>
             </a>
             <a href="/pens/edit?id={{ pen.id }}">
