@@ -1,0 +1,47 @@
+{# Pen Src #}
+{% extends "base.html" %}
+{% block title %}{{ pen.title or "Pen " + pen.id }}{% endblock %}
+{% block head_content %}
+    <link rel="stylesheet" href="/pygments.css">
+{% endblock %}
+{% block content %}
+	<h1>HTMLify</h1>
+    <div class="file-container">
+        <div class="file-header">
+            <div class="file-title" style="overflow:auto;">{{ pen.title or "Pen " + pen.id }}</div>
+            <div class="file-info">
+                Views: {{ pen.views }} | Author: <a href="/{{ pen.username }}" style="text-decoration: none;color: black;">{{ pen.user.username }}</a>
+            </div>
+        </div>
+        {% if pen.body_content %}
+        <span>HTML Body</span>
+        <div class="file-content">
+            {{ pen.highlighted_body_html(linenos=True) | safe }}
+        </div>
+        {% endif %}
+        {% if pen.head_content %}
+        <span>HTML Head</span>
+        <div class="file-content">
+            {{ pen.highlighted_head_html(linenos=True) | safe }}
+        </div>
+        {% endif %}
+        {% if pen.css_content %}
+        <span>CSS</span>
+        <div class="file-content">
+            {{ pen.highlighted_css_html(linenos=True) | safe }}
+        </div>
+        {% endif %}
+        {% if pen.js_content %}
+        <span>JS</span>
+        <div class="file-content">
+            {{ pen.highlighted_js_html(linenos=True) | safe }}
+        </div>
+        {% endif %}
+        <div class="link-copy-box">
+            <h3>Share this pen:</h3>
+            <input type="text" id="fileLink" value="{{ request.url }}" readonly>
+            <button onclick="copyToClipboard('{{ pen.url }}');">Copy</button><br><br>
+        <a href="/raw{{ pen.path }}"><button>View Raw</button></a>
+        <a href="{{ pen.path }}"><button>View Live</button></a>
+        </div>
+{% endblock %}

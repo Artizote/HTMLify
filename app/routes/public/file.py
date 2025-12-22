@@ -44,7 +44,7 @@ def user_file(username, path):
     if file.blob.type == BlobType.BINARY:
         if file.mode == FileMode.RENDER:
             return send_file(file.blob.filepath, download_name=file.name)
-        return render_template("file-view.html", file=file)
+        return render_template("file-src.html", file=file)
 
     # Text files 
     if file.mode == FileMode.RENDER:
@@ -55,7 +55,7 @@ def user_file(username, path):
         if not e in _executors:
             _executors.append(e)
 
-    return render_template("file-view.html", file=file, executors=_executors)
+    return render_template("file-src.html", file=file, executors=_executors)
 
 
 @public.route("/raw/<path:path>")
@@ -123,5 +123,5 @@ def file_src(path):
         if not e in _executors:
             _executors.append(e)
 
-    return render_template("file-view.html", file=file, executors=_executors)
+    return render_template("file-src.html", file=file, executors=_executors)
 

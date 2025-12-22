@@ -1,6 +1,6 @@
-{# Flie Show #}
+{# Flie Src #}
 {% extends "base.html" %}
-{% block title %}{{ file.name }}{% endblock %}
+{% block title %}{{ file.title or file.name }}{% endblock %}
 {% block head_content %}
     <link rel="stylesheet" href="/pygments.css">
     <style>
@@ -46,7 +46,7 @@
 	<h1>HTMLify</h1>
     <div class="file-container">
         <div class="file-header">
-            <div class="file-title" style="overflow:auto;">{{ file.name }}</div>
+            <div class="file-title" style="overflow:auto;">{{ file.title or file.name }}</div>
             <div class="file-info">
                 Views: {{ file.views }} | Author: <a href="/{{ file.username }}" style="text-decoration: none;color: black;">{{ file.user.username }}</a>
             </div>
@@ -84,8 +84,8 @@
             <input type="text" id="fileLink" value="{{ request.url }}" readonly>
             <button onclick="copycontent('fileLink')">Copy</button><br><br>
             <button id="shortlinkbutton" onclick="shortlink()">Short Link</button>
-        <a href="/raw/{{ file.path }}"><button>View Raw</button></a>
-        <a href="/raw/{{ file.path }}" download><button>Download File<span class="file-size">({{ file.sizef() }})</span></button></a>
+        <a href="/raw{{ file.path }}"><button>View Raw</button></a>
+        <a href="/raw{{ file.path }}" download><button>Download File<span class="file-size">({{ file.sizef() }})</span></button></a>
         <button id="embedcodebutton" onclick="embedcode()">Embed Code</button>        
         <form method="POST" action="/edit" style="display:inline-block;">
             <input type="hidden" name="clone" value="{{ file.id }}"/>

@@ -1,4 +1,6 @@
 from peewee import Model, SqliteDatabase, IntegerField, CharField, TimestampField
+from pygments import lexers, highlight
+from pygments.formatters import HtmlFormatter
 
 from datetime import datetime, UTC
 
@@ -8,6 +10,11 @@ from app.config import SCHEME, SERVER_NAME
 
 
 pens_database = SqliteDatabase("instance/pens.db")
+html_lexer = lexers.get_lexer_by_name("html")
+css_lexer = lexers.get_lexer_by_name("css")
+js_lexer = lexers.get_lexer_by_name("js")
+html_formatter = HtmlFormatter()
+html_formatter_with_linenos = HtmlFormatter(linenos=True)
 
 
 class Pen(Model):
@@ -16,7 +23,7 @@ class Pen(Model):
     class Meta:
         database = pens_database
 
-    id : str | CharField = CharField(unique=True, index=True, default=lambda:Pen.new_id())
+    id : str | CharField = CharField(primary_key=True, unique=True, index=True, default=lambda:Pen.new_id())
     user_id : int | IntegerField = IntegerField()
     title: str | CharField = CharField(255, default="Untitled Pen")
     head_blob_hash : str | CharField = CharField(64)
@@ -47,6 +54,34 @@ class Pen(Model):
     def update_modified_time(self):
         self.modified = datetime.now(UTC)
         self.save()
+
+    def highlighted_head_html(self, linenos=False) -> str:
+        if linenos:
+            formatter = html_formatter_with_linenos
+        else:
+            formatter = html_formatter
+        return highlight(self.head_content, html_lexer, formatter)
+
+    def highlighted_body_html(self, linenos=False) -> str:
+        if linenos:
+            formatter = html_formatter_with_linenos
+        else:
+            formatter = html_formatter
+        return highlight(self.body_content, html_lexer, formatter)
+
+    def highlighted_css_html(self, linenos=False) -> str:
+        if linenos:
+            formatter = html_formatter_with_linenos
+        else:
+            formatter = html_formatter
+        return highlight(self.css_content, css_lexer, formatter)
+
+    def highlighted_js_html(self, linenos=False) -> str:
+        if linenos:
+            formatter = html_formatter_with_linenos
+        else:
+            formatter = html_formatter
+        return highlight(self.js_content, js_lexer, formatter)
 
     def to_dict(self, **kwargs):
         show_head_content = kwargs.get("show_head_content", False)
