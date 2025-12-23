@@ -1,4 +1,4 @@
-from flask import render_template, send_file
+from flask import render_template, send_file, abort
 
 from app.models import TmpFile, TmpFolder
 from .public import public
@@ -13,7 +13,7 @@ def create_temp_file():
 def tmp_file(code):
     tf = TmpFile.by_code(code)
     if not tf:
-        return "<h1>404 File Not Found</br><a href='/'>Back to home</a></h1>", 404
+        abort(404)
     return send_file(tf.filepath, download_name=tf.name)
 
 
@@ -26,6 +26,6 @@ def tmp_folder():
 def tmp_folder_(code):
     tf = TmpFolder.by_code(code)
     if not tf:
-        return "<h1>404 Temp folder Not found</br><a href='/'>Back to home</a></h1>", 404
+        abort(404)
     return render_template("temp-folder.html")
 

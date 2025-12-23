@@ -1,0 +1,21 @@
+{% if request.host.startswith("my.") %}
+{% extends "dashboard/base.html" %}
+{% else %}
+{% extends "base.html" %}
+{% endif %}
+
+{% block content %}
+<div class="card-center">
+    <h1>{{ error.code }} - {{ error.name }}</h1>
+    <div class="card card-half">
+        <p><code>{{ error.description }}</code></p>
+        <a href="/">
+        {% if request.host.startswith("my.") %}
+            Back to Doshboard
+        {% else %}
+            Back to Home
+        {% endif %}
+        </a>
+    </div>
+</div>
+{% endblock %}

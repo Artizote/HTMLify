@@ -1,5 +1,6 @@
-from flask import Flask
+from flask import Flask, render_template
 from flask_jwt_extended import JWTManager
+from werkzeug.exceptions import HTTPException
 
 from datetime import timedelta
 from threading import Thread
@@ -16,7 +17,6 @@ app = Flask(__name__, subdomain_matching=True)
 app.secret_key = SECRET_KEY
 
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=28)
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
 app.config["SERVER_NAME"] = SERVER_NAME
 
 jwt = JWTManager(app)
@@ -31,6 +31,10 @@ def context_processor():
         "FileVisibility": FileVisibility,
         "BlobType": BlobType,
     }
+
+@app.errorhandler(HTTPException)
+def http_exception(error):
+    return render_template("error.html", error=error)
 
 register_blueprints(app)
 

@@ -1,4 +1,4 @@
-from flask import render_template, request, g, session, send_file
+from flask import render_template, request, g, session, send_file, abort
 
 from app.models import User, BlobType, File, FileMode, FileVisibility, Dir
 from app.executors import executors, suggest_executors
@@ -16,7 +16,7 @@ def user_file(username, path):
     if not file:
         if dir:
             return render_template("dir-view.html", dir=dir)
-        return "404", 404
+        abort(404)
 
     if file.visibility == FileVisibility.HIDDEN:
         if not g.user:
@@ -63,11 +63,11 @@ def raw_file(path):
     fullpath = "/" + path
     file = File.by_path(fullpath)
     if not file:
-        return "File not fousd", 404
+        abort(404)
 
     if file.visibility == FileVisibility.HIDDEN:
         if not g.user or g.usel != file.user:
-            return "File is hidden", 403
+            return render_template("hidden-file.html"), 403
 
     # TODO: different password approach for raw files
     if file.password:
@@ -96,7 +96,7 @@ def file_src(path):
     fullpath = "/" + path
     file = File.by_path(fullpath)
     if not file:
-        return "File not found", 404
+        abort(404)
 
     if file.visibility == FileVisibility.HIDDEN:
         if not g.user or g.usel != file.user:

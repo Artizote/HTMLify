@@ -1,5 +1,5 @@
 import requests
-from flask import Blueprint, render_template, send_file, session, g, request
+from flask import Blueprint, render_template, send_file, session, g, request, abort, redirect
 from pygments.formatters import HtmlFormatter
 
 from hashlib import md5
@@ -30,7 +30,8 @@ def user_dp(username):
     except:
         pass
     user = User.by_username(username)
-    if not user: return "File not found", 404
+    if not user:
+        abort(404)
     hash = md5(user.email.encode()).hexdigest()
     gravatar_url = "https://gravatar.com/avatar/" + hash + "?d=retro"
     dp = requests.get(gravatar_url).content
@@ -87,7 +88,7 @@ def user_files(username):
     username = username.lower()
     user = User.by_username(username)
     if not user:
-        return "<center><h1>NO USER FOUND WITH NAME '<b>" + username + "</b>'</h1></center>", 404
+        abort(404)
     dir = Dir(username)
     latest_comments = user.comments.limit(10)
     g.q = "user:@"+user.username+" "
@@ -96,11 +97,19 @@ def user_files(username):
 # TODO: Impliment new Search Engine
 @public.route("/search", methods=["GET", "POST"])
 def search_page():
-    return "", 404
+    abort(404)
 
 @public.route("/pastebin/<id>")
 def pastebin_data(id):
     c = pastebin_fetch(id)
     if c: return c, {"Content-type": "text/plain charset=utf-8"}
-    return "", 404
+    abort(404)
+
+
+@public.route("/http/<int:code>")
+def http_states(code):
+    try:
+        abort(code)
+    except LookupError:
+        return redirect("/http")
 
