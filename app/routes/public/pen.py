@@ -9,6 +9,7 @@ def pen_(id):
     pen = Pen.by_id(id)
     if not pen:
         abort(404)
+    pen.hit()
     return render_template("pen.html", pen=pen)
 
 
@@ -37,6 +38,7 @@ def pen_src(id):
     pen = Pen.by_id(id)
     if not pen:
         abort(404)
+    pen.hit()
     return render_template("pen-src.html", pen=pen)
 
 
@@ -45,4 +47,6 @@ def pen_raw(id):
     pen = Pen.by_id(id)
     if not pen:
         abort(404)
+    pen.hit()
     return render_template("pen.html", pen=pen), { "Content-Type": "text/text" }
+

@@ -4,6 +4,7 @@
 from .public import public
 
 
+from .blob import *
 from .file import *
 from .frames import *
 from .pen import *

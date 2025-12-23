@@ -22,6 +22,7 @@ class BlobMeta(type(Model)):
     """ Blob Metaclass """
 
     def __getitem__(self, hash: str):
+        hash = hash.lower()
         return self.by_hash(hash)
 
     @abstractmethod
