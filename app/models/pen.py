@@ -200,6 +200,10 @@ class Pen(Model):
     @property
     def url(self):
         return f"{SCHEME}://{SERVER_NAME}/pen/{self.id}"
+    
+    @property
+    def depends_on(self) -> list[Blob]:
+        return [self.head_blob, self.body_blob, self.css_blob, self.js_blob]
 
 
 pens_database.create_tables([Pen])

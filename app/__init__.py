@@ -8,7 +8,7 @@ from threading import Thread
 from .routes import register_blueprints
 from .routes.public import PROCESS_POOL
 from .executors import *
-from .models import TmpFile, TmpFolder, FileMode, FileType, FileVisibility, BlobType
+from .models import *
 from .utils.daemons import *
 from .config import *
 
@@ -24,12 +24,12 @@ jwt = JWTManager(app)
 @app.context_processor
 def context_processor():
     return {
-        "SCHEME": SCHEME,
-        "SERVER_NAME": SERVER_NAME,
-        "FileType": FileType,
-        "FileMode": FileMode,
+        "SCHEME":         SCHEME,
+        "SERVER_NAME":    SERVER_NAME,
+        "FileType":       FileType,
+        "FileMode":       FileMode,
         "FileVisibility": FileVisibility,
-        "BlobType": BlobType,
+        "BlobType":       BlobType,
     }
 
 @app.errorhandler(HTTPException)
@@ -41,9 +41,10 @@ register_blueprints(app)
 def run_daemons():
     # TODO: update/rewrote search engine
     # Thread(target=search_indexing_daemon,   args=(TermFrequency, app, files),   daemon=True).start()
-    Thread(target=process_pool_purger,      args=(PROCESS_POOL,),               daemon=True).start()
-    Thread(target=tmp_file_purger,          args=(TmpFile,),                    daemon=True).start()
-    Thread(target=tmp_folder_purger,        args=(TmpFolder,),                  daemon=True).start()
+    Thread(target=process_pool_purger, args=(PROCESS_POOL,),               daemon=True).start()
+    Thread(target=tmp_file_purger,     args=(TmpFile,),                    daemon=True).start()
+    Thread(target=tmp_folder_purger,   args=(TmpFolder,),                  daemon=True).start()
+    Thread(target=blob_purger,         args=(Blob, File, TmpFile, Pen),    daemon=True).start()
 
 def run_app(debug=True):
     run_daemons()

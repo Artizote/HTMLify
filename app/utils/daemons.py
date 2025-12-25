@@ -1,17 +1,17 @@
+import os
 from time import sleep
 
 from app.config import *
 
 
-def search_indexing_daemon(TermFrequency, app, files):
-    with app.app_context():
-        while True:
-            sleep(SEARCH_INDEXING_TIME_DELAY)
-            file_count = files.query.order_by(files.id.desc()).first()
-            if not file_count:
-                continue
-            for id in range(1, file_count.id+1):
-                TermFrequency.feed(id)
+def search_indexing_daemon(index_fn, File):
+    """Index files for search engine"""
+    while True:
+        sleep(SEARCH_INDEXING_TIME_DELAY)
+        for file in File.select():
+            if not file.as_guest and not file.is_locked and file.mode_s != "hidden":
+                index_fn(file)
+                sleep(1)
 
 def process_pool_purger(process_pool):
     """Removes completed process from `process_pool`"""
@@ -24,7 +24,7 @@ def process_pool_purger(process_pool):
 def tmp_file_purger(TmpFile):
     """Deletes expire temp files"""
     while True:
-        sleep(60)
+        sleep(300)
         TmpFile.purge()
 
 def tmp_folder_purger(TmpFolder):
@@ -36,3 +36,31 @@ def tmp_folder_purger(TmpFolder):
             if not folder.files:
                 folder.delete_instance()
         to_be_delete = list(TmpFolder.select().where(TmpFolder.file_codes==""))
+
+def blob_purger(Blob, File, TmpFile, Pen):
+    """Delete unused blobs"""
+    to_be_delate = []
+    while True:
+        sleep(300)
+        for blob in Blob:
+            sleep(1)
+            file_count = File.select().where(File.blob_hash == blob.hash).count()
+            if file_count:
+                continue
+            tmpfile_count = TmpFile.select().where(TmpFile.blob_hash == blob.hash)
+            if tmpfile_count:
+                continue
+            pen_count = Pen.select().where(
+                    (Pen.head_blob_hash == blob.hash) |
+                    (Pen.body_blob_hash == blob.hash) |
+                    (Pen.css_blob_hash == blob.hash) |
+                    (Pen.js_blob_hash == blob.hash)
+                    ).count()
+            if pen_count:
+                continue
+            if blob in to_be_delate:
+                os.remove(blob.filepath)
+                blob.delete_instance()
+            else:
+                to_be_delate.append(blob)
+

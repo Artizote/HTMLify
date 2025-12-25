@@ -490,6 +490,9 @@ class File(Model):
     def url(self) -> str:
         return f"{SCHEME}://{SERVER_NAME}{self.path}"
 
+    @property
+    def depends_on(self) -> list[Blob]:
+        return [self.blob]
 
 class Dir:
     """ Directory """
