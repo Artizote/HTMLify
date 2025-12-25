@@ -83,6 +83,7 @@ function render_folder_files() {
                 files_container.innerHTML += `
                 <div style="display:flex; justify-content:space-between; align-items:center; padding:6px; border:1px solid #ddd; border-radius:6px; margin-bottom:6px;">
                 <span><code>[${f.code}]</code> <b>${f.name}</b></span>
+                <a class="download-file-link" href="/tmp/${f.code}" target="_blank">Open</a>
                 <a class="download-file-link" href="/tmp/${f.code}" download>Download</a>
                 ${folder_auth_code ? `<button class="remove-file-button" onclick="remove_file_from_folder('${f.code}')">Remove</button>` : `` }
                 </div>

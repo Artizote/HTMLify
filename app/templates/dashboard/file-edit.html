@@ -57,8 +57,9 @@
 {% if not file %}
 <div class="form-group">
     <div>
-        <label>As Guest</label>
+        <label for="as-guest">As Guest</label>
         <input id="as-guest" type="checkbox">
+        <label id="as-guest-warning" style="display:none;color:orange;">You won't be able to edit after creation</label>
     </div>
 </div>
 
@@ -74,11 +75,11 @@
         <button id="switch-hex-editor-button" onclick="switch_to_hex_editor()" class="btn">Hex Mode</button>
         <button id="switch-binary-editor-button" onclick="switch_to_binary_editor()" class="btn">Binary Mode</button>
         <button id="line-number-toggle-button" onclick="toggle_editor_linenos()" class="btn">Line Numbers</button>
-        <select id="indent-unit-selector" onchange="update_editor_indent_unit()"></select>
+        <select id="indent-unit-selector" onchange="update_editor_indent_unit()" class="form-select" style="width:auto;"></select>
         <button id="indent-with-tabs-toggle-button" onclick="toggle_editor_indent_with_tabs()" class="btn">Spaces</button>
-        <select id="tab-size-selector" onchange="update_editor_tab_size()"></select>
-        <select id="theme-selector" onchange="update_editor_theme()"></select>
-        <select id="font-size-selector" onchange="update_editor_font_size()"></select>
+        <select id="tab-size-selector" onchange="update_editor_tab_size()" class="form-select" style="width:auto;"></select>
+        <select id="theme-selector" onchange="update_editor_theme()" class="form-select" style="width:auto;"></select>
+        <select id="font-size-selector" onchange="update_editor_font_size()" class="form-select" style="width:auto;"></select>
     </div>
 </div>
 

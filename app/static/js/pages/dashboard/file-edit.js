@@ -8,6 +8,7 @@ const password_toggle_button = document.getElementById("password-toggle-button")
 const mode_selector = document.getElementById("mode");
 const visibility_selector = document.getElementById("visibility");
 const as_guest_check = document.getElementById("as-guest");
+const as_guest_warning = document.getElementById("as-guest-warning");
 const ext_field_container = document.getElementById("ext-field-container");
 const ext_field = document.getElementById("ext");
 const line_number_toggle_button = document.getElementById("line-number-toggle-button");
@@ -430,8 +431,10 @@ if (as_guest_check) {
     as_guest_check.addEventListener("change", () => {
         if (as_guest_check.checked) {
             ext_field_container.style.display = "flex";
+            as_guest_warning.style.display = "inline";
         } else {
             ext_field_container.style.display = "none";
+            as_guest_warning.style.display = "none";
         }
     });
 }

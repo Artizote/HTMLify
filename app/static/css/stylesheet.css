@@ -1,3 +1,5 @@
+/* Uncomment for debugging */
+/* * { outline: 1px solid rgb(255, 0, 255, 10) } */
 
 html {
     scroll-behavior: smooth;

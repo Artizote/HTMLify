@@ -12,21 +12,6 @@
     font-family: sans-serif;
 }
 
-.btn {
-    background: #4a90e2;
-    color: white;
-    border: none;
-    padding: 0.6rem 1.2rem;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background 0.3s ease;
-    font-size: 14px;
-}
-
-.btn:hover {
-    background: #357ab8;
-}
-
 .folder-box input[type="file"] {
     margin: 0.5rem 0;
     display: block;
@@ -122,8 +107,8 @@ em {
     <div id="folder-section">
         <p>Create a Temp Folder for your Temp Files, Open to acccess a folder's files.<br>
         <sup>Just want a single file? Checkout <a href="/tmp">Temp File Share</a><sup></p>
-        <button id="create-folder-btn" class="btn" onclick="create_temp_folder()">Create Folder</button>
-        <button id="open-folder-btn" class="btn" onclick="open_temp_folder()">Open folder</button>
+        <button id="create-folder-btn" class="btn btn-primary" onclick="create_temp_folder()">Create Folder</button>
+        <button id="open-folder-btn" class="btn btn-primary" onclick="open_temp_folder()">Open folder</button>
     </div>
 
     <div id="upload-section" style="display:none; margin-top:1rem;">
@@ -132,7 +117,7 @@ em {
             Uploading: <span id="current-upload-name"></span> | <span id="current-upload-percent"></span>%
             <progress id="progress-bar" value="0" max="100"></progress>
         </div>
-        <button class="btn" onclick="upload_files()">Upload Files</button>
+        <button class="btn btn-primary" onclick="upload_files()">Upload Files</button>
     </div>
 
     <div id="files-container" style="margin-top:1rem; text-align:left;"> </div>
