@@ -33,6 +33,14 @@ def file_path(*path) -> str:
     """Returns abslute path for file inside files dir"""
     return os.path.abspath((os.path.join("files", *path)))
 
+def rgb_hex_to_int(color: str) -> tuple[int, int, int]:
+    """Convert RGB Hex string to Int tuple"""
+    color = color.replace("#", "")
+    r = int(color[0:2], base=16)
+    g = int(color[2:4], base=16)
+    b = int(color[4:6], base=16)
+    return r, g, b
+
 def normalizer(string: str) -> str:
     """Returns a normlized version of `string`"""
     s = string
