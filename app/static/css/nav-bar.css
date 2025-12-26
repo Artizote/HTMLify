@@ -69,7 +69,7 @@ nav .icon {
     border: none;
     background: #4b5563;
     color: #eee;
-    border-radius: 0 4px 4px 0;
+    border-radius: 4px;
     cursor: pointer;
     transition: background 0.3s;
 }
@@ -91,7 +91,6 @@ nav .icon {
     background: none;
     border: none;
     color: #eee;
-    margin-left: 16px;
     cursor: pointer;
     display: none;
 }
@@ -132,7 +131,6 @@ nav .icon {
     .search-form input[type="search"] {
         width: 0;
         padding: 0;
-        border-radius: 4px;
         visibility: hidden;
     }
 

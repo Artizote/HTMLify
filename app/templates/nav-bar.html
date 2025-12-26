@@ -11,14 +11,13 @@
 <nav>
     <div style="display: flex; align-items: center;">
         <a href="/"><h1>HTMLify</h1></a>
+    </div>
 
+    <div style="display: flex; align-items: center; overflow: hidden">
         <form class="search-form" action="/search">
             <input type="search" placeholder="Search..." name="q" value="{{ g.q }}">
             <button type="submit" id="search-toggle"><img class="icon" src="/static/svg/search.svg"></button>
         </form>
-    </div>
-
-    <div style="display: flex; align-items: center;">
 
         <div class="nav-links">
             {{ navbar_links() }}
@@ -57,9 +56,22 @@ mobile_menu_button.addEventListener('click', () => {
 search_toggle.addEventListener('click', (e) => {
     if (window.innerWidth <= 768) {
         if (!search_form.classList.contains('expanded')) {
-            search_form.classList.toggle('expanded');
+            search_form.classList.add('expanded');
+            search_toggle.style.borderRadius = "0 4px 4px 0";
             search_input.focus();
             e.preventDefault();
+        }
+    }
+});
+
+document.addEventListener('mousedown', (e) => {
+    if (window.innerWidth <= 768) {
+        if (
+            search_form.classList.contains('expanded') &&
+            !search_form.contains(e.target)
+        ) {
+            search_form.classList.remove('expanded');
+            search_toggle.style.borderRadius = "4px";
         }
     }
 });
