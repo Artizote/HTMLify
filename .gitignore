@@ -14,11 +14,8 @@ venv/
 env/
 .venv/
 
-# Database folder
+# Database directory
 instance/
-
-# Database file
-*.db
 
 # App files
 files/

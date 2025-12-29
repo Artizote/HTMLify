@@ -9,7 +9,13 @@ from app.utils import randstr
 from app.config import SCHEME, SERVER_NAME
 
 
-pens_database = SqliteDatabase("instance/pens.db")
+pen_db = SqliteDatabase(
+        "instance/pens.db",
+        pragmas={
+            "journal_mode": "wal",
+            "synchronous":  2,
+            "busy_timeout": 8000,
+        })
 html_lexer = lexers.get_lexer_by_name("html")
 css_lexer = lexers.get_lexer_by_name("css")
 js_lexer = lexers.get_lexer_by_name("js")
@@ -21,7 +27,7 @@ class Pen(Model):
     """ Pen """
 
     class Meta:
-        database = pens_database
+        database = pen_db
 
     id : str | CharField = CharField(primary_key=True, unique=True, index=True, default=lambda:Pen.new_id())
     user_id : int | IntegerField = IntegerField()
@@ -206,4 +212,4 @@ class Pen(Model):
         return [self.head_blob, self.body_blob, self.css_blob, self.js_blob]
 
 
-pens_database.create_tables([Pen])
+pen_db.create_tables([Pen])

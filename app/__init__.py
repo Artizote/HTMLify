@@ -32,9 +32,21 @@ def context_processor():
         "BlobType":       BlobType,
     }
 
+@app.before_request
+def before_request():
+    connect_all_dbs()
+
+@app.teardown_request
+def teardown_request(_):
+    close_all_dbs()
+
 @app.errorhandler(HTTPException)
 def http_exception(error):
     return render_template("error.html", error=error)
+
+@app.teardown_appcontext
+def teardown_appcontext(_):
+    close_all_dbs()
 
 register_blueprints(app)
 

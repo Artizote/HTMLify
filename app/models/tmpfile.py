@@ -7,11 +7,11 @@ from .blob import Blob
 from app.utils.helpers import randstr
 from app.config import SCHEME, SERVER_NAME
 
-tmpfile_database = SqliteDatabase("instance/tmpfiles.db")
+tmpfile_db = SqliteDatabase("instance/tmpfiles.db")
 
 class TmpFile(Model):
     class Meta:
-        database = tmpfile_database
+        database = tmpfile_db
 
     name : str | CharField = CharField()
     code : str | CharField = CharField(unique=True, index=True, default=lambda:TmpFile.new_code())
@@ -98,7 +98,7 @@ class TmpFile(Model):
 
 class TmpFolder(Model):
     class Meta:
-        database = tmpfile_database
+        database = tmpfile_db
 
     id = AutoField()
     name = CharField(default="")
@@ -155,4 +155,4 @@ class TmpFolder(Model):
                 tmp_files.append(f)
         return tmp_files
 
-tmpfile_database.create_tables([TmpFile, TmpFolder])
+tmpfile_db.create_tables([TmpFile, TmpFolder])

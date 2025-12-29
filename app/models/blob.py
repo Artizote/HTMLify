@@ -6,7 +6,13 @@ from base64 import b64encode, b64decode
 from ..utils import file_path, hash_sha256
 
 
-blob_db = SqliteDatabase("instance/blobs.db")
+blob_db = SqliteDatabase(
+        "instance/blobs.db",
+        pragmas={
+            "journal_mode": "wal",
+            "synchronous":  2,
+            "busy_timeout": 8000,
+        })
 
 
 class BlobType:

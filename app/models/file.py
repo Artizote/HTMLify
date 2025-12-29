@@ -12,7 +12,13 @@ from ..utils.helpers import randstr
 from ..config import SCHEME, SERVER_NAME
 
 
-file_db = SqliteDatabase("instance/files.db")
+file_db = SqliteDatabase(
+        "instance/files.db",
+        pragmas={
+            "journal_mode": "wal",
+            "synchronous":  2,
+            "busy_timeout": 8000,
+        })
 text_lexer = lexers.get_lexer_by_name("text")
 html_formatter = HtmlFormatter()
 html_formatter_with_linenos = HtmlFormatter(linenos=True)
