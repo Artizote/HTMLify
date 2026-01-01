@@ -426,6 +426,8 @@ async function save() {
 // EventListeners
 
 path_field.addEventListener("input", update_editor_mode);
+if (ext_field)
+    ext_field.addEventListener("input", update_editor_mode);
 
 if (as_guest_check) {
     as_guest_check.addEventListener("change", () => {

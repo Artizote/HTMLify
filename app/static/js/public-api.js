@@ -74,7 +74,9 @@ const publicApi = {
         },
 
         async create(url) {
-            return await publicApi.fetchJson("/shortlink?url=" + url);
+            let params = new URLSearchParams();
+            params.append("url", url);
+            return await publicApi.fetchJson(`/shortlink?${params.toString()}`);
         }
     },
 
@@ -147,8 +149,12 @@ const publicApi = {
     },
 
     qr: {
-        get_url(url) {
-            return `${publicApi._base}/qr?url=`+url;
+        get_url(url, fg=null, bg=null) {
+            let params = new URLSearchParams();
+            params.append("url", url);
+            if (fg) params.append("fg", fg);
+            if (bg) params.append("bg", bg);
+            return `${publicApi._base}/qr?${params.toString()}`;
         }
     },
 }

@@ -48,7 +48,6 @@ def serve_pygments_css():
 def home():
     if request.method == "POST":
         session["filter-file-modes"]=list(map(int, request.form.getlist("file-modes")))
-        print("session:", session["filter-file-modes"])
         session["filter-file-order"]=request.form.get("filter-order", "r")
 
     files = File.select().where(File.as_guest==False)
@@ -57,9 +56,7 @@ def home():
         return render_template("home.html", files=[])
 
     filter_modes = session.setdefault("filter-file-modes", [FileMode.SOURCE, FileMode.RENDER])
-    print("filter_modes:", filter_modes)
     filter_order = session.setdefault("filter-file-order", "r")
-    print("filter_order:", filter_order)
 
     if len(filter_modes) == 2:
         pass
@@ -69,7 +66,6 @@ def home():
         return render_template("home.html", files=[])
 
     files_count = files.count()
-    print("files_count:", files_count)
     if not files_count:
         return render_template("home.html", files=[])
 

@@ -31,7 +31,7 @@ const hit_count = document.getElementById("hit-count");
 const mention = document.getElementById("mention");
 
 function short() {
-    publicApi.shortlink.create(url_input.value)
+    publicApi.shortlink.create((url_input.value))
         .then(res => {
             if (!res.success) {
                 showToast("Some Error happned", "error");

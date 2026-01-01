@@ -39,16 +39,20 @@ def tmp_folder_purger(TmpFolder):
 
 def blob_purger(Blob, File, TmpFile, Pen):
     """Delete unused blobs"""
-    to_be_delate = []
+    to_be_delete = []
     while True:
         sleep(300)
         for blob in Blob:
             sleep(1)
             file_count = File.select().where(File.blob_hash == blob.hash).count()
             if file_count:
+                if blob in to_be_delete:
+                    to_be_delete.remove(blob)
                 continue
             tmpfile_count = TmpFile.select().where(TmpFile.blob_hash == blob.hash)
             if tmpfile_count:
+                if blob in to_be_delete:
+                    to_be_delete.remove(blob)
                 continue
             pen_count = Pen.select().where(
                     (Pen.head_blob_hash == blob.hash) |
@@ -57,10 +61,16 @@ def blob_purger(Blob, File, TmpFile, Pen):
                     (Pen.js_blob_hash == blob.hash)
                     ).count()
             if pen_count:
+                if blob in to_be_delete:
+                    to_be_delete.remove(blob)
                 continue
-            if blob in to_be_delate:
-                os.remove(blob.filepath)
+            if blob in to_be_delete:
+                to_be_delete.remove(blob)
+                try:
+                    os.remove(blob.filepath)
+                except:
+                    pass
                 blob.delete_instance()
             else:
-                to_be_delate.append(blob)
+                to_be_delete.append(blob)
 

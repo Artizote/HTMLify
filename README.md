@@ -48,7 +48,7 @@ python run.py
 
 ```
 
-If everything goes as expected, the site would be available on `127.0.0.1:5000`.
+If everything goes as expected, the site would be available on `localhost:5000`.
 
 ## Contributing
 

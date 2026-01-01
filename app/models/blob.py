@@ -65,7 +65,7 @@ class Blob(Model, metaclass=BlobMeta):
         return self.size
 
     def __add__(self, other):
-        return Blob(self.get_binary() + other.get_binary())
+        return Blob.create(self.get_bytes() + other.get_bytes())
 
     def __eq__(self, other):
         if isinstance(other, str):

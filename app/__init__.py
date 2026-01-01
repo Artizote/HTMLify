@@ -42,7 +42,7 @@ def teardown_request(_):
 
 @app.errorhandler(HTTPException)
 def http_exception(error):
-    return render_template("error.html", error=error)
+    return render_template("error.html", error=error), error.code
 
 @app.teardown_appcontext
 def teardown_appcontext(_):

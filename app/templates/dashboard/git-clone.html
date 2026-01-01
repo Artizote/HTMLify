@@ -4,19 +4,28 @@
 {% block content %}
 <div class="card-center">
     <h1>Git Clone</h1>
-    <div class="card card-center">
-        <div>
-            <code>git clone </code><input type="text" id="repo" placeholder="http://yourgit.host/path-to-your/repo.git" required=""><br><br>
+    <div class="card">
+        <div class="form-group">
+            <table>
+                <tr>
+                    <td><code>git clone </code></td>
+                    <td><input type="text" id="repo" class="form-input" placeholder="http://yourgit.host/path-to-your/repo.git" required=""></td>
+                </tr>
+            </table>
         </div>
-        <div>
+        <div class="form-group">
             <label>Directory (where to clone the repo):</label><br><br>
-            /{{ g.user.username }}/<input type="text" id="dir" placeholder="my-repo" value="{{ dir.path[dir.username.__len__()+2:] }}"><br><br>
+            <table>
+                <tr>
+                    <td>/{{ g.user.username }}/</td>
+                    <td><input type="text" id="dir" class="form-input" style="display:inline-block;" placeholder="my-repo" value="{{ dir.path[dir.username.__len__()+2:] }}"></td>
+            </table>
         </div>
         <table>
             <tbody><tr>
                 <td>Display Mode:</td>
                 <td>
-                    <select id="mode" name="mode">
+                    <select id="mode" name="mode" class="form-select">
                         <option value="{{ FileMode.SOURCE }}">Source</option>
                         <option value="{{ FileMode.RENDER }}">Render</option>
                     </select>
@@ -24,7 +33,7 @@
             </tr>
             <tr><td>Visibility:</td>
                 <td>
-                    <select id="visibility" name="visibility">
+                    <select id="visibility" name="visibility" class="form-select">
                             <option value="{{ FileVisibility.PUBLIC }}">Public</option>
                             <option value="{{ FileVisibility.HIDDEN }}">Hidden</option>
                     </select>
@@ -32,7 +41,7 @@
             </tr>
             <tr><td>Overwrite:</td>
                 <td>
-                    <input id="overwrite-checkbox" type="checkbox" checked="">
+                    <input id="overwrite-checkbox" type="checkbox" class="form-check" checked="">
                 </td>
             </tr>
         </tbody></table>
