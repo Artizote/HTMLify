@@ -202,6 +202,14 @@ function save() {
     }
 }
 
+async function view() {
+    let res = await privateApi.pen.get(pen_id);
+    if (res.success) {
+        window.open(res.pen.url, "_blank");
+    } else {
+        showToast("Pen is not saved yet", "warn");
+    }
+}
 
 // Event Triggers
 

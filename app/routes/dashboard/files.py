@@ -17,7 +17,8 @@ def file_upload():
 def file_edit():
     path = request.args.get("path")
     file = File.by_path(path)
-    return render_template("file-edit.html", file=file)
+    dir = Dir(path or "/" + g.user.username + "/")
+    return render_template("file-edit.html", file=file, dir=dir)
 
 @dashboard.route("/files/delete")
 def file_delete():

@@ -422,6 +422,16 @@ async function save() {
     }
 }
 
+async function view() {
+    let path = path_field.value;
+    let file = await privateApi.file.get(0, path);
+    if (file.success) {
+        window.open(file.file.url, "_blank");
+    } else {
+        showToast("File not saved yet", "warn");
+    }
+}
+
 
 // EventListeners
 

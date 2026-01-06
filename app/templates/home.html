@@ -8,7 +8,7 @@
 {% endblock %}
 {% block content %}
     <h1>HTMLify your dreams</h1>
-    <form id="filter-form" method="POST">
+    <form id="filter-form" class="form-inline" method="POST">
         <input id="file-mode-source-checkbox" type="checkbox" name="file-modes" value="{{ FileMode.SOURCE }}" {% if FileMode.SOURCE in session["filter-file-modes"] %}checked{% endif %}>
         <label for="file-mode-source-checkbox">Source</label>
         <input id="file-mode-render-checkbox" type="checkbox" name="file-modes" value="{{ FileMode.RENDER }}" {% if FileMode.RENDER in session["filter-file-modes"] %}checked{% endif %}>

@@ -1,0 +1,14 @@
+{
+    "routes": [
+        {
+            "path": "/embed",
+            "title": "Embed API",
+            "perameters": {
+                "id": {
+                    "require": true,
+                    "description": "File Id"
+                }
+            }
+        }
+    ]
+}

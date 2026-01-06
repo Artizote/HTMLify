@@ -120,6 +120,10 @@ const privateApi = {
     },
 
     pen: {
+        async get(pen_id) {
+            return await privateApi.fetchJson("/pen?id=" + pen_id);
+        },
+
         async create(fields) {
             return await privateApi.fetchJson("/pen", {
                 method: "POST",

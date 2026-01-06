@@ -17,21 +17,26 @@
 <div class="card">
     <div class="form-group">
     <label>File Path</label>
-    <input type="text" id="path" value="{{ file.path if file else "/" + g.user.username + "/" }}" class="form-input" placeholder="File Path">
+    <input type="text" id="path" value="{{ (file.path if file else "") or (dir.path if dir else "") or "/" + g.user.username + "/" }}" class="form-input" placeholder="File Path">
 </div>
 
 <div class="form-group">
     <label>Title</label>
-    <input type="text" id="title" value="{{ file.title if file else "" }}" class="form-input" placeholder="File Title">
+    <input type="text" id="title" value="{{ file.title if file else "" }}" class="form-input" placeholder="File Title" autocomplete="new-title">
 </div>
 
 <div class="form-group" >
-    <button onclick="password_field_toggle()" class="btn">Password Protection</button>
+    <div class="form-group">
+        <button onclick="password_field_toggle()" class="btn">Password Protection</button>
+    </div>
     <div id="password-field-container" class="form-inline" style="display:none;">
-        <label>Set password</label>
-        <input type="password" style="display: none;"> <!-- Fake Password Field -->
-        <input type="password" id="password" value="{{ file.password }}" class="form-input" placeholder="Password" autocomplete="new-password">
-        <button id="password-toggle-button" onclick="toggle_password()" class="btn">Show</button>
+        <div class="form-group">
+            <input type="password" style="display: none;"> <!-- Fake Password Field -->
+            <input type="password" id="password" value="{{ file.password }}" class="form-input" placeholder="Password" autocomplete="new-password">
+        </div>
+        <div class="form-group">
+            <button id="password-toggle-button" onclick="toggle_password()" class="btn">Show</button>
+        </div>
     </div>
 </div>
 
@@ -81,6 +86,11 @@
         <select id="theme-selector" onchange="update_editor_theme()" class="form-select" style="width:auto;"></select>
         <select id="font-size-selector" onchange="update_editor_font_size()" class="form-select" style="width:auto;"></select>
     </div>
+    <hr>
+    <div class="form-inline">
+        <button class="btn btn-primary" onclick="save()">Save</button>
+        <button class="btn btn-primary" onclick="view()">View</button>
+    </div>
 </div>
 
 <div class="form-group">
@@ -89,11 +99,6 @@
     </div>
 </div>
 
-<div class="form-group">
-    <button class="btn btn-primary" onclick="save()">Save</button>
-</div>
-
-</div>
 {% endblock %}
 
 {% block after_body %}
