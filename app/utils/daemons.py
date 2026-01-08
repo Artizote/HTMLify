@@ -37,40 +37,37 @@ def tmp_folder_purger(TmpFolder):
                 folder.delete_instance()
         to_be_delete = list(TmpFolder.select().where(TmpFolder.file_codes==""))
 
-def blob_purger(Blob, File, TmpFile, Pen):
+def blob_purger(Blob, dependents: list):
     """Delete unused blobs"""
-    to_be_delete = []
+    delete_queue = []
     while True:
         sleep(300)
         for blob in Blob:
             sleep(1)
-            file_count = File.select().where(File.blob_hash == blob.hash).count()
-            if file_count:
-                if blob in to_be_delete:
-                    to_be_delete.remove(blob)
+            queue_to_delete = True
+
+            for dependent in dependents:
+                instances = dependent.get_blob_dependents(blob)
+                if instances.count():
+                    queue_to_delete = False
+                    if blob in delete_queue:
+                        delete_queue.remove(blob)
+                    break
+
+            if not queue_to_delete:
+                if blob in delete_queue:
+                    delete_queue.remove(blob)
                 continue
-            tmpfile_count = TmpFile.select().where(TmpFile.blob_hash == blob.hash)
-            if tmpfile_count:
-                if blob in to_be_delete:
-                    to_be_delete.remove(blob)
-                continue
-            pen_count = Pen.select().where(
-                    (Pen.head_blob_hash == blob.hash) |
-                    (Pen.body_blob_hash == blob.hash) |
-                    (Pen.css_blob_hash == blob.hash) |
-                    (Pen.js_blob_hash == blob.hash)
-                    ).count()
-            if pen_count:
-                if blob in to_be_delete:
-                    to_be_delete.remove(blob)
-                continue
-            if blob in to_be_delete:
-                to_be_delete.remove(blob)
-                try:
-                    os.remove(blob.filepath)
-                except:
-                    pass
-                blob.delete_instance()
-            else:
-                to_be_delete.append(blob)
+            
+            if queue_to_delete:
+                if blob not in delete_queue:
+                    delete_queue.append(blob)
+                else:
+                    delete_queue.remove(blob)
+                    filepath = blob.filepath
+                    blob.delete_instance()
+                    try:
+                        os.remove(filepath)
+                    except:
+                        pass
 

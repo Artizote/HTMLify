@@ -9,6 +9,7 @@ from .routes import register_blueprints
 from .routes.public import PROCESS_POOL
 from .executors import *
 from .models import *
+from .models.base import BlobDependent
 from .utils.daemons import *
 from .config import *
 
@@ -53,10 +54,10 @@ register_blueprints(app)
 def run_daemons():
     # TODO: update/rewrote search engine
     # Thread(target=search_indexing_daemon,   args=(TermFrequency, app, files),   daemon=True).start()
-    Thread(target=process_pool_purger, args=(PROCESS_POOL,),               daemon=True).start()
-    Thread(target=tmp_file_purger,     args=(TmpFile,),                    daemon=True).start()
-    Thread(target=tmp_folder_purger,   args=(TmpFolder,),                  daemon=True).start()
-    Thread(target=blob_purger,         args=(Blob, File, TmpFile, Pen),    daemon=True).start()
+    Thread(target=process_pool_purger, args=(PROCESS_POOL,),                        daemon=True).start()
+    Thread(target=tmp_file_purger,     args=(TmpFile,),                             daemon=True).start()
+    Thread(target=tmp_folder_purger,   args=(TmpFolder,),                           daemon=True).start()
+    Thread(target=blob_purger,         args=(Blob, BlobDependent.__subclasses__()), daemon=True).start()
 
 def run_app(debug=True):
     run_daemons()
