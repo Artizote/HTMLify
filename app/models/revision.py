@@ -2,11 +2,13 @@ from peewee import SqliteDatabase, Model, AutoField, IntegerField, CharField, Ti
 
 from datetime import datetime, UTC
 
+from .base import PeeweeABCMeta, BlobDependent
+
 
 revision_db = SqliteDatabase("instance/revisions.db")
 
 
-class Revision(Model):
+class Revision(Model, BlobDependent, metaclass=PeeweeABCMeta):
     """ Revision """
 
     class Meta:
@@ -20,6 +22,14 @@ class Revision(Model):
     @classmethod
     def by_id(cls, id):
         return cls.get_or_none(cls.id==id)
+
+    @classmethod
+    def get_blob_dependents(cls, blob):
+        if not isinstance(blob, str):
+            blob_hash = blob.hash
+        else:
+            blob_hash = blob
+        return cls.select().where(cls.blob_hash == blob_hash)
 
     @classmethod
     def make_for(cls, file):
@@ -49,6 +59,10 @@ class Revision(Model):
             "timestamp": self.timestamp.timestamp(),
             "content": content,
         }
+
+    @property
+    def blob_dependencies(self) -> list[str]:
+        return [str(self.blob_hash)]
 
     @property
     def prev(self):

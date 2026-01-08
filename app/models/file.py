@@ -8,6 +8,7 @@ from mimetypes import guess_type
 from random import randint
 
 from .blob import Blob
+from .base import PeeweeABCMeta, BlobDependent
 from ..utils.helpers import randstr
 from ..config import SCHEME, SERVER_NAME
 
@@ -127,7 +128,7 @@ class FileType:
         return FileType.type_map.get(type, 0)
 
 
-class File(Model):
+class File(Model, BlobDependent, metaclass=PeeweeABCMeta):
     """ File """
 
     class Meta:
@@ -192,6 +193,14 @@ class File(Model):
         if not files_count:
             return None
         return files[randint(0, files_count-1)]
+
+    @classmethod
+    def get_blob_dependents(cls, blob):
+        if not isinstance(blob, str):
+            blob_hash = blob.hash
+        else:
+            blob_hash = blob
+        return cls.select().where(cls.blob_hash == blob_hash)
 
     @classmethod
     def new_guest_path(cls, filename: str) -> str:
@@ -344,6 +353,10 @@ class File(Model):
             "url": self.url,
             "username": self.username,
         }
+
+    @property
+    def blob_dependencies(self):
+        return [str(self.blob_hash)]
 
     @property
     def name(self) -> str:

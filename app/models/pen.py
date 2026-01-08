@@ -5,6 +5,7 @@ from pygments.formatters import HtmlFormatter
 from datetime import datetime, UTC
 
 from .blob import Blob
+from .base import PeeweeABCMeta, BlobDependent
 from app.utils import randstr
 from app.config import SCHEME, SERVER_NAME
 
@@ -23,7 +24,7 @@ html_formatter = HtmlFormatter()
 html_formatter_with_linenos = HtmlFormatter(linenos=True)
 
 
-class Pen(Model):
+class Pen(Model, BlobDependent, metaclass=PeeweeABCMeta):
     """ Pen """
 
     class Meta:
@@ -45,6 +46,19 @@ class Pen(Model):
     @classmethod
     def by_id(cls, id):
         return cls.get_or_none(cls.id==id)
+
+    @classmethod
+    def get_blob_dependents(cls, blob):
+        if not isinstance(blob, str):
+            blob_hash = blob.hash
+        else:
+            blob_hash = blob
+        return cls.select().where((
+            (cls.head_blob_hash == blob_hash) |
+            (cls.body_blob_hash == blob_hash) |
+            (cls.css_blob_hash == blob_hash) |
+            (cls.js_blob_hash == blob_hash)
+        ))
 
     @classmethod
     def new_id(cls) -> str:
@@ -113,6 +127,15 @@ class Pen(Model):
             "url": self.url,
             "username": self.user.username,
         }
+
+    @property
+    def blob_dependencies(self):
+        return [
+            str(self.head_blob_hash),
+            str(self.body_blob_hash),
+            str(self.css_blob_hash),
+            str(self.js_blob_hash),
+        ]
 
     @property
     def user(self):
@@ -206,10 +229,6 @@ class Pen(Model):
     @property
     def url(self):
         return f"{SCHEME}://{SERVER_NAME}/pen/{self.id}"
-    
-    @property
-    def depends_on(self) -> list[Blob]:
-        return [self.head_blob, self.body_blob, self.css_blob, self.js_blob]
 
 
 pen_db.create_tables([Pen])

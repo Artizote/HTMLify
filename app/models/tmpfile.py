@@ -4,12 +4,13 @@ from datetime import datetime, timedelta, UTC
 from io import BytesIO
 
 from .blob import Blob
+from .base import PeeweeABCMeta, BlobDependent
 from app.utils.helpers import randstr
 from app.config import SCHEME, SERVER_NAME
 
 tmpfile_db = SqliteDatabase("instance/tmpfiles.db")
 
-class TmpFile(Model):
+class TmpFile(Model, BlobDependent, metaclass=PeeweeABCMeta):
     class Meta:
         database = tmpfile_db
 
@@ -22,6 +23,14 @@ class TmpFile(Model):
     @classmethod
     def by_code(cls, code: str) -> "TmpFile":
         return cls.get_or_none(cls.code == code)
+
+    @classmethod
+    def get_blob_dependents(cls, blob):
+        if not isinstance(blob, str):
+            blob_hash = blob.hash
+        else:
+            blob_hash = blob
+        return cls.select().where(cls.blob_hash == blob_hash)
 
     @classmethod
     def create_with_buffer(cls, buffer) -> "TmpFile":
@@ -74,6 +83,10 @@ class TmpFile(Model):
             "expire": self.expiry,
             "url": f"{SCHEME}://{SERVER_NAME}/tmp/{self.code}"
         }
+
+    @property
+    def blob_dependencies(self) -> list[str]:
+        return [str(self.blob_hash)]
 
     @property
     def blob(self) -> Blob:
