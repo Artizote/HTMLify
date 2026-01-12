@@ -21,8 +21,8 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=28)
 app.config["SERVER_NAME"] = SERVER_NAME
 
 # Enable cross-subdomain sessions for localhost
-if SERVER_NAME.startswith("localhost"):
-    app.config["SESSION_COOKIE_DOMAIN"] = ".localhost"
+# if SERVER_NAME.startswith("localhost"):
+#     app.config["SESSION_COOKIE_DOMAIN"] = ".localhost"
 
 jwt = JWTManager(app)
 

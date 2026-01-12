@@ -110,12 +110,12 @@
         </header>
 
         {% if error %}
-        <div class="alert alert-danger mb-4">
-            {{ error }}
-        </div>
+        <script>
+            showToast("{{ error }}", "error");
+        </script>
         {% endif %}
 
-        <form method="POST" class="auth-form">
+        <form method="POST" class="auth-form" id="registerForm">
             <div class="form-group">
                 <label class="form-label">Username</label>
                 <input class="form-input" type="text" name="username" placeholder="Choose a unique username" required
@@ -142,6 +142,48 @@
                 Create Account
             </button>
         </form>
+
+        <script>
+            document.getElementById('registerForm').addEventListener('submit', async function (e) {
+                e.preventDefault();
+                const submitBtn = this.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerText;
+                submitBtn.disabled = true;
+                submitBtn.innerText = "Creating Account...";
+
+                const formData = new FormData(this);
+                const data = Object.fromEntries(formData.entries());
+
+                try {
+                    const response = await fetch('/register', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify(data)
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        showToast("Registration Successful!", "success");
+                        setTimeout(() => {
+                            window.location.href = result.redirect;
+                        }, 1000);
+                    } else {
+                        showToast(result.error || "Registration failed", "error");
+                        submitBtn.disabled = false;
+                        submitBtn.innerText = originalText;
+                    }
+                } catch (err) {
+                    console.error(err);
+                    showToast("Registration failed. Please check your connection.", "error");
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = originalText;
+                }
+            });
+        </script>
 
         <footer class="auth-footer">
             Already have an account? <a href="/login">Sign in</a>

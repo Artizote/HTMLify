@@ -6,50 +6,75 @@ from .dashboard import dashboard
  
 @dashboard.route("/login", methods=["GET", "POST"])
 def login():
+    # If already logged in, go straight to dashboard
+    if g.get('user') and g.user:
+        return redirect('/files')
+
     if request.method == "GET":
         return render_template("login.html")
 
-    username = request.form.get("username", "").strip().lower()
-    password = request.form.get("password", "")
+    # Support both JSON and Form data
+    data = request.get_json() if request.is_json else request.form
+    username = data.get("username", "").strip().lower()
+    password = data.get("password", "")
 
     user = User.by_username(username)
     if user and user.match_password(password):
         session["username"] = user.username
-        redirect_path = session.get("redirect-after-login", "/")
-        return redirect(redirect_path)
-    return render_template("login.html", error="Invalid Credidentials")
+        
+        if request.is_json:
+            return {"success": True, "redirect": "/files"}
+            
+        return redirect('/files')
+
+    error_msg = "Invalid Credentials"
+    if request.is_json:
+        return {"success": False, "error": error_msg}, 401
+        
+    return render_template("login.html", error=error_msg)
 
 @dashboard.route("/register", methods=["GET", "POST"])
 def register():
+    # If already logged in, go straight to dashboard
+    if g.get('user') and g.user:
+        return redirect('/files')
+
     if request.method == "GET":
         return render_template("register.html")
 
-    username = request.form.get("username", "").lower()
-    password = request.form.get("password", "")
-    repassword = request.form.get("repassword", "")
-    email = request.form.get("email", "").lower()
+    data = request.get_json() if request.is_json else request.form
+    username = data.get("username", "").lower()
+    password = data.get("password", "")
+    repassword = data.get("repassword", "")
+    email = data.get("email", "").lower()
 
+    error = None
     if not all([username, password, repassword, email]):
-        return render_template("register.html", error="Fill required fields")
+        error = "Fill required fields"
+    elif not User.is_username_valid(username):
+        error = "Username is not valid"
+    elif not User.is_username_available(username):
+        error = "Username is not available"
+    elif User.get_or_none(User.email==email):
+        error = "Email already in use"
+    elif password != repassword:
+        error = "Confirmation password did not match"
 
-    if not User.is_username_valid(username):
-        return render_template("register.html", error="Username is not valid")
-
-    if not User.is_username_available(username):
-        return render_template("register.html", error="Username is not available")
-
-    if User.get_or_none(User.email==email):
-        return render_template("register.html", error="Email already in use")
-    
-    if password != repassword:
-        return render_template("register.html", error="Confirmation password did not match")
+    if error:
+        if request.is_json:
+            return {"success": False, "error": error}, 400
+        return render_template("register.html", error=error)
 
     user: User = User.create(username=username, email=email)
     user.set_password(password)
 
     session["username"] = user.username
-    redirect_path = session.get("redirect-after-login", "/")
-    return redirect(redirect_path)
+    
+    if request.is_json:
+        return {"success": True, "redirect": "/files"}
+    
+    # After registration, go to dashboard files view
+    return redirect('/files')
 
 @dashboard.route("/logout")
 def logout():

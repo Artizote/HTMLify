@@ -31,14 +31,7 @@
 
     <!-- Scripts -->
     <script src="/static/js/utils.js"></script>
-    <script>
-        const currentUser = "{{ g.user.username if g.user else '' }}";
-        if (currentUser) {
-            localStorage.setItem("username", currentUser);
-        } else {
-            localStorage.removeItem("username");
-        }
-    </script>
+
     {% block after_body %}{% endblock %}
 
     <style>

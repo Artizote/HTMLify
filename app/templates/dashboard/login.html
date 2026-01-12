@@ -98,12 +98,12 @@
         </header>
 
         {% if error %}
-        <div class="alert alert-danger mb-4">
-            {{ error }}
-        </div>
+        <script>
+            showToast("{{ error }}", "error");
+        </script>
         {% endif %}
 
-        <form method="POST" class="auth-form">
+        <form method="POST" class="auth-form" id="loginForm">
             <div class="form-group">
                 <label class="form-label">Username</label>
                 <input class="form-input" type="text" name="username" placeholder="Enter your username" required
@@ -119,6 +119,49 @@
                 Login
             </button>
         </form>
+
+        <script>
+            document.getElementById('loginForm').addEventListener('submit', async function (e) {
+                e.preventDefault();
+                const submitBtn = this.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerText;
+                submitBtn.disabled = true;
+                submitBtn.innerText = "Logging in...";
+
+                const formData = new FormData(this);
+                const data = Object.fromEntries(formData.entries());
+
+                try {
+                    const response = await fetch('/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify(data)
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        showToast("Login Successful!", "success");
+                        setTimeout(() => {
+                            window.location.href = result.redirect;
+                        }, 1000);
+                    } else {
+                        showToast(result.error || "Login failed", "error");
+                        submitBtn.disabled = false;
+                        submitBtn.innerText = originalText;
+                    }
+                } catch (err) {
+                    // Fallback for non-JSON responses or network errors
+                    console.error(err);
+                    showToast("Login failed. Please check your connection.", "error");
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = originalText;
+                }
+            });
+        </script>
 
         <footer class="auth-footer">
             Don't have an account? <a href="/register">Create one for free</a>
