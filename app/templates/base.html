@@ -1,28 +1,154 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        <link href="/static/css/base.css" rel="stylesheet" />
-        <link href="/static/css/components/card.css" rel="stylesheet" />
-        <link href="/static/css/components/form.css" rel="stylesheet" />
-        <link href="/static/css/components/button.css" rel="stylesheet" />
-        <link href="/static/css/components/toast.css" rel="stylesheet" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}HTMLify - Share Code Beautifully{% endblock %}</title>
 
-        <link href="/static/css/stylesheet.css" rel="stylesheet">
-        <link href="/static/css/nav-bar.css" rel="stylesheet">
-        <script src="/static/js/utils.js"></script>
-        <script src="/static/js/public-api.js"></script>
-        {% block head_content %}{% endblock %}
-        <title>{% block title %}HTMLify{% endblock %}</title>
-    </head>
-    <body>
-        <div id="toast-container"></div>
-        {% include "nav-bar.html" %}
-        <main>
-            {% block content %}{% endblock %}
-        </main>
-    </body>
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/static/svg/code.svg">
+
+    <!-- Core Styles -->
+    <link rel="stylesheet" href="/static/css/base.css">
+    <link rel="stylesheet" href="/static/css/components.css">
+    <link rel="stylesheet" href="/static/css/stylesheet.css">
+    <link rel="stylesheet" href="/static/css/components/toast.css">
+
+    <!-- Page-specific styles -->
+    {% block head_content %}{% endblock %}
+
+    <!-- Meta Tags -->
+    <meta name="description"
+        content="Share and showcase your code with beautiful syntax highlighting and instant previews.">
+    <meta property="og:title" content="{% block og_title %}HTMLify{% endblock %}">
+    <meta property="og:description" content="Share code beautifully">
+</head>
+
+<body>
+    <!-- Navigation -->
+    {% include "nav-bar.html" %}
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <h3>HTMLify</h3>
+                    <p>Share code beautifully</p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>Product</h4>
+                        <a href="/">Home</a>
+                        <a href="/api">API</a>
+                        <a href="/frames">Frames</a>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Resources</h4>
+                        <a href="{{ SCHEME }}://my.{{ SERVER_NAME }}">Dashboard</a>
+                        <a href="/r">Shortlinks</a>
+                        <a href="/tmp">Temp Share</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 HTMLify. Built with ❤️ for developers.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="/static/js/utils.js"></script>
     {% block after_body %}{% endblock %}
+
+    <style>
+        .main-content {
+            min-height: calc(100vh - 140px);
+        }
+
+        .site-footer {
+            background: var(--text-main);
+            color: rgba(255, 255, 255, 0.8);
+            padding: 3rem 0 1.5rem;
+            margin-top: 4rem;
+        }
+
+        .footer-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: 2fr 3fr;
+            gap: 4rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-brand h3 {
+            color: white;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-brand p {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .footer-links {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+        }
+
+        .footer-column h4 {
+            color: white;
+            font-size: 0.875rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+        }
+
+        .footer-column a {
+            display: block;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            margin-bottom: 0.75rem;
+            transition: var(--transition-fast);
+        }
+
+        .footer-column a:hover {
+            color: white;
+            transform: translateX(4px);
+        }
+
+        .footer-bottom {
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.875rem;
+        }
+
+        @media (max-width: 768px) {
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .footer-links {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</body>
+
 </html>

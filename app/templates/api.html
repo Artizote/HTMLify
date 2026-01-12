@@ -1,0 +1,241 @@
+{# API Documentation - Redesigned #}
+{% extends "base.html" %}
+
+{% block title %}Developer API - HTMLify{% endblock %}
+
+{% block head_content %}
+<style>
+    .api-page {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 4rem 1.5rem;
+    }
+
+    .api-header {
+        text-align: center;
+        margin-bottom: 5rem;
+    }
+
+    .api-title {
+        font-size: 3.5rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+        letter-spacing: -0.04em;
+    }
+
+    .api-subtitle {
+        font-size: 1.25rem;
+        color: var(--text-muted);
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .api-section {
+        margin-bottom: 4rem;
+        padding-top: 4rem;
+        border-top: 1px solid var(--border-light);
+    }
+
+    .section-label {
+        color: var(--primary);
+        font-weight: 700;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 1rem;
+        display: block;
+    }
+
+    .api-card {
+        background: #ffffff;
+        border: 1px solid var(--border-medium);
+        border-radius: var(--radius-lg);
+        padding: 2rem;
+        box-shadow: var(--shadow-sm);
+        margin-top: 1.5rem;
+    }
+
+    .endpoint-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .method {
+        padding: 0.25rem 0.75rem;
+        background: var(--primary);
+        color: white;
+        border-radius: var(--radius-sm);
+        font-weight: 700;
+        font-size: 0.8rem;
+        font-family: var(--font-mono);
+    }
+
+    .path {
+        font-family: var(--font-mono);
+        font-weight: 600;
+        color: var(--text-main);
+        font-size: 1.1rem;
+    }
+
+    .code-block {
+        background: var(--text-main);
+        color: #e2e8f0;
+        padding: 1.5rem;
+        border-radius: var(--radius-md);
+        font-family: var(--font-mono);
+        font-size: 0.9rem;
+        overflow-x: auto;
+        position: relative;
+        margin: 1.5rem 0;
+    }
+
+    .copy-btn {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: rgba(255, 255, 255, 0.1);
+        border: none;
+        color: white;
+        padding: 0.4rem 0.8rem;
+        border-radius: var(--radius-sm);
+        font-size: 0.75rem;
+        transition: var(--transition-fast);
+    }
+
+    .copy-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .param-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1.5rem;
+    }
+
+    .param-table th,
+    .param-table td {
+        text-align: left;
+        padding: 1rem;
+        border-bottom: 1px solid var(--border-light);
+    }
+
+    .param-table th {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+    }
+
+    .param-name {
+        font-family: var(--font-mono);
+        color: var(--primary);
+        font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+        .api-title {
+            font-size: 2.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="api-page fade-in">
+    <div class="api-header">
+        <span class="section-label">Documentation</span>
+        <h1 class="api-title">HTMLify Developer API</h1>
+        <p class="api-subtitle">
+            Integrate HTMLify into your own apps with our simple REST API.
+        </p>
+    </div>
+
+    <div class="api-section">
+        <span class="section-label">Authentication</span>
+        <h3>No Auth Required</h3>
+        <p class="text-muted mt-2">
+            Most public endpoints are accessible without any API key. Rate limits apply to unauthenticated requests.
+        </p>
+    </div>
+
+    <div class="api-section">
+        <span class="section-label">Endpoints</span>
+
+        <!-- Get File Detail -->
+        <div class="api-card">
+            <div class="endpoint-header">
+                <span class="method">GET</span>
+                <span class="path">/api/v1/file/<span class="text-dim">{id}</span></span>
+            </div>
+            <p>Fetch details about a specific file including its metadata and content preview.</p>
+
+            <div class="code-block">
+                <button class="copy-btn">Copy</button>
+                curl {{ request.url_root }}api/v1/file/123
+            </div>
+
+            <table class="param-table">
+                <thead>
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="param-name">id</span></td>
+                        <td>String</td>
+                        <td>The unique identifier of the file.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Search Files -->
+        <div class="api-card">
+            <div class="endpoint-header">
+                <span class="method">GET</span>
+                <span class="path">/api/v1/search</span>
+            </div>
+            <p>Search for public files by query or username.</p>
+
+            <div class="code-block">
+                <button class="copy-btn">Copy</button>
+                curl {{ request.url_root }}api/v1/search?q=cool-project
+            </div>
+
+            <table class="param-table">
+                <thead>
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="param-name">q</span></td>
+                        <td>String</td>
+                        <td>Search query string.</td>
+                    </tr>
+                    <tr>
+                        <td><span class="param-name">user</span></td>
+                        <td>String</td>
+                        <td>Filter by username.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="api-section">
+        <span class="section-label">Best Practices</span>
+        <h3>Rate Limiting</h3>
+        <p class="text-muted mt-2">
+            Please limit your requests to 60 per minute. Excessive usage may result in temporary IP banning.
+        </p>
+    </div>
+</div>
+{% endblock %}

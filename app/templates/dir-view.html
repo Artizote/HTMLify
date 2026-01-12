@@ -1,70 +1,316 @@
-{# User Profile #}
+{# User Profile & Directory View - Redesigned #}
 {% extends "base.html" %}
 {% from "macros.html" import file_card, dir_card with context %}
 
 {% block title %}
-    {% if show_profile %}
-        {{ dir.username }} | HTMLify profile
-    {% else %}
-        {{ dir.path }}
-    {% endif %}
+{% if show_profile %}
+{{ dir.username }} (@{{ dir.username }}) - HTMLify Profile
+{% else %}
+{{ dir.path }} - HTMLify
+{% endif %}
 {% endblock %}
 
 {% block head_content %}
-    <link href="/static/css/file-card.css" rel="stylesheet">
-    <link href="/static/css/dir-card.css" rel="stylesheet">
-    <link href="/static/css/profile.css" rel="stylesheet">
+<link href="/static/css/file-card.css" rel="stylesheet">
+<link href="/static/css/dir-card.css" rel="stylesheet">
+<style>
+    .profile-page {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 3rem 1.5rem;
+    }
+
+    .profile-hero {
+        background: #ffffff;
+        border: 1px solid var(--border-medium);
+        border-radius: var(--radius-xl);
+        padding: 3rem;
+        margin-bottom: 3rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .profile-hero::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 300px;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, var(--ice-50));
+        z-index: 0;
+        opacity: 0.5;
+    }
+
+    .profile-content {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        gap: 3rem;
+    }
+
+    .profile-avatar-wrapper {
+        position: relative;
+    }
+
+    .profile-avatar {
+        width: 140px;
+        height: 140px;
+        border-radius: var(--radius-2xl);
+        border: 4px solid #ffffff;
+        box-shadow: var(--shadow-lg);
+        object-fit: cover;
+    }
+
+    .avatar-badge {
+        position: absolute;
+        bottom: -10px;
+        right: -10px;
+        background: var(--primary);
+        color: white;
+        width: 44px;
+        height: 44px;
+        border-radius: var(--radius-full);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: var(--shadow-md);
+        border: 4px solid #ffffff;
+    }
+
+    .profile-info {
+        flex: 1;
+    }
+
+    .profile-username {
+        font-size: 3rem;
+        font-weight: 800;
+        margin-bottom: 0.25rem;
+        color: var(--text-main);
+        letter-spacing: -0.03em;
+    }
+
+    .profile-handle {
+        font-family: var(--font-mono);
+        color: var(--primary);
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+        display: block;
+    }
+
+    .profile-stats {
+        display: flex;
+        gap: 3rem;
+        margin-top: 2rem;
+    }
+
+    .stat-item {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--text-main);
+        line-height: 1;
+    }
+
+    .stat-label {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-top: 0.25rem;
+    }
+
+    .activity-section {
+        margin-bottom: 4rem;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .activity-card {
+        background: #ffffff;
+        border: 1px solid var(--border-light);
+        border-radius: var(--radius-lg);
+        padding: 1.5rem;
+        box-shadow: var(--shadow-xs);
+    }
+
+    .activity-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .activity-item {
+        padding: 1rem;
+        background: var(--bg-hover);
+        border-radius: var(--radius-md);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: var(--transition-base);
+    }
+
+    .activity-item:hover {
+        background: var(--ice-100);
+        transform: translateX(4px);
+    }
+
+    .activity-text {
+        font-size: 0.95rem;
+        color: var(--text-muted);
+    }
+
+    .activity-link {
+        color: var(--primary);
+        font-weight: 600;
+        font-family: var(--font-mono);
+    }
+
+    .files-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+        gap: 2rem;
+    }
+
+    @media (max-width: 768px) {
+        .profile-hero {
+            padding: 2rem;
+        }
+
+        .profile-content {
+            flex-direction: column;
+            text-align: center;
+            gap: 2rem;
+        }
+
+        .profile-username {
+            font-size: 2.25rem;
+        }
+
+        .profile-stats {
+            justify-content: center;
+            gap: 2rem;
+        }
+
+        .files-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
 {% endblock %}
 
 {% block content %}
-<h1>{{ dir.username }} - HTMLify profile</h1>
-<main class="profile-container">
+<div class="profile-page">
     {% if show_profile %}
-    <!-- Profile Card -->
-    <section class="profile-card">
-        <div class="profile-header">
-            <img src="/dp/{{ user.username }}" alt="{{ user.username }}'s Profile Picture" class="profile-picture">
+    <!-- Professional Profile Hero -->
+    <div class="profile-hero fade-in">
+        <div class="profile-content">
+            <div class="profile-avatar-wrapper">
+                <img src="{{ SCHEME }}://{{ SERVER_NAME }}/dp/{{ user.username }}" alt="{{ user.username }}"
+                    class="profile-avatar" onerror="this.onerror=null; this.src='/static/svg/user.svg';">
+                <div class="avatar-badge">
+                    <img src="/static/svg/code.svg" class="icon-sm" style="filter: brightness(0) invert(1);">
+                </div>
+            </div>
             <div class="profile-info">
-                <h1 class="profile-name">{{ user.username }}</h1>
-                <p class="total-files">{{ user.files.count() }} Files</p>
-                <p class="total-views">{{ user.total_views }} Views</p>
+                <h1 class="profile-username">{{ user.username }}</h1>
+                <span class="profile-handle">@{{ user.username }}</span>
+                <div class="profile-stats">
+                    <div class="stat-item">
+                        <span class="stat-value">{{ user.files.count() }}</span>
+                        <span class="stat-label">Projects</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">{{ user.total_views }}</span>
+                        <span class="stat-label">Views</span>
+                    </div>
+                    {% if latest_comments %}
+                    <div class="stat-item">
+                        <span class="stat-value">{{ latest_comments.count() }}</span>
+                        <span class="stat-label">Activity</span>
+                    </div>
+                    {% endif %}
+                </div>
             </div>
         </div>
+    </div>
 
-        <!--
-        We litrely don't have anything to show here
-        But might be in future
-        <div class="profile-details">
-            <h2>User Info</h2>
-            <ul>
-                <li><strong>Key:</strong>Value</li>
-            </ul>
+    <!-- Activity Section -->
+    {% if latest_comments and latest_comments.count() > 0 %}
+    <div class="activity-section slide-in-left">
+        <h2 class="section-title">
+            <img src="/static/svg/message-square-text.svg" class="icon-md">
+            Recent Activity
+        </h2>
+        <div class="activity-card">
+            <div class="activity-list">
+                {% for comment in latest_comments %}
+                <div class="activity-item">
+                    <span class="activity-text">
+                        Commented on <a href="/src{{ comment.file.path }}#comment-{{ comment.id }}"
+                            class="activity-link">{{ comment.file.name }}</a>
+                    </span>
+                    <span class="text-dim small">{{ comment.created_at.strftime('%b %d') if comment.created_at else ''
+                        }}</span>
+                </div>
+                {% endfor %}
+            </div>
         </div>
-        -->
-    </section>
-
-    <!-- Recent Comments -->
-    {% if latest_comments %}
-    <section class="comments-activity-container">
-        <h2>Recent Comments</h2>
-        {% for comment in latest_comments %}
-        <span class="comment-activity">{{ user.username }} commented something <a href="/src{{ comment.file.path }}#comment-{{ comment.id }}">@{{ comment.file.path }}</a></span>
-        {% endfor %}
-    </section>
+    </div>
+    {% endif %}
     {% endif %}
 
-    {% endif %}
+    <!-- Projects Section -->
+    <div class="projects-section slide-in-right">
+        <h2 class="section-title">
+            <img src="/static/svg/folder-open.svg" class="icon-md">
+            {% if show_profile %}Featured Projects{% else %}Directory: {{ dir.path }}{% endif %}
+        </h2>
 
-    <!-- Files -->
-    <section style="max-width:100%">
-                <h2 style="padding:4px;">files of <span style="font-family:monospace;">{{ dir.path }}</span></h2>
-        {% for item in dir.items() %}
-        {% if item.is_file and not item.as_guest %}
-        {{ file_card(item) }}
+        {% set items = dir.items()|list %}
+        {% if items %}
+        <div class="files-grid">
+            {% for item in items %}
+            <div class="card-wrapper scale-in">
+                {% if item.is_file and not item.as_guest %}
+                {{ file_card(item) }}
+                {% else %}
+                {{ dir_card(item) }}
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
         {% else %}
-        {{ dir_card(item) }}
+        <div class="empty-state card py-5 text-center">
+            <img src="/static/svg/file-question.svg" class="icon-xl opacity-20 mb-3 mx-auto">
+            <h3>No projects found</h3>
+            <p class="text-muted">This workspace is currently empty.</p>
+        </div>
         {% endif %}
-        {% endfor %}
-    </section>
-    </main>
+    </div>
+</div>
+
+{% block after_body %}
+<script>
+    // Staggered animation for cards
+    document.querySelectorAll('.files-grid .card-wrapper').forEach((card, i) => {
+        card.style.animationDelay = `${i * 0.05}s`;
+    });
+</script>
+{% endblock %}
 {% endblock %}

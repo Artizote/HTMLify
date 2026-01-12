@@ -17,7 +17,8 @@ pygments_css = HtmlFormatter().get_style_defs()
 
 @public.before_request
 def before_request():
-    g.user = None # No login check till now
+    username = session.get("username", "")
+    g.user = User.by_username(username) if username else None
 
 
 @public.route("/dp/<username>")
@@ -69,15 +70,13 @@ def home():
     if not files_count:
         return render_template("home.html", files=[])
 
+    files_list = list(files)
     if filter_order == "n":
         return render_template("home.html", files=files.order_by(File.id.desc()).limit(MAX_FILES_ON_HOME))
 
-    _files = []
-
-    for _ in range(MAX_FILES_ON_HOME):
-        _files.append(files[randint(0, files_count-1)])
-
-    return render_template("home.html", files=_files) 
+    import random
+    random.shuffle(files_list)
+    return render_template("home.html", files=files_list[:MAX_FILES_ON_HOME])
 
 @public.route("/<username>/")
 def user_files(username):
@@ -109,3 +108,6 @@ def http_states(code):
     except LookupError:
         return redirect("/http")
 
+@public.route("/api", strict_slashes=False)
+def api_docs():
+    return render_template("api.html")

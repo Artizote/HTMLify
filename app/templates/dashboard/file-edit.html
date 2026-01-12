@@ -1,122 +1,327 @@
+{# Professional File Editor Page #}
 {% extends "dashboard/base.html" %}
 
-{% block title %}Editing - {{ request.args.get("path") }} {% endblock %}
+{% block title %}{% if file %}Editing: {{ file.name }}{% else %}New File{% endif %} - HTMLify{% endblock %}
 
 {% block head_content %}
-    <link rel="stylesheet" href="/static/vendor/codemirror/lib/codemirror.css">
-    <style>
-        .CodeMirror {
-            height: 60vh;
-            min-height: 300px;
-            border: 1px solid black;
+<link rel="stylesheet" href="/static/vendor/codemirror/lib/codemirror.css">
+<style>
+    .editor-layout {
+        display: grid;
+        grid-template-columns: 1fr 320px;
+        gap: 2rem;
+        align-items: start;
+    }
+
+    /* Editor Header */
+    .edit-header {
+        background: white;
+        border: 1px solid var(--border-medium);
+        border-radius: var(--radius-lg);
+        padding: 1.25rem 2rem;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .header-main h2 {
+        font-size: 1.25rem;
+        font-weight: 800;
+        margin-bottom: 0.25rem;
+    }
+
+    .path-display {
+        font-family: var(--font-mono);
+        color: var(--text-dim);
+        font-size: 0.8125rem;
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 0.75rem;
+    }
+
+    /* Editor Section */
+    .editor-section {
+        background: white;
+        border: 1px solid var(--border-medium);
+        border-radius: var(--radius-xl);
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .editor-toolbar {
+        background: var(--bg-hover);
+        border-bottom: 1px solid var(--border-light);
+        padding: 0.75rem 1rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .toolbar-group {
+        display: flex;
+        background: white;
+        border: 1px solid var(--border-medium);
+        border-radius: var(--radius-md);
+        padding: 0.2rem;
+    }
+
+    .toolbar-btn {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        border-radius: var(--radius-sm);
+        color: var(--text-muted);
+        text-transform: uppercase;
+        transition: var(--transition-fast);
+    }
+
+    .toolbar-btn:hover {
+        background: var(--bg-hover);
+        color: var(--text-main);
+    }
+
+    .toolbar-btn.active {
+        background: var(--primary);
+        color: white;
+    }
+
+    .CodeMirror {
+        height: 65vh;
+        font-family: var(--font-mono);
+        font-size: 14px;
+    }
+
+    /* Sidebar Settings */
+    .sidebar-card {
+        background: white;
+        border: 1px solid var(--border-medium);
+        border-radius: var(--radius-xl);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .card-title {
+        font-size: 1rem;
+        font-weight: 800;
+        margin-bottom: 1.25rem;
+        color: var(--text-main);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-group-vertical {
+        margin-bottom: 1.25rem;
+    }
+
+    .form-group-vertical label {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-dim);
+        margin-bottom: 0.5rem;
+    }
+
+    .password-input-wrapper {
+        position: relative;
+    }
+
+    .password-toggle {
+        position: absolute;
+        right: 0.5rem;
+        top: 50%;
+        transform: translateY(-50%);
+        padding: 0.4rem;
+        color: var(--text-dim);
+    }
+
+    .modern-select-sm {
+        padding: 0.4rem 0.5rem;
+        font-size: 0.75rem;
+        border: 1px solid var(--border-medium);
+        border-radius: var(--radius-md);
+        background: white;
+        color: var(--text-muted);
+    }
+
+    @media (max-width: 1024px) {
+        .editor-layout {
+            grid-template-columns: 1fr;
         }
-    </style>
+    }
+</style>
 {% endblock %}
 
 {% block content %}
-<div class="card">
-    <div class="form-group">
-    <label>File Path</label>
-    <input type="text" id="path" value="{{ (file.path if file else "") or (dir.path if dir else "") or "/" + g.user.username + "/" }}" class="form-input" placeholder="File Path">
-</div>
-
-<div class="form-group">
-    <label>Title</label>
-    <input type="text" id="title" value="{{ file.title if file else "" }}" class="form-input" placeholder="File Title" autocomplete="new-title">
-</div>
-
-<div class="form-group" >
-    <div class="form-group">
-        <button onclick="password_field_toggle()" class="btn">Password Protection</button>
-    </div>
-    <div id="password-field-container" class="form-inline" style="display:none;">
-        <div class="form-group">
-            <input type="password" style="display: none;"> <!-- Fake Password Field -->
-            <input type="password" id="password" value="{{ file.password }}" class="form-input" placeholder="Password" autocomplete="new-password">
+<div class="fade-in">
+    <!-- Header -->
+    <header class="edit-header">
+        <div class="header-main">
+            <h2>{% if file %}Edit File{% else %}New File{% endif %}</h2>
+            <div class="path-display" id="path-preview">{{ (file.path if file else "") or (dir.path if dir else "") }}
+            </div>
         </div>
-        <div class="form-group">
-            <button id="password-toggle-button" onclick="toggle_password()" class="btn">Show</button>
+        <div class="header-actions">
+            <button class="btn btn-outline btn-sm" onclick="view()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+                Preview
+            </button>
+            <button class="btn btn-primary btn-sm" onclick="save()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                    <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                    <polyline points="7 3 7 8 15 8"></polyline>
+                </svg>
+                Save File
+            </button>
         </div>
+    </header>
+
+    <div class="editor-layout">
+        <!-- Main Editor -->
+        <main class="editor-section">
+            <div class="editor-toolbar">
+                <div class="toolbar-group">
+                    <button id="switch-text-editor-button" onclick="switch_to_text_editor()"
+                        class="toolbar-btn active">Text</button>
+                    <button id="switch-hex-editor-button" onclick="switch_to_hex_editor()"
+                        class="toolbar-btn">Hex</button>
+                    <button id="switch-binary-editor-button" onclick="switch_to_binary_editor()"
+                        class="toolbar-btn">Binary</button>
+                </div>
+
+                <div class="toolbar-group">
+                    <button id="line-number-toggle-button" onclick="toggle_editor_linenos()"
+                        class="btn btn-ghost btn-sm" title="Toggle Line Numbers">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <line x1="8" y1="6" x2="21" y2="6"></line>
+                            <line x1="8" y1="12" x2="21" y2="12"></line>
+                            <line x1="8" y1="18" x2="21" y2="18"></line>
+                            <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                            <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                            <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                        </svg>
+                    </button>
+                    <button id="indent-with-tabs-toggle-button" onclick="toggle_editor_indent_with_tabs()"
+                        class="btn btn-ghost btn-sm" title="Toggle Indent Mode">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <polyline points="9 10 4 15 9 20"></polyline>
+                            <path d="M20 4v7a4 4 0 0 1-4 4H4"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <div style="margin-left: auto; display: flex; gap: 0.5rem;">
+                    <select id="theme-selector" onchange="update_editor_theme()" class="modern-select-sm"></select>
+                    <select id="font-size-selector" onchange="update_editor_font_size()"
+                        class="modern-select-sm"></select>
+                </div>
+            </div>
+            <div id="editor-container">
+                <textarea id="editor"></textarea>
+            </div>
+        </main>
+
+        <!-- Sidebar -->
+        <aside class="editor-sidebar">
+            <div class="sidebar-card">
+                <h3 class="card-title">File Details</h3>
+                <div class="form-group-vertical">
+                    <label>Internal Path</label>
+                    <input type="text" id="path" value="{{ (file.path if file else "") or (dir.path if dir else "") or "
+                        /" + g.user.username + "/" }}" class="form-input" placeholder="/username/file.ext">
+                </div>
+                <div class="form-group-vertical">
+                    <label>Display Title</label>
+                    <input type="text" id="title" value="{{ file.title if file else "" }}" class="form-input"
+                        placeholder="e.g. My Website Script">
+                </div>
+            </div>
+
+            <div class="sidebar-card">
+                <h3 class="card-title">Configuration</h3>
+                <div class="form-group-vertical">
+                    <label>Mode</label>
+                    <select id="mode" class="form-select">
+                        <option value="{{ FileMode.SOURCE }}" {% if file and file.mode==FileMode.SOURCE %}selected{%
+                            endif %}>Code View</option>
+                        <option value="{{ FileMode.RENDER }}" {% if file and file.mode==FileMode.RENDER %}selected{%
+                            endif %}>Live Preview</option>
+                    </select>
+                </div>
+                <div class="form-group-vertical">
+                    <label>Visibility</label>
+                    <select id="visibility" class="form-select">
+                        <option value="{{ FileVisibility.PUBLIC }}" {% if file and
+                            file.visibility==FileVisibility.PUBLIC %}selected{% endif %}>Public</option>
+                        <option value="{{ FileVisibility.HIDDEN }}" {% if file and
+                            file.visibility==FileVisibility.HIDDEN %}selected{% endif %}>Hidden</option>
+                        <option value="{{ FileVisibility.ONCE }}" {% if file and file.visibility==FileVisibility.ONCE
+                            %}selected{% endif %}>Once</option>
+                    </select>
+                </div>
+                <div class="form-group-vertical">
+                    <label>Password</label>
+                    <div class="password-input-wrapper">
+                        <input type="password" id="password" value="{{ file.password or '' }}" class="form-input"
+                            placeholder="Optional password" autocomplete="new-password">
+                        <button id="password-toggle-button" onclick="toggle_password()" class="password-toggle">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {% if not file %}
+            <div class="sidebar-card">
+                <h3 class="card-title">Anonymous Share</h3>
+                <div class="form-group"
+                    style="display: flex; align-items: center; gap: 0.75rem; border: 1px solid var(--border-light); padding: 0.75rem; border-radius: var(--radius-md); background: var(--bg-hover);">
+                    <input id="as-guest" type="checkbox" style="width: 20px; height: 20px;">
+                    <label for="as-guest" style="font-size: 0.8125rem; font-weight: 600; cursor: pointer;">Share as
+                        Guest</label>
+                </div>
+                <p id="as-guest-warning" class="alert alert-warning"
+                    style="display:none; margin-top: 1rem; font-size: 0.75rem; padding: 0.5rem 0.75rem;">
+                    Guest files cannot be edited after they are created!
+                </p>
+                <div id="ext-field-container" class="form-group-vertical" style="display: none; margin-top: 1rem;">
+                    <label>Ext</label>
+                    <input id="ext" type="text" class="form-input" value="txt" placeholder="extension">
+                </div>
+            </div>
+            {% endif %}
+        </aside>
     </div>
 </div>
-
-<div class="form-inline">
-    <div class="form-group">
-        <label>File Mode</label>
-        <select id="mode" class="form-select">
-            <option value="{{ FileMode.SOURCE }}" {% if file and file.mode == FileMode.SOURCE %}selected{% endif %}>Source</option>
-            <option value="{{ FileMode.RENDER }}" {% if file and file.mode == FileMode.RENDER %}selected{% endif %}>Render</option>
-        </select>
-    </div>
-
-    <div class="form-group">
-        <label>File Visibility</label>
-        <select id="visibility" class="form-select">
-            <option value="{{ FileVisibility.PUBLIC }}" {% if file and file.visibility == FileVisibility.PUBLIC %}selected{% endif %}>Public</option>
-            <option value="{{ FileVisibility.HIDDEN }}" {% if file and file.visibility == FileVisibility.HIDDEn %}selected{% endif %}>Hidden</option>
-            <option value="{{ FileVisibility.ONCE }}" {% if file and file.visibility == FileVisibility.ONCE %}selected{% endif %}>Once</option>
-        </select>
-    </div>
-</div>
-
-{% if not file %}
-<div class="form-group">
-    <div>
-        <label for="as-guest">As Guest</label>
-        <input id="as-guest" type="checkbox">
-        <label id="as-guest-warning" style="display:none;color:orange;">You won't be able to edit after creation</label>
-    </div>
-</div>
-
-<div id="ext-field-container" class="form-group" style="display: none;">
-    <label>File Extension:</label>
-    <input id="ext" type="text" class="form-input" value="txt">
-</div>
-{% endif %}
-
-<div class="form-group">
-    <div class="form-inline">
-        <button id="switch-text-editor-button" onclick="switch_to_text_editor()" class="btn">Text Mode</button>
-        <button id="switch-hex-editor-button" onclick="switch_to_hex_editor()" class="btn">Hex Mode</button>
-        <button id="switch-binary-editor-button" onclick="switch_to_binary_editor()" class="btn">Binary Mode</button>
-        <button id="line-number-toggle-button" onclick="toggle_editor_linenos()" class="btn">Line Numbers</button>
-        <select id="indent-unit-selector" onchange="update_editor_indent_unit()" class="form-select" style="width:auto;"></select>
-        <button id="indent-with-tabs-toggle-button" onclick="toggle_editor_indent_with_tabs()" class="btn">Spaces</button>
-        <select id="tab-size-selector" onchange="update_editor_tab_size()" class="form-select" style="width:auto;"></select>
-        <select id="theme-selector" onchange="update_editor_theme()" class="form-select" style="width:auto;"></select>
-        <select id="font-size-selector" onchange="update_editor_font_size()" class="form-select" style="width:auto;"></select>
-    </div>
-    <hr>
-    <div class="form-inline">
-        <button class="btn btn-primary" onclick="save()">Save</button>
-        <button class="btn btn-primary" onclick="view()">View</button>
-    </div>
-</div>
-
-<div class="form-group">
-    <div id="editor-container">
-        <textarea id="editor" class="form-textarea" style="width: 100%;"></textarea>
-    </div>
-</div>
-
 {% endblock %}
 
 {% block after_body %}
 <script>
-window.file_id = {{ file.id if file else 0 }};
-window.file_type = "";
-{% if file %}
-{% if file.blob.type == BlobType.TEXT %}
-window.file_type = "text";
-{% else %}
-window.file_type = "{{ file.type_s }}";
-{% endif %}
-{% endif %}
-window.file_path = "{{ file.path if file else "" }}";
+    window.file_id = parseInt("{{ file.id if file else 0 }}");
+    window.file_type = "{{ 'text' if file and file.blob.type == BlobType.TEXT else (file.type_s if file else '') }}";
+    window.file_path = "{{ file.path if file else '' }}";
 </script>
 <script src="/static/js/private-api.js"></script>
-<script src="/static/js/codemirror.js"></script>
 <script src="/static/vendor/codemirror/lib/codemirror.js"></script>
 <script src="/static/vendor/codemirror/mode/meta.js"></script>
+<script src="/static/js/codemirror.js"></script>
 <script src="/static/js/pages/dashboard/file-edit.js"></script>
 {% endblock %}

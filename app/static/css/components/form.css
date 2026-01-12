@@ -1,135 +1,105 @@
 /* FORM Styles */
 
-/* From group */
 .form-group {
     display: flex;
-    flex-direction: column;
-    margin-bottom: 18px;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0;
 }
 
-/* Label */
 .form-group label {
-    font-size: 14px;
-    font-weight: 600;
-    color: #333;
-    margin-bottom: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
 }
 
-/* Text input */
-.form-input {
+.form-input,
+.form-select,
+.form-textarea,
+.form-file {
     width: 100%;
-    padding: 10px 12px;
-    border: 1px solid var(--border, #d0d0d5);
-    border-radius: var(--radius, 10px);
-    background: var(--bg, #fff);
-    font-size: 15px;
-    transition: all 0.2s ease;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    background: var(--bg-surface);
+    color: var(--text-main);
+    font-size: 0.95rem;
+    font-family: var(--font-sans);
+    transition: var(--transition-base);
     box-sizing: border-box;
 }
 
-/* File input */
-.form-file {
-    display: block;
-    padding: 6px 10px;
-    border: 1px solid var(--border, #d0d0d5);
-    border-radius: var(--radius, 10px);
-    background: var(--bg, #fff);
-    cursor: pointer;
-}
-
-/* Select dropdown */
-.form-select {
-    width: 100%;
-    padding: 10px 12px;
-    border: 1px solid var(--border, #d0d0d5);
-    border-radius: var(--radius, 10px);
-    background: var(--bg, #fff);
-    font-size: 15px;
-    transition: all 0.2s ease;
-    appearance: none; /* remove default arrow in some browsers */
-    cursor: pointer;
-}
-
-/* Textarea */
-.form-textarea {
-    width: 100%;
-    padding: 10px 12px;
-    border: 1px solid var(--border, #d0d0d5);
-    border-radius: var(--radius, 10px);
-    background: var(--bg, #fff);
-    font-size: 15px;
-    resize: vertical;
-    transition: all 0.2s ease;
-}
-
-/* Focus and hover states */
 .form-input:hover,
 .form-select:hover,
 .form-textarea:hover,
 .form-file:hover {
-    border-color: var(--primary, #4D7BFF);
+    border-color: var(--border-accent);
 }
 
 .form-input:focus,
 .form-select:focus,
 .form-textarea:focus {
-    border-color: var(--primary, #4D7BFF);
-    box-shadow: 0 0 0 3px rgba(77, 123, 255, 0.25);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-soft);
     outline: none;
 }
 
-/* Validation States */
-.form-input.success,
-.form-select.success,
-.form-textarea.success {
-    border-color: #28a745;
-}
-
-.form-input.error,
-.form-select.error,
-.form-textarea.error {
-    border-color: #dc3545;
-}
-
-/* Error mesasge */
-.form-error-message {
-    font-size: 12px;
-    color: #dc3545;
-    margin-top: 4px;
-}
-
-/* Inline input */
 .form-inline {
     display: flex;
-    gap: 15px;
-    flex-wrap: wrap;
-}
-
-.form-inline .form-group {
-    flex: 1;
-    min-width: 150px;
-}
-
-/* Checkbox / Radio */
-.form-check {
-    display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: 14px;
+    justify-content: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    padding: 1rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    margin: 2rem auto;
+    max-width: fit-content;
 }
 
-.form-check input[type="checkbox"],
-.form-check input[type="radio"] {
-    width: 16px;
-    height: 16px;
-    accent-color: var(--primary, #4D7BFF);
+.modern-select {
+    padding: 0.625rem 2rem 0.625rem 1rem;
+    background: var(--bg-main);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    color: var(--text-main);
+    font-weight: 500;
     cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 1rem;
 }
 
-/* Help text */
-.form-help {
-    font-size: 12px;
-    color: #6c757d;
-    margin-top: 4px;
+/* Checkbox */
+input[type="checkbox"] {
+    appearance: none;
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 2px solid var(--border-light);
+    border-radius: 4px;
+    background: var(--bg-main);
+    cursor: pointer;
+    position: relative;
+    transition: var(--transition-fast);
 }
 
+input[type="checkbox"]:checked {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+input[type="checkbox"]:checked::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: bold;
+}

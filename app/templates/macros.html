@@ -1,253 +1,246 @@
-{# Macros #}
+{# Professional Card Macros #}
 
 {# File Card #}
 {% macro file_card(file, hls=0, hle=0, custom_body=None) %}
-<div
-    class="file-card
-    {% if file.is_locked %} locked {% endif %}
-    {% if file.visibility == FileVisibility.HIDDEN %} hidden {% endif %}
-    {% if file.visibility == FileVisibility.ONCE %} once {% endif %}
-    {% if file.blob.type == BlobType.TEXT %} media {% endif %}
-    "
-    onclick="window.location.href='{{ file.path }}'"
-    data-visibility="{{ file.visibility_s }}"
-    data-type="{{ file.type_s }}"
-    >
+<article class="file-card">
     <div class="file-card-header">
-        <div>
-            <a href="/{{ file.user.username }}">
-                <img class="profile-pic" src="/dp/{{ file.user.username }}" title="{{ file.user.username }}">
-            </a>
-        </div>
-        <div class="file-info">
-            <b class="file-title">{{ file.title }}</b>
-            <span class="file-path">{{ file.path }}</span>
-        </div>
-        <div class="meta">
-            <div>{{ file.views }} Views</div>
-            <div>{{ file.comments.count() }} Comments</div>
+        <a href="{{ SCHEME }}://{{ SERVER_NAME }}/{{ file.user.username }}" class="file-author"
+            onclick="event.stopPropagation()">
+            <img class="author-avatar" src="{{ SCHEME }}://{{ SERVER_NAME }}/dp/{{ file.user.username }}"
+                alt="{{ file.user.username }}" onerror="this.onerror=null; this.src='/static/svg/user.svg';">
+            <span class="author-name">{{ file.user.username }}</span>
+        </a>
+        <div class="file-badges">
+            {% if file.password %}
+            <span class="badge badge-warning">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+                Locked
+            </span>
+            {% elif file.visibility == FileVisibility.HIDDEN %}
+            <span class="badge badge-neutral">Hidden</span>
+            {% elif file.visibility == FileVisibility.ONCE %}
+            <span class="badge badge-danger">Once</span>
+            {% endif %}
         </div>
     </div>
 
-    {% if file.password -%}
-        {% set custom_body = "<i style='color:blue;'>File is locked</i>" -%}
-    {% elif file.visibility == FileVisibility.HIDDEN -%}
-        {% set custom_body = "<i style='color:red;'>File is hidden</i>" -%}
-    {% elif file.visibility == FileVisibility.ONCE -%}
-        {% set custom_body = "<i style='color:gray;'>File can only seen once</i>" -%}
-    {% elif file.blob.type != BlobType.TEXT -%}
-        {% set custom_body = "<i style='color:purple;'>Media file</i>" -%}
-    {% endif -%}
+    <a href="{{ file.path }}" class="file-card-body">
+        <h3 class="file-title">{{ file.title or file.name }}</h3>
+        <p class="file-path">{{ file.path }}</p>
 
-    <div class="file-card-body">
-        {% if custom_body == None %}
-            {% for line in file.preview().split("\n")[:8] %}
-                {{ line }}<br>
+        {% if file.blob.type == BlobType.TEXT %}
+        <div class="file-preview">
+            {% if custom_body == None %}
+            {% for line in file.preview().split("\n")[:4] %}
+            <code>{{ line }}</code>
             {% endfor %}
-        {% else %}
+            {% else %}
             {{ custom_body | safe }}
-        {% endif %}
-    </div>
-    <div class="action-buttons">
-        {% if g.user and file.user == g.user %}
-        <a href="{{ SCHEME }}://my.{{ SERVER_NAME }}/files/edit?path={{ file.path }}" title="Edit">
-                <button><img src="/static/svg/file-pen-line.svg"></button>
-            </a>
-        {% endif %}
-        <a href="{{ file.path }}" title="View">
-            <button><img src="/static/svg/eye.svg"></button>
-        </a>
-        <a href="/src{{ file.path }}" title="Source">
-            <button><img src="/static/svg/code.svg"></button>
-        </a>
-        <a href="{{ file.path }}#run-button" title="Run">
-            <button><img src="/static/svg/play.svg"></button>
-        </a>
-    </div>
-</div>
-{% endmacro %}
-
-{# Dir Card #}
-{% macro dir_card(dir) %}
-<div
-    class="dir-card"
-    onclick="window.location.href = '{{ dir.path }}'"
-    >
-    <div class="dir-card-header">
-        <div>
-            <a href="/{{ dir.username }}">
-                <img class="profile-pic" src="/dp/{{ dir.username }}" title="{{ dir.username }}">
-            </a>
+            {% endif %}
         </div>
-        <div class="dir-info">
-            <b class="dir-title">{{ dir.title }}</b>
-            <span class="dir-path">{{ dir.path }}</span>
-        </div>
-        <div class="meta">
-            <div>{{ dir.items_count() }} Items</div>
-        </div>
-    </div>
-    <div class="dir-card-body">
-        {% for item in dir.items()[:8] %}
-        {% if item.__class__.__name__ == "Dir" %}
-            <li style="color:orange;">{{ item.title }}</li>
         {% else %}
-            <li style="color:black;">{{ item.name }}</li>
+        <div class="file-media-badge">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                <polyline points="21 15 16 10 5 21"></polyline>
+            </svg>
+            <span>Media File</span>
+        </div>
         {% endif %}
-        {% endfor %}
+    </a>
+
+    <div class="file-card-footer">
+        <div class="file-stats">
+            <span class="stat-item">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+                {{ file.views }}
+            </span>
+            <span class="stat-item">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                </svg>
+                {{ file.comments.count() }}
+            </span>
+        </div>
+        <div class="file-actions">
+            {% if g.user and file.user == g.user %}
+            <a href="{{ SCHEME }}://my.{{ SERVER_NAME }}/files/edit?path={{ file.path }}" class="action-btn"
+                title="Edit" onclick="event.stopPropagation()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+            </a>
+            {% endif %}
+            <a href="/src{{ file.path }}" class="action-btn" title="View Source" onclick="event.stopPropagation()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="16 18 22 12 16 6"></polyline>
+                    <polyline points="8 6 2 12 8 18"></polyline>
+                </svg>
+            </a>
+        </div>
     </div>
-    <div class="action-buttons">
-        <a href="{{ dir.path }}" title="Open">
-            <button><img src="/static/svg/folder-open.svg"></button>
-        </a>
-    </div>
-</div>
+</article>
 {% endmacro %}
 
-{# Grid Item #}
+{# Directory Card #}
+{% macro dir_card(dir) %}
+<article class="dir-card">
+    <a href="{{ dir.path }}" class="dir-card-content">
+        <div class="dir-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            </svg>
+        </div>
+        <h3 class="dir-title">{{ dir.title }}</h3>
+        <p class="dir-path">{{ dir.path }}</p>
+        <div class="dir-meta">
+            <span class="dir-count">{{ dir.items_count() }} items</span>
+        </div>
+    </a>
+</article>
+{% endmacro %}
 
-{# Files Grid View #}
+{# Files Grid View (Dashboard) #}
 {% macro files_grid_view(items) %}
-<div class="files-grid">
+<div class="dashboard-grid">
     {% for item in items %}
-    {% if item.is_file %}
-    <div
-        class="item"
-        onclick="window.location.href = '/files/edit?path={{ item.path }}'"
-        data-title="{{ item.name }}"
-        data-path="{{ item.path }}"
-        data-visibility="{{ item.visibility }}"
-        data-type="{{ item.type }}"
-        >
+    <div class="dashboard-item"
+        onclick="window.location.href = '{% if item.is_file %}/files/edit?path={{ item.path }}{% else %}/files?dir={{ item.path }}{% endif %}'">
         <div class="item-icon">
-            <img src="/static/svg/{{ self.type_s }}.svg" alt="Thumbnail" class="item-thumbnail">
+            {% if item.is_file %}
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+                <polyline points="13 2 13 9 20 9"></polyline>
+            </svg>
+            {% else %}
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            </svg>
+            {% endif %}
         </div>
-
-        <div class="item-details">
-            <div class="item-title">{{ item.name or item.path[item.path.rfind("/")+1:] }}</div>
-            <div class="item-filename">{{ item.path[item.path.rfind("/")+1:] }}</div>
-            <div class="item-size">Size: {{ item.sizef() }}</div>
+        <div class="item-info">
+            <h4 class="item-name">{% if item.is_file %}{{ item.name or item.path.split('/')[-1] }}{% else %}{{
+                item.title }}{% endif %}</h4>
+            <p class="item-path">{{ item.path }}</p>
+            <span class="item-size">{% if item.is_file %}{{ item.sizef() }}{% else %}{{ item.items() | length }} items{%
+                endif %}</span>
         </div>
-
-        <div class="item-actions">
-            <a href="{{ item.url }}" target="_blank">
-                <button title="View"><img src="/static/svg/eye.svg"></button>
+        <div class="item-actions" onclick="event.stopPropagation()">
+            {% if item.is_file %}
+            <a href="{{ item.url }}" target="_blank" class="action-btn" title="View">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                </svg>
             </a>
-            
-            <a href="/files/delete?path={{ item.path }}">
-                <button class="delete" title="Delete"><img src="/static/svg/trash.svg"></button>
-            </a>
+            {% endif %}
         </div>
     </div>
-    {% else %}
-    <div
-        class="item"
-        onclick="window.location.href = '/files?dir={{ item.dir.path }}'"
-        data-title="{{ item.title }}"
-        data-path="{{ item.dir }}"
-        >
-        <div class="item-icon">
-            <img src="/static/svg/folder-open.svg">
-        </div>
-
-        <div class="item-details">
-            <div class="item-title">{{ item.title }}</div>
-            <div class="item-filename">{{ item.title }}/</div>
-            <div class="item-size">Content: {{ item.items() | length }} items</div>
-        </div>
-
-        <div class="item-actions">
-            <a href="/files?dir={{ item.dir[item.dir.find("/")+1:] }}" title="Open">
-                <button><img src="/static/svg/folder-open.svg"></button>
-            </a>
-        </div>
-    </div>
-    {% endif %}
     {% endfor %}
 </div>
 {% endmacro %}
 
-{# Files List View #}
+{# Files List View (Dashboard) #}
 {% macro files_list_view(items) %}
-<div class="files-list">
+<div class="dashboard-list">
     {% for item in items %}
-    {% if item.is_file%}
-    <div
-        class="item" onclick="window.location.href = '/files/edit?path={{ item.path }}'"
-        data-title="{{ item.name }}"
-        data-path="{{ item.path }}"
-        >
-        <img src="/static/svg/filetype/{{ item.type_s }}.svg" alt="Thumbnail" class="item-thumbnail">
-
-        <div class="item-info">
-            <h3 class="item-name">{{ item.name or item.path[item.path.rfind("/"):] }}</h3>
-            <h5 class="item-path">{{ item.path }}</h5>
-            <div class="item-meta">Size: {{ item.sizef() }}</div>
+    <div class="list-row"
+        onclick="window.location.href = '{% if item.is_file %}/files/edit?path={{ item.path }}{% else %}/files?dir={{ item.path }}{% endif %}'">
+        <div class="row-icon">
+            {% if item.is_file %}
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+                <polyline points="13 2 13 9 20 9"></polyline>
+            </svg>
+            {% else %}
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            </svg>
+            {% endif %}
         </div>
-
-        <div class="item-actions">
-            <a href="{{ item.url }}" target="_blank" onclick="event.stopPropagation()">
-                <button title="View"><img src="/static/svg/eye.svg"></button>
+        <div class="row-main">
+            <span class="row-name">{% if item.is_file %}{{ item.name or item.path.split('/')[-1] }}{% else %}{{
+                item.title }}{% endif %}</span>
+            <span class="row-path">{{ item.path }}</span>
+        </div>
+        <div class="row-meta">
+            <span class="row-size">{% if item.is_file %}{{ item.sizef() }}{% else %}{{ item.items() | length }} items{%
+                endif %}</span>
+        </div>
+        <div class="row-actions" onclick="event.stopPropagation()">
+            {% if item.is_file %}
+            <a href="{{ item.url }}" target="_blank" class="action-btn" title="View">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                </svg>
             </a>
-            <a href="/files/edit?path={{ item.path }}">
-                <button title="Edit"><img src="/static/svg/file-pen-line.svg"></button>
+            <a href="/files/edit?path={{ item.path }}" class="action-btn" title="Edit">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
             </a>
-            <a href="/files/delete?path={{ item.path }}">
-                <button class="delete" title="Delete"><img src="/static/svg/trash.svg"></button>
+            <a href="/files/delete?path={{ item.path }}" class="action-btn action-btn-danger" title="Delete">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
             </a>
+            {% else %}
+            <a href="/files?dir={{ item.path }}" class="action-btn" title="Open">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                </svg>
+            </a>
+            {% endif %}
         </div>
     </div>
-    {% else %} 
-    <div
-        class="item"
-        onclick="window.location.href = '/files?dir={{ item.path }}'"
-        data-title="{{ item.title }}"
-        data-path="{{ item.dir }}"
-        >
-        <img src="/static/svg/folder-open.svg" alt="Thumbnail" class="item-thumbnail">
-
-        <div class="item-info">
-            <h3 class="item-name">{{ item.title }}</h3>
-            <h5 class="item-path">{{ item.path }}</h5>
-            <div class="item-meta">Contains {{ item.items() | length }} Items</div>
-        </div>
-
-        <div class="item-actions">
-            <a href="/files?dir={{ item.path }}">
-                <button><img src="/static/svg/folder-open.svg"></button>
-            </a>
-        </div>
-    </div>
-    {% endif %}
     {% endfor %}
 </div>
 {% endmacro %}
 
 {# Pens List View #}
 {% macro pens_list_view(pens) %}
-<div class="files-list">
+<div class="dashboard-list">
     {% for pen in pens %}
-    <div
-        class="item" onclick="window.location.href = '/pens/edit?id={{ pen.id }}'"
-        data-title="{{ pen.title }}"
-        data-path="{{ pen.path }}"
-        >
-        <img src="/static/svg/file-code-corner.svg" alt="Thumbnail" class="item-thumbnail">
-
-        <div class="item-info">
-            <h3 class="item-name">{{ pen.title or pen.id }}</h3>
-            <h5 class="item-path">{{ pen.path }}</h5>
+    <div class="list-row" onclick="window.location.href = '/pens/edit?id={{ pen.id }}'">
+        <div class="row-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="16 18 22 12 16 6"></polyline>
+                <polyline points="8 6 2 12 8 18"></polyline>
+            </svg>
         </div>
-
-        <div class="item-actions">
-            <a href="{{ pen.url }}" target="_blank" onclick="event.stopPropagation()">
-                <button title="View"><img src="/static/svg/eye.svg"></button>
+        <div class="row-main">
+            <span class="row-name">{{ pen.title or pen.id }}</span>
+            <span class="row-path">{{ pen.path }}</span>
+        </div>
+        <div class="row-actions" onclick="event.stopPropagation()">
+            <a href="{{ pen.url }}" target="_blank" class="action-btn" title="View">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                </svg>
             </a>
-            <a href="/pens/edit?id={{ pen.id }}">
-                <button title="Edit"><img src="/static/svg/file-pen-line.svg"></button>
+            <a href="/pens/edit?id={{ pen.id }}" class="action-btn" title="Edit">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
             </a>
-            <a href="/pens/delete?id={{ pen.id }}">
-                <button class="delete" title="Delete"><img src="/static/svg/trash.svg"></button>
+            <a href="/pens/delete?id={{ pen.id }}" class="action-btn action-btn-danger" title="Delete">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
             </a>
         </div>
     </div>

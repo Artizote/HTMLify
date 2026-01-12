@@ -1,44 +1,151 @@
-{# Register #}
-
+{# Professional Register Page #}
 {% extends "dashboard/base.html" %}
 
-{% block title %}Registration{% endblock %}
+{% block title %}Create Account - HTMLify{% endblock %}
+
+{% block head_content %}
+<style>
+    .auth-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: calc(100vh - 150px);
+        padding: 2rem;
+    }
+
+    .auth-card {
+        width: 100%;
+        max-width: 500px;
+        background: white;
+        border: 1px solid var(--border-medium);
+        border-radius: var(--radius-2xl);
+        padding: 3rem;
+        box-shadow: var(--shadow-xl);
+    }
+
+    .auth-header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+    }
+
+    .auth-brand {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .brand-logo {
+        width: 48px;
+        height: 48px;
+        background: var(--primary);
+        border-radius: var(--radius-lg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+    }
+
+    .auth-title {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--text-main);
+        letter-spacing: -0.03em;
+    }
+
+    .auth-subtitle {
+        color: var(--text-muted);
+        font-size: 0.9375rem;
+        margin-top: 0.5rem;
+    }
+
+    .auth-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .auth-footer {
+        margin-top: 2rem;
+        text-align: center;
+        font-size: 0.9375rem;
+        color: var(--text-muted);
+    }
+
+    .auth-footer a {
+        font-weight: 600;
+        color: var(--primary);
+    }
+
+    @media (max-width: 640px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="card-center">
-    <h1>HTMlify</h1>
-
-    <div class="card card-half">
-        <h1 class="card-title">User Registration</h1>
+<div class="auth-container fade-in">
+    <div class="auth-card">
+        <header class="auth-header">
+            <div class="auth-brand">
+                <div class="brand-logo">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2.5">
+                        <polyline points="16 18 22 12 16 6"></polyline>
+                        <polyline points="8 6 2 12 8 18"></polyline>
+                    </svg>
+                </div>
+                <h1 class="auth-title">Join HTMLify</h1>
+            </div>
+            <p class="auth-subtitle">Start sharing your code with the world</p>
+        </header>
 
         {% if error %}
-        <div class="error-msg">
+        <div class="alert alert-danger mb-4">
             {{ error }}
         </div>
         {% endif %}
 
-        <form method="POST">
+        <form method="POST" class="auth-form">
             <div class="form-group">
-                <label>Username</label>
-                <input class="form-input" type="text" name="username" placeholder="Username" required />
+                <label class="form-label">Username</label>
+                <input class="form-input" type="text" name="username" placeholder="Choose a unique username" required
+                    autofocus>
             </div>
+
             <div class="form-group">
-                <label>Email</label>
-                <input class="form-input" type="email" name="email" placeholder="you@example.com" required />
+                <label class="form-label">Email Address</label>
+                <input class="form-input" type="email" name="email" placeholder="you@example.com" required>
             </div>
-            <div class="form-group">
-                <label>Password</label>
-                <input class="form-input" type="password" name="password" placeholder="Password" required />
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input class="form-input" type="password" name="password" placeholder="••••••••" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Confirm Password</label>
+                    <input class="form-input" type="password" name="repassword" placeholder="••••••••" required>
+                </div>
             </div>
-            <div class="form-group">
-                <label>Confirm Password</label>
-                <input class="form-input" type="password" name="repassword" placeholder="Re-Password" required />
-            </div>
-            <div class="form-group">
-                <button class="btn btn-primary">Register</button>
-                <p>Already registerd? <a href="/login">Login</a>.</p>
-            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg w-full mt-2">
+                Create Account
+            </button>
         </form>
+
+        <footer class="auth-footer">
+            Already have an account? <a href="/login">Sign in</a>
+        </footer>
     </div>
 </div>
 {% endblock %}

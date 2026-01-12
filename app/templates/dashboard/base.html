@@ -1,27 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link href="/static/css/base.css" rel="stylesheet">
-        <link href="/static/css/components/card.css" rel="stylesheet" />
-        <link href="/static/css/components/form.css" rel="stylesheet" />
-        <link href="/static/css/components/button.css" rel="stylesheet" />
-        <link href="/static/css/components/toast.css" rel="stylesheet" />
 
-        <link href="/static/css/stylesheet.css" rel="stylesheet">
-        <link href="/static/css/nav-bar.css" rel="stylesheet">
-        <link href="/static/css/dashboard.css" rel="stylesheet">
-        <script src="/static/js/utils.js"></script>
-        {% block head_content %}{% endblock %}
-        <title>{% block title %}HTMLify{% endblock %}</title>
-    </head>
-    <body>
-        <div id="toast-container"></div>
-        {% include "dashboard/nav-bar.html" %}
-        <main>
-            {% block content %}{% endblock %}
-        </main>
-    </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Dashboard - HTMLify{% endblock %}</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/static/svg/code.svg">
+
+    <!-- Core Styles -->
+    <link rel="stylesheet" href="/static/css/base.css">
+    <link rel="stylesheet" href="/static/css/components.css">
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+    <link rel="stylesheet" href="/static/css/file-card.css">
+    <link rel="stylesheet" href="/static/css/components/toast.css">
+
+    <!-- Page-specific styles -->
+    {% block head_content %}{% endblock %}
+</head>
+
+<body class="dashboard-body">
+    <!-- Dashboard Navigation -->
+    {% include "dashboard/nav-bar.html" %}
+
+    <!-- Main Content -->
+    <main class="dashboard-main">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Scripts -->
+    <script src="/static/js/utils.js"></script>
+    <script>
+        const currentUser = "{{ g.user.username if g.user else '' }}";
+        if (currentUser) {
+            localStorage.setItem("username", currentUser);
+        } else {
+            localStorage.removeItem("username");
+        }
+    </script>
     {% block after_body %}{% endblock %}
+
+    <style>
+        .dashboard-body {
+            background: var(--bg-main);
+        }
+
+        .dashboard-main {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+            min-height: calc(100vh - 64px);
+        }
+    </style>
+</body>
+
 </html>

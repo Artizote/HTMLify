@@ -1,73 +1,284 @@
-{# Dashboard #}
+{# Dashboard Files - Modernized with SVG Icons & New Option #}
 {% extends "dashboard/base.html" %}
 {% from "macros.html" import files_list_view, files_grid_view %}
-{% block title %}Dashboard - {{ g.user.username }}{% endblock %}
+
+{% block title %}My Files - HTMLify{% endblock %}
+
 {% block head_content %}
-    <link href="/static/css/dashboard.css" rel="stylesheet">
-    <link href="/static/css/files-view.css" rel="stylesheet">
+<style>
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 2.5rem;
+        gap: 2rem;
+    }
+
+    .header-main {
+        flex: 1;
+    }
+
+    .page-title {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--text-main);
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.02em;
+    }
+
+    .dir-breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-muted);
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+
+    .breadcrumb-item {
+        color: var(--text-muted);
+        text-decoration: none;
+        transition: var(--transition-fast);
+        display: flex;
+        align-items: center;
+    }
+
+    .breadcrumb-item:hover {
+        color: var(--primary);
+    }
+
+    .breadcrumb-item.current {
+        color: var(--text-main);
+        pointer-events: none;
+    }
+
+    .breadcrumb-separator {
+        color: var(--border-dark);
+        opacity: 0.5;
+    }
+
+    .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    /* View Toggles */
+    .view-toggle-group {
+        display: flex;
+        background: white;
+        border: 1px solid var(--border-medium);
+        border-radius: var(--radius-md);
+        padding: 0.25rem;
+    }
+
+    .toggle-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: var(--radius-sm);
+        color: var(--text-muted);
+        transition: var(--transition-base);
+    }
+
+    .toggle-btn:hover {
+        background: var(--bg-hover);
+        color: var(--text-main);
+    }
+
+    .toggle-btn.active {
+        background: var(--primary-soft);
+        color: var(--primary);
+    }
+
+    /* Filter Bar */
+    .filter-bar {
+        background: white;
+        border: 1px solid var(--border-medium);
+        border-radius: var(--radius-lg);
+        padding: 0.75rem 1rem;
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        box-shadow: var(--shadow-xs);
+    }
+
+    .filter-input-wrapper {
+        flex: 1;
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .filter-icon {
+        position: absolute;
+        left: 0.75rem;
+        color: var(--text-dim);
+        pointer-events: none;
+    }
+
+    .filter-input {
+        width: 100%;
+        padding: 0.625rem 1rem 0.625rem 2.5rem;
+        border: 1px solid transparent;
+        border-radius: var(--radius-md);
+        font-size: 0.9375rem;
+        background: var(--bg-hover);
+        transition: var(--transition-base);
+    }
+
+    .filter-input:focus {
+        outline: none;
+        background: white;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px var(--primary-soft);
+    }
+
+    .filter-status {
+        font-size: 0.8125rem;
+        font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-header {
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .header-actions {
+            width: 100%;
+            justify-content: space-between;
+        }
+    }
+</style>
 {% endblock %}
+
 {% block content %}
-    <h1>Files</h1>
+<div class="main-container fade-in">
+    <div class="dashboard-header">
+        <div class="header-main">
+            <h1 class="page-title">My Files</h1>
+            <div class="dir-breadcrumb">
+                {% set dirs = dir.path.split("/")[1:] %}
+                <a href="/files" class="breadcrumb-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg>
+                </a>
+                {% for d_path in dirs %}
+                <span class="breadcrumb-separator">/</span>
+                <a href="/files?dir=/{{ '/'.join(dirs[:loop.index]) }}"
+                    class="breadcrumb-item {% if loop.last %}current{% endif %}">
+                    {{ d_path }}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
 
-    {% set files_view = session.get("dashboard-files-view", "list") %}
-    {# TODO: add view switch button #}
+        <div class="header-actions">
+            <!-- New File Option -->
+            <a href="/files/edit?dir={{ dir.path }}" class="btn btn-outline" title="Create New File">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                New File
+            </a>
 
-    {% set dirs = dir.path.split("/")[1:] %}
-    <div class="dir-nav">
-        {% for d_path in dirs %}
-        /<a href="/files?dir=/{{ "/".join(dirs[:loop.index]) }}"
-            {% if loop.index == dirs.__len__() - 1 %}
-            class="current"
-            {% endif %}
-            >
-            {{ d_path }}
-        </a>
-        {% endfor %}
+            <a href="/files/upload?dir={{ dir.path }}" class="btn btn-secondary">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                Upload
+            </a>
+
+            <div class="view-toggle-group">
+                <a href="?dir={{ dir.path }}&view=list"
+                    class="toggle-btn {% if files_view == 'list' %}active{% endif %}" title="List View">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="8" y1="6" x2="21" y2="6"></line>
+                        <line x1="8" y1="12" x2="21" y2="12"></line>
+                        <line x1="8" y1="18" x2="21" y2="18"></line>
+                        <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                        <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                        <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                    </svg>
+                </a>
+                <a href="?dir={{ dir.path }}&view=grid"
+                    class="toggle-btn {% if files_view == 'grid' %}active{% endif %}" title="Grid View">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect>
+                        <rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>
+                </a>
+            </div>
+        </div>
     </div>
 
-    <div id="file-filter">
-        <input type="search" id="file-filter-input" placeholder="Filter files">
-        <p id="file-filter-status"></p>
+    <div class="filter-bar">
+        <div class="filter-input-wrapper">
+            <svg class="filter-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.35-4.35"></path>
+            </svg>
+            <input type="search" id="file-filter-input" placeholder="Filter files in this directory..."
+                class="filter-input">
+        </div>
+        <div id="file-filter-status" class="filter-status" style="display: none;"></div>
     </div>
 
-    {% if files_view == "list" %}
-    {{ files_list_view(dir.items()) }}
-    {% else %}
-    {{ files_grid_view(dir.items()) }}
-    {% endif %}
-
+    <div class="files-view-container">
+        {% if files_view == "list" %}
+        {{ files_list_view(dir.items()) }}
+        {% else %}
+        {{ files_grid_view(dir.items()) }}
+        {% endif %}
+    </div>
+</div>
 {% endblock %}
+
 {% block after_body %}
 <script>
-const file_filter_input = document.getElementById("file-filter-input");
-const file_filter_status = document.getElementById("file-filter-status");
+    const file_filter_input = document.getElementById("file-filter-input");
+    const file_filter_status = document.getElementById("file-filter-status");
 
-file_filter_input.addEventListener("input", () => {
-    const items = document.querySelectorAll(".item");
-    const q = file_filter_input.value.toLowerCase();
-    let match_count = 0;
-    items.forEach((item) => {
-        if (
-            item.getAttribute("data-title").toLowerCase().includes(q) ||
-            item.getAttribute("data-path").toLowerCase().includes(q)
-        ) {
-            item.style.display = "flex";
-            match_count++;
+    file_filter_input.addEventListener("input", () => {
+        const q = file_filter_input.value.toLowerCase();
+        // Updated selectors to match macros.html
+        const listItems = document.querySelectorAll(".list-row");
+        const gridItems = document.querySelectorAll(".dashboard-item");
+        const items = [...listItems, ...gridItems];
+
+        let match_count = 0;
+
+        items.forEach((item) => {
+            const name = item.querySelector(".row-name, .item-name")?.innerText.toLowerCase() || "";
+            const path = item.querySelector(".row-path, .item-path")?.innerText.toLowerCase() || "";
+
+            if (name.includes(q) || path.includes(q)) {
+                item.style.display = "";
+                match_count++;
+            } else {
+                item.style.display = "none";
+            }
+        });
+
+        if (q.length > 0) {
+            file_filter_status.style.display = "block";
+            file_filter_status.innerText = `${match_count} results found for "${q}"`;
+            file_filter_status.style.color = match_count === 0 ? "var(--danger)" : "var(--primary)";
         } else {
-            item.style.display = "none";
+            file_filter_status.style.display = "none";
         }
     });
-    if (q.length > 0) {
-        file_filter_status.style.display = "block";
-        file_filter_status.innerText = `${match_count} Files matched out of ${items.length}`;
-        if (match_count == 0) {
-            file_filter_status.style.backgroundColor = "orange";
-        } else {
-            file_filter_status.style.backgroundColor = "yellow";
-        }
-    } else {
-        file_filter_status.style.display = "none";
-    }
-});
 </script>
 {% endblock %}

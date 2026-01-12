@@ -5,30 +5,83 @@
 {% block title %}File Upload{% endblock %}
 
 {% block content %}
-<div class="card-center">
-    <h1>File Upload</h1>
+<div class="main-container fade-in">
+    <div class="page-header">
+        <h1 class="page-title">Upload Files</h1>
+        <p class="page-subtitle">Add new assets to your directory</p>
+    </div>
 
-    <div class="card card-half">
-        <div class="form-group">
-            <input id="file-upload-field" type="file" class="form-file" multiple>
+    <div class="upload-grid">
+        <div class="upload-main">
+            <div class="upload-dropzone" id="dropzone">
+                <img src="/static/svg/upload-cloud.svg" class="upload-icon">
+                <div class="upload-text">
+                    <span class="primary-text">Click to upload or drag and drop</span>
+                    <span class="secondary-text">Maximum file size: 32MB</span>
+                </div>
+                <input id="file-upload-field" type="file" class="hidden-input" multiple
+                    onchange="handleFileSelect(this)">
+                <button class="btn btn-primary" onclick="document.getElementById('file-upload-field').click()">Select
+                    Files</button>
+            </div>
+
+            <div id="file-list-preview" class="file-preview-list">
+                <!-- Selected files will appear here -->
+            </div>
         </div>
-        <div class="form-group">
-            <label>Upload dir</label>
-            <input id="upload-dir" type="text" value="{{ request.args.get("dir") or "/" + g.user.username + "/" }}" class="form-file" >
-        </div>
-        <label for="overwrite">Overwrite files?</label>
-        <input id="overwrite" type="checkbox" class="form-check">
-        <br>
-        <div class="form-group">
-            <button class="btn btn-primary" onclick="upload()">Upload</button>
-        </div>
-        <div id="logs" class="card card-scroll">
-        </div>
+
+        <aside class="upload-settings">
+            <div class="settings-card">
+                <h3 class="settings-title">Upload Settings</h3>
+                <div class="form-group-vertical">
+                    <label>Target Directory</label>
+                    <input id="upload-dir" type="text"
+                        value="{{ request.args.get('dir') or '/' + g.user.username + '/' }}" class="form-input"
+                        placeholder="/username/folder/">
+                </div>
+
+                <div class="form-checkbox-group">
+                    <input id="overwrite" type="checkbox">
+                    <label for="overwrite">Overwrite existing files</label>
+                </div>
+
+                <div class="upload-actions">
+                    <button class="btn btn-primary btn-block" onclick="upload()">
+                        <img src="/static/svg/upload.svg" class="icon-sm">
+                        Start Upload
+                    </button>
+                </div>
+            </div>
+
+            <div id="logs-container" class="logs-card" style="display: none;">
+                <h3 class="settings-title">Upload Progress</h3>
+                <div id="logs" class="logs-content"></div>
+            </div>
+        </aside>
     </div>
 </div>
+
+<script>
+    function handleFileSelect(input) {
+        const list = document.getElementById('file-list-preview');
+        list.innerHTML = '';
+        if (input.files.length > 0) {
+            Array.from(input.files).forEach(file => {
+                const item = document.createElement('div');
+                item.className = 'preview-item';
+                item.innerHTML = `
+                <img src="/static/svg/file.svg" class="icon-sm">
+                <span class="file-name">${file.name}</span>
+                <span class="file-size">${(file.size / 1024).toFixed(1)} KB</span>
+            `;
+                list.appendChild(item);
+            });
+        }
+    }
+</script>
 {% endblock %}
 
 {% block after_body %}
-    <script src="/static/js/private-api.js"></script>
-    <script src="/static/js/pages/dashboard/file-upload.js"></script>
+<script src="/static/js/private-api.js"></script>
+<script src="/static/js/pages/dashboard/file-upload.js"></script>
 {% endblock %}

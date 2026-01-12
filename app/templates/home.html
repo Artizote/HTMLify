@@ -1,43 +1,306 @@
-{# home.html #}
+{# Home Page - Professional Redesign #}
 {% extends "base.html" %}
 {% from "macros.html" import file_card with context %}
-{% block title %}HTMLify your dreams{% endblock %}
-{% block head_content %}
-    <link href="/static/css/file-card.css" rel="stylesheet">
-    <link href="/static/css/dir-card.css" rel="stylesheet">
-{% endblock %}
-{% block content %}
-    <h1>HTMLify your dreams</h1>
-    <form id="filter-form" class="form-inline" method="POST">
-        <input id="file-mode-source-checkbox" type="checkbox" name="file-modes" value="{{ FileMode.SOURCE }}" {% if FileMode.SOURCE in session["filter-file-modes"] %}checked{% endif %}>
-        <label for="file-mode-source-checkbox">Source</label>
-        <input id="file-mode-render-checkbox" type="checkbox" name="file-modes" value="{{ FileMode.RENDER }}" {% if FileMode.RENDER in session["filter-file-modes"] %}checked{% endif %}>
-        <label for="file-mode-render-checkbox">Render</label>
-        <select name="filter-order">
-            <option value="r" {% if session.get("filter-file-order", "r") == "r"%}selected{% endif %}>Random</option>
-            <option value="n" {% if session.get("filter-file-order", "r") == "n"%}selected{% endif %}>Newest</option>
-        </select>
-        <button class="btn btn-primary">Filter</button>
-    </form>
-    <hr>
-    {% for file in files %}
-    {{ file_card(file) }}
-    {% endfor %}
-    <script>
-        // to prevent the Document expire worning on bact-to-home after filter
-        document.getElementById("filter-form").addEventListener("submit", function(e) {
-            e.preventDefault(); 
-            let formData = new FormData(this);
-            fetch("", {
-                method: "POST",
-                body: formData
-            })
-            .then(responce => responce.text())
-            .then(data => {
-                console.log("data:", data);
-                location.reload();
-            });
-        });
-    </script>
 
+{% block title %}Discover & Share Code - HTMLify{% endblock %}
+
+{% block head_content %}
+<link href="/static/css/file-card.css" rel="stylesheet">
+<style>
+    .home-container {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 0 1.5rem;
+    }
+
+    .hero-section {
+        text-align: center;
+        padding: 5rem 2rem;
+        margin: 3rem 0;
+    }
+
+    .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: var(--primary-soft);
+        color: var(--primary);
+        border-radius: var(--radius-full);
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+    }
+
+    .hero-title {
+        font-size: 4rem;
+        font-weight: 800;
+        line-height: 1.1;
+        margin-bottom: 1.5rem;
+        color: var(--text-main);
+        letter-spacing: -0.04em;
+    }
+
+    .hero-subtitle {
+        font-size: 1.25rem;
+        color: var(--text-muted);
+        max-width: 600px;
+        margin: 0 auto 2.5rem;
+        line-height: 1.6;
+    }
+
+    .hero-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .filter-section {
+        background: white;
+        border: 1px solid var(--border-medium);
+        border-radius: var(--radius-lg);
+        padding: 1.5rem;
+        margin-bottom: 3rem;
+        box-shadow: var(--shadow-xs);
+    }
+
+    .filter-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.25rem;
+    }
+
+    .filter-title {
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: var(--text-main);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .filter-form {
+        display: flex;
+        gap: 1.5rem;
+        align-items: flex-end;
+        flex-wrap: wrap;
+    }
+
+    .filter-group {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .filter-label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        margin-bottom: 0.5rem;
+    }
+
+    .checkbox-group {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .checkbox-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .checkbox-item input[type="checkbox"] {
+        width: 1.125rem;
+        height: 1.125rem;
+        cursor: pointer;
+    }
+
+    .checkbox-item label {
+        font-size: 0.9375rem;
+        color: var(--text-main);
+        cursor: pointer;
+    }
+
+    .projects-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .projects-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-main);
+    }
+
+    .projects-count {
+        font-size: 0.875rem;
+        color: var(--text-muted);
+    }
+
+    .projects-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+        gap: 2rem;
+        margin-bottom: 4rem;
+    }
+
+    .card-wrapper {
+        animation: fadeInUp 0.4s ease-out backwards;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 2.5rem;
+        }
+
+        .projects-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .filter-form {
+            flex-direction: column;
+            align-items: stretch;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="home-container">
+    <!-- Hero Section -->
+    <div class="hero-section fade-in">
+        <div class="hero-badge">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon
+                    points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
+                </polygon>
+            </svg>
+            Explore Projects
+        </div>
+        <h1 class="hero-title">Discover Amazing Code</h1>
+        <p class="hero-subtitle">
+            Explore, share, and collaborate on creative projects from developers around the world.
+            Find inspiration and showcase your work.
+        </p>
+        <div class="hero-actions">
+            <a href="{{ SCHEME }}://my.{{ SERVER_NAME }}/files/edit" class="btn btn-primary btn-lg">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 5v14M5 12h14"></path>
+                </svg>
+                Create Project
+            </a>
+            <a href="/api" class="btn btn-outline btn-lg">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="16 18 22 12 16 6"></polyline>
+                    <polyline points="8 6 2 12 8 18"></polyline>
+                </svg>
+                View API
+            </a>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-section slide-in-left">
+        <div class="filter-header">
+            <span class="filter-title">Filter Projects</span>
+        </div>
+        <form method="post" id="filter-form" class="filter-form">
+            <div class="filter-group">
+                <span class="filter-label">File Modes</span>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" name="file-modes" value="{{ FileMode.SOURCE }}" id="mode-source" {% if
+                            FileMode.SOURCE in session.get('filter-file-modes', [FileMode.SOURCE, FileMode.RENDER])
+                            %}checked{% endif %}>
+                        <label for="mode-source">Source Code</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" name="file-modes" value="{{ FileMode.RENDER }}" id="mode-render" {% if
+                            FileMode.RENDER in session.get('filter-file-modes', [FileMode.SOURCE, FileMode.RENDER])
+                            %}checked{% endif %}>
+                        <label for="mode-render">Rendered</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <label for="filter-order" class="filter-label">Sort By</label>
+                <select name="filter-order" id="filter-order" class="form-select">
+                    <option value="r" {% if session.get('filter-file-order', 'r' )=='r' %}selected{% endif %}>Random
+                    </option>
+                    <option value="n" {% if session.get('filter-file-order', 'r' )=='n' %}selected{% endif %}>Newest
+                        First</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                </svg>
+                Apply Filters
+            </button>
+        </form>
+    </div>
+
+    <!-- Projects Grid -->
+    <div class="projects-section">
+        {% if files %}
+        <div class="projects-header">
+            <h2 class="projects-title">Featured Projects</h2>
+            <span class="projects-count">{{ files|length }} projects</span>
+        </div>
+        <div class="projects-grid">
+            {% for file in files %}
+            <div class="card-wrapper">
+                {{ file_card(file) }}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                opacity="0.2">
+                <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+                <polyline points="13 2 13 9 20 9"></polyline>
+            </svg>
+            <h3>No projects found</h3>
+            <p>Try adjusting your filters or check back later for new content.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    // Staggered animation for project cards
+    document.querySelectorAll('.card-wrapper').forEach((card, i) => {
+        card.style.animationDelay = `${i * 0.05}s`;
+    });
+
+    // Filter form handling
+    document.getElementById('filter-form').addEventListener('submit', function (e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        fetch('', {
+            method: 'POST',
+            body: formData
+        }).then(() => location.reload());
+    });
+</script>
 {% endblock %}

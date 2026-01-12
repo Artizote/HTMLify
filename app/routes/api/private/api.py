@@ -9,7 +9,7 @@ private_api = Blueprint("private", __name__, url_prefix="/private")
 
 
 @private_api.before_request
-def before_requesn():
+def before_request():
     if request.method == "OPTIONS":
         return None
     # checking authorized user with JWT

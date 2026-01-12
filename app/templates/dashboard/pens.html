@@ -1,12 +1,97 @@
 {% extends "dashboard/base.html" %}
 {% from "macros.html" import pens_list_view %}
 
+{% block title %}My Pens - HTMLify{% endblock %}
+
 {% block head_content %}
-    <link href="/static/css/files-view.css" rel="stylesheet">
+<link href="/static/css/file-card.css" rel="stylesheet">
 {% endblock %}
 
 
 {% block content %}
-<h1>Pens</h1>
-{{ pens_list_view(pens) }}
+<div class="dashboard-container fade-in">
+    <!-- Header -->
+    <header class="dashboard-header">
+        <div class="header-content">
+            <h1 class="page-title">My Pens</h1>
+            <p class="page-subtitle">Manage your HTML/CSS/JS experiments</p>
+        </div>
+        <div class="header-actions">
+            <a href="/pens/edit" class="btn btn-primary">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 5v14"></path>
+                    <path d="M5 12h14"></path>
+                </svg>
+                New Pen
+            </a>
+        </div>
+    </header>
+
+    <!-- Toolbar -->
+    <div class="dashboard-toolbar">
+        <div class="toolbar-left">
+            <div class="search-box">
+                <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                </svg>
+                <input type="text" id="filter-input" placeholder="Filter pens..." class="search-input">
+            </div>
+        </div>
+        <div class="toolbar-right">
+            <div class="status-badge" id="item-count">
+                {{ pens|length }} Pens
+            </div>
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div class="dashboard-content" id="pens-list">
+        {% if pens %}
+        {{ pens_list_view(pens) }}
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M12 19l7-7 3 3-7 7-3-3z"></path>
+                    <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path>
+                    <path d="M2 2l7.586 7.586"></path>
+                    <circle cx="11" cy="11" r="2"></circle>
+                </svg>
+            </div>
+            <h3>No Pens Yet</h3>
+            <p>Create your first code pen to start experimenting.</p>
+            <a href="/pens/edit" class="btn btn-primary mt-4">Create Pen</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    // Simple filter functionality
+    const filterInput = document.getElementById('filter-input');
+    const pensList = document.getElementById('pens-list');
+    const itemCount = document.getElementById('item-count');
+
+    if (filterInput && pensList) {
+        filterInput.addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            const items = pensList.querySelectorAll('.list-row');
+            let visibleCount = 0;
+
+            items.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                if (text.includes(term)) {
+                    item.style.display = '';
+                    visibleCount++;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+
+            if (itemCount) itemCount.textContent = visibleCount + " Pens";
+        });
+    }
+</script>
 {% endblock %}

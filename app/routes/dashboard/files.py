@@ -6,8 +6,15 @@ from .dashboard import dashboard
 
 @dashboard.get("/files")
 def files():
+    from flask import session
     dir = Dir(request.args.get("dir", g.user.username))
-    return render_template("files.html", dir=dir)
+    
+    view = request.args.get("view")
+    if view in ["grid", "list"]:
+        session["files_view"] = view
+        
+    files_view = session.get("files_view", "grid")
+    return render_template("files.html", dir=dir, files_view=files_view)
 
 @dashboard.route("/files/upload")
 def file_upload():

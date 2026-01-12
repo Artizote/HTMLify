@@ -1,41 +1,88 @@
-/* Toast Notification CSS */
+/* Professional Toast Notification CSS */
 
 #toast-container {
     position: fixed;
-    top: 20px;
-    right: 20px;
+    top: 24px;
+    right: 24px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    z-index: 9999;
+    gap: 12px;
+    z-index: var(--z-modal);
+    pointer-events: none;
 }
 
 .toast {
-    padding: 12px 16px;
-    background: #333;
-    color: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    pointer-events: auto;
+    min-width: 300px;
+    max-width: 450px;
+    background: white;
+    color: var(--text-main);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-xl);
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border-left: 4px solid var(--primary);
+
+    /* Animation initial state */
     opacity: 0;
-    transform: translateY(-10px);
-    transition: opacity 0.3s, transform 0.3s;
-    font-size: 14px;
+    transform: translateX(40px) scale(0.95);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .toast.show {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateX(0) scale(1);
 }
 
+.toast.hide {
+    opacity: 0;
+    transform: translateX(20px) scale(0.95);
+}
+
+.toast-icon {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.toast-content {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+/* Variants */
 .toast.success {
-    background: #2d8a3b;
+    border-color: var(--success);
+}
+
+.toast.success .toast-icon {
+    color: var(--success);
 }
 
 .toast.error {
-    background: #c0392b;
+    border-color: var(--danger);
+}
+
+.toast.error .toast-icon {
+    color: var(--danger);
+}
+
+.toast.warning {
+    border-color: var(--warning);
+}
+
+.toast.warning .toast-icon {
+    color: var(--warning);
 }
 
 .toast.info {
-    background: #2980b9;
+    border-color: var(--info);
 }
 
+.toast.info .toast-icon {
+    color: var(--info);
+}

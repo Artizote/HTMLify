@@ -1,122 +1,296 @@
+{# Professional Pen Editor Page #}
 {% extends "dashboard/base.html" %}
 
-{% block title %}{{ "Editing - " + pen.id if pen else "New Pen" }}{% endblock %}
+{% block title %}{% if pen %}Editing: {{ pen.title }}{% else %}New Pen{% endif %} - HTMLify{% endblock %}
 
 {% block head_content %}
 <link rel="stylesheet" href="/static/vendor/codemirror/lib/codemirror.css">
 <style>
-.CodeMirror {
-    outline: 2px solid  #000000;
-}
-#output-container {
-    resize: vertical;
-}
-#output-iframe {
-    width: 100%;
-    height: 100%;
-    min-height: 300px;
-}
-.overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
-    background: rgba(0,0,0,0.4);
+    .editor-layout {
+        display: grid;
+        grid-template-columns: 1fr 320px;
+        gap: 2rem;
+        align-items: start;
+    }
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
+    /* Header */
+    .edit-header {
+        background: white;
+        border: 1px solid var(--border-medium);
+        border-radius: var(--radius-lg);
+        padding: 1.25rem 2rem;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .header-main h2 {
+        font-size: 1.25rem;
+        font-weight: 800;
+        margin-bottom: 0.25rem;
+    }
+
+    .path-display {
+        font-family: var(--font-mono);
+        color: var(--text-dim);
+        font-size: 0.8125rem;
+    }
+
+    /* Editor Section */
+    .editor-section {
+        background: white;
+        border: 1px solid var(--border-medium);
+        border-radius: var(--radius-xl);
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .editor-toolbar {
+        background: var(--bg-hover);
+        border-bottom: 1px solid var(--border-light);
+        padding: 0.75rem 1rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .toolbar-group {
+        display: flex;
+        background: white;
+        border: 1px solid var(--border-medium);
+        border-radius: var(--radius-md);
+        padding: 0.2rem;
+    }
+
+    .toolbar-btn {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        border-radius: var(--radius-sm);
+        color: var(--text-muted);
+        text-transform: uppercase;
+        transition: var(--transition-fast);
+        border: none;
+        background: transparent;
+        cursor: pointer;
+    }
+
+    .toolbar-btn:hover {
+        background: var(--bg-hover);
+        color: var(--text-main);
+    }
+
+    .toolbar-btn.active {
+        background: var(--primary);
+        color: white;
+    }
+
+    .CodeMirror {
+        height: 400px;
+        font-family: var(--font-mono);
+        font-size: 14px;
+        border-bottom: 1px solid var(--border-light);
+    }
+
+    .editor-wrapper {
+        display: none;
+    }
+
+    .editor-wrapper.active {
+        display: block;
+    }
+
+    .editor-label {
+        padding: 0.5rem 1rem;
+        background: var(--ice-50);
+        font-size: 0.7rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--text-dim);
+        border-bottom: 1px solid var(--border-light);
+        display: block;
+    }
+
+    /* Preview Section */
+    .output-preview {
+        background: white;
+        border-top: 1px solid var(--border-medium);
+    }
+
+    .output-header {
+        padding: 0.5rem 1rem;
+        background: var(--bg-hover);
+        font-size: 0.7rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        color: var(--text-dim);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    #output-iframe {
+        width: 100%;
+        height: 400px;
+        border: none;
+        background: white;
+    }
+
+    /* Sidebar */
+    .sidebar-card {
+        background: white;
+        border: 1px solid var(--border-medium);
+        border-radius: var(--radius-xl);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .card-title {
+        font-size: 1rem;
+        font-weight: 800;
+        margin-bottom: 1.25rem;
+        color: var(--text-main);
+    }
+
+    .form-group-vertical {
+        margin-bottom: 1.25rem;
+    }
+
+    .form-group-vertical label {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: var(--text-dim);
+        margin-bottom: 0.5rem;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="card">
-    <div class="form-group">
-        <input id="title-input" type="text" class="form-input" placeholder="Pen Title" value="{{ pen.title if pen else "Untitled Pen" }}"><br>
-    </div>
-
-    <div class="form-group">
-        <div class="form-inline">
-            <div style="flex:1;">
-                <button id="body-editor-toggle-button"  onclick="toggle_body_editor()"  style="margin:2px;" class="btn btn-primary">HTML</button>
-                <button id="css-editor-toggle-button"   onclick="toggle_css_editor()"   style="margin:2px;" class="btn btn-primary">CSS</button>
-                <button id="js-editor-toggle-button"    onclick="toggle_js_editor()"    style="margin:2px;" class="btn btn-primary">JS</button>
-                <button id="output-toggle-button"       onclick="toggle_output()"       style="margin:2px;" class="btn btn-primary">Output</button>
-            </div>
-            <div>
-                <button onclick="update_output()"   style="margin:2px;" class="btn">Run</button>
-                <button onclick="save()"            style="margin:2px;" class="btn">Save</button>
-                <button onclick="view()"            style="margin:2px;" class="btn">View</button>
-                <button onclick="toggle_settings()" style="margin:2px;" class="btn">Settings</button>
-            </div>
+<div class="fade-in">
+    <!-- Header -->
+    <header class="edit-header">
+        <div class="header-main">
+            <h2>{% if pen %}Edit Pen{% else %}New Pen{% endif %}</h2>
+            {% if pen %}<div class="path-display">ID: {{ pen.id }}</div>{% endif %}
         </div>
-    </div>
-
-    <div class="form-group">
-        <div class="form-inline">
-            <fieldset style="flex:1;min-width: 0;">
-                <legend>HTML</legend>
-                <textarea id="body-editor"  cols="30" rows="10">{{ pen.body_content  if pen else "" }}</textarea>
-            </fieldset>
-            <fieldset style="flex:1;min-width: 0;">
-                <legend>CSS</legend>
-                <textarea id="css-editor"   cols="30" rows="10">{{ pen.css_content   if pen else "" }}</textarea>
-            </fieldset>
-            <fieldset style="flex:1;min-width: 0;">
-                <legend>JS</legend>
-                <textarea id="js-editor"    cols="30" rows="10">{{ pen.js_content    if pen else "" }}</textarea>
-            </fieldset>
+        <div class="header-actions">
+            <button class="btn btn-outline btn-sm" onclick="view()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+                View
+            </button>
+            <button class="btn btn-primary btn-sm" onclick="save()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                    <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                    <polyline points="7 3 7 8 15 8"></polyline>
+                </svg>
+                Save Pen
+            </button>
         </div>
-    </div>
+    </header>
 
-    <div id="output-container" class="">
-        <iframe
-            id="output-iframe"
-            src="{{ pen.url if pen else "" }}"
-            allow="camera *; display-capture *; geolocation *; microphone *; web-share *"
-            allowfullscreen="true"
-            allowpaymentrequest="true"
-            allowtransparency="true"
-            sandbox="
-            allow-downloads
-            allow-forms
-            allow-modals
-            allow-pointer-lock
-            allow-popups
-            allow-popups-to-escape-sandbox
-            allow-presentation
-            allow-same-origin
-            allow-scripts
-            allow-top-navigation-by-user-activation
-            "
-            loading="lazy"></iframe>
-    </div>
-</div>
+    <div class="editor-layout">
+        <!-- Main Editor Section -->
+        <main class="editor-section">
+            <div class="editor-toolbar">
+                <div class="toolbar-group">
+                    <button id="body-editor-toggle-button" onclick="toggle_body_editor()"
+                        class="toolbar-btn active">HTML</button>
+                    <button id="css-editor-toggle-button" onclick="toggle_css_editor()" class="toolbar-btn">CSS</button>
+                    <button id="js-editor-toggle-button" onclick="toggle_js_editor()" class="toolbar-btn">JS</button>
+                </div>
 
-<div id="settings-container" class="overlay" style="display:none;">
-    <div class="card card-half">
-        <div class="form-inline">
-            <div style="flex:1;">
-                <button id="linenos-toggle-button" onclick="toggle_editor_linenos()" class="btn btn-primary">Line Numbers</button>
+                <button id="output-toggle-button" onclick="toggle_output()"
+                    class="btn btn-ghost btn-sm active">Preview</button>
+
+                <div style="margin-left: auto; display: flex; gap: 0.5rem;">
+                    <button class="btn btn-primary btn-icon btn-sm" onclick="update_output()" title="Run Code">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                        </svg>
+                    </button>
+                </div>
             </div>
-            <div>
-                <button onclick="toggle_settings()" class="btn">Close</button>
+
+            <div class="pen-editors-container">
+                <div id="html-editor-wrapper" class="editor-wrapper active">
+                    <span class="editor-label">Structure (HTML)</span>
+                    <textarea id="body-editor">{{ pen.body_content if pen else "" }}</textarea>
+                </div>
+                <div id="css-editor-wrapper" class="editor-wrapper">
+                    <span class="editor-label">Style (CSS)</span>
+                    <textarea id="css-editor">{{ pen.css_content if pen else "" }}</textarea>
+                </div>
+                <div id="js-editor-wrapper" class="editor-wrapper">
+                    <span class="editor-label">Logic (JS)</span>
+                    <textarea id="js-editor">{{ pen.js_content if pen else "" }}</textarea>
+                </div>
             </div>
-        </div>
-        <br>
-        <select id="theme-selector" onchange="update_editor_theme()" class="form-select"></select>
-        <h2 class="card-headling">Head Content</h2>
-        <fieldset style="flex:1;min-width:0;">
-            <legend>Head Content</legend>
-            <textarea id="head-editor">{{ pen.head_content if pen else "" }}</textarea>
-        </fieldset>
+
+            <div id="output-container" class="output-preview">
+                <div class="output-header">
+                    <span>Live Render</span>
+                    <div class="spinner-sm" id="preview-loader" style="display: none;"></div>
+                </div>
+                <iframe id="output-iframe" src="{{ pen.url if pen else "" }}"
+                    allow="camera *; display-capture *; geolocation *; microphone *; web-share *" allowfullscreen="true"
+                    sandbox="allow-downloads allow-forms allow-modals allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts allow-top-navigation-by-user-activation">
+                </iframe>
+            </div>
+        </main>
+
+        <!-- Sidebar Section -->
+        <aside class="editor-sidebar">
+            <div class="sidebar-card">
+                <h3 class="card-title">Pen Details</h3>
+                <div class="form-group-vertical">
+                    <label>Title</label>
+                    <input id="title-input" type="text" class="form-input" placeholder="My Awesome Project"
+                        value="{{ pen.title if pen else 'Untitled Pen' }}">
+                </div>
+            </div>
+
+            <div class="sidebar-card">
+                <h3 class="card-title">Head Content</h3>
+                <div class="form-group-vertical">
+                    <label>External Resources</label>
+                    <textarea id="head-editor" class="form-textarea"
+                        style="font-family: var(--font-mono); font-size: 0.75rem; min-height: 150px;"
+                        placeholder="<link...> <script...>">{{ pen.head_content if pen else "" }}</textarea>
+                </div>
+            </div>
+
+            <div class="sidebar-card">
+                <h3 class="card-title">Appearance</h3>
+                <div class="form-group-vertical">
+                    <label>Editor Theme</label>
+                    <select id="theme-selector" onchange="update_editor_theme()" class="form-select"></select>
+                </div>
+                <div class="form-group" style="display: flex; align-items: center; gap: 0.75rem;">
+                    <input id="linenos-toggle-checkbox" type="checkbox" onchange="toggle_editor_linenos()" checked
+                        style="width:16px; height:16px;">
+                    <label for="linenos-toggle-checkbox"
+                        style="font-size: 0.8rem; font-weight:600; cursor:pointer;">Show Line Numbers</label>
+                </div>
+            </div>
+        </aside>
     </div>
 </div>
 {% endblock %}
 
 {% block after_body %}
 <script>
-window.pen_id = "{{ pen.id if pen else "" }}";
+    window.pen_id = '{{ pen.id if pen else "" }}';
 </script>
 <script src="/static/js/public-api.js"></script>
 <script src="/static/js/private-api.js"></script>
