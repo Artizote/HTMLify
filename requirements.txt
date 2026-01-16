@@ -1,8 +1,8 @@
 flask
 flask_cors
 flask_jwt_extended
-requests
-pygments
 peewee
-PIL
+pillow
+pygments
 qrcode
+requests

@@ -12,6 +12,7 @@ const head_editor = CodeMirror.fromTextArea(head_textarea, { mode: "htmlmixed", 
 const body_editor = CodeMirror.fromTextArea(body_textarea, { mode: "htmlmixed", indentUnit: 4 });
 const css_editor = CodeMirror.fromTextArea(css_textarea, { mode: "css", indentUnit: 4 });
 const js_editor = CodeMirror.fromTextArea(js_textarea, { mode: "javascript", indentUnit: 4 });
+const run_button = document.getElementById("run-button");
 const output_container = document.getElementById("output-container");
 const output_iframe = document.getElementById("output-iframe");
 const settings_container = document.getElementById("settings-container");
@@ -140,6 +141,7 @@ function auto_update_output() {
 }
 
 function update_output() {
+    run_button.innerText = "Updating...";
     let html = `<!DOCTYPE html>
 <html lang="en">
     <head>
@@ -159,7 +161,7 @@ function update_output() {
 </html>`;
     let data = {
         name: "pen.html",
-        content: btoa(html)
+        content: text_to_base64(html)
     }
     publicApi.tmpfile.create(data)
         .then(res => {
@@ -167,6 +169,7 @@ function update_output() {
                 output_iframe.src = res.tmpfile.url;
                 last_update = Date.now();
                 content_changed = false;
+                run_button.innerText = "Run";
             }
         });
 }
@@ -175,10 +178,10 @@ function save() {
     let data = {
         id: pen_id,
         title: title_field.value,
-        head_content: btoa(head_editor.getValue()),
-        body_content: btoa(body_editor.getValue()),
-        css_content: btoa(css_editor.getValue()),
-        js_content: btoa(js_editor.getValue()),
+        head_content: text_to_base64(head_editor.getValue()),
+        body_content: text_to_base64(body_editor.getValue()),
+        css_content: text_to_base64(css_editor.getValue()),
+        js_content: text_to_base64(js_editor.getValue()),
     };
     if (pen_id === "") {
         privateApi.pen.create(data)

@@ -4,6 +4,7 @@ import binascii
 import os
 
 from app.utils.helpers import randstr, file_path
+from app.utils.git import git_clone
 from app.models import Blob, File, FileMode, FileVisibility, Dir
 from .api import *
 

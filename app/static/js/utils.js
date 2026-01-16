@@ -94,3 +94,15 @@ function loadCSS(url) {
     });
 }
 
+/*
+ * encode text to base64
+ */
+function text_to_base64(text) {
+    let encoder = new TextEncoder();
+    let bytes = encoder.encode(text);
+
+    let binary = "";
+    for (let b of bytes) binary += String.fromCharCode(b);
+
+    return btoa(binary);
+}
