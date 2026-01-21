@@ -1,6 +1,8 @@
 from random import randint
 from hashlib import sha256
+import unicodedata
 import os
+import re
 
 def randstr(n: int) -> str:
     """Returns an alphanumaric string of length `n`"""
@@ -41,17 +43,29 @@ def rgb_hex_to_int(color: str) -> tuple[int, int, int]:
     b = int(color[4:6], base=16)
     return r, g, b
 
-def normalizer(string: str) -> str:
+def normalize_string(string: str) -> str:
     """Returns a normlized version of `string`"""
+
     s = string
+
+    # unicode normlize
+    s = unicodedata.normalize("NFKD", s)
+    s = s.encode("ascii", "ignore").decode("ascii")
+
     s = s.lower()
-    char_set = set(s)
-    for c in char_set:
-        if not c.isalnum() and c != " ":
-            s = s.replace(c, "")
+
+    # Replace separators with space
+    s = re.sub(r"[_\-\/\.\:<>\(\)\[\]\|,]+", " ", s)
+
+    # Remove non-alphanumeric characters
+    s = re.sub(r"[^a-z0-9\s]", "", s)
+
+    # Remove extra whitespacses
+    s = re.sub(r"\s+", " ", s).strip()
+
     return s
 
-def tokenizer(string: str) -> list[str]:
+def tokenize_string(string: str) -> list[str]:
     """Basic tokenizer, returns tokens out of `string`"""
     splits = string.split(" ")
     tokens = []

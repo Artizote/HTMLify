@@ -4,7 +4,7 @@ from typing import Optional
 from datetime import timedelta, datetime, UTC
 
 
-notification_db = SqliteDatabase("notifications.db")
+notification_db = SqliteDatabase("instance/notifications.db")
 
 
 class Notification(Model):
