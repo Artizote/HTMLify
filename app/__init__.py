@@ -7,6 +7,7 @@ from threading import Thread
 
 from .routes import register_blueprints
 from .routes.public import PROCESS_POOL
+from .services.search import index_item
 from .executors import *
 from .models import *
 from .models.base import BlobDependent
@@ -52,12 +53,12 @@ def teardown_appcontext(_):
 register_blueprints(app)
 
 def run_daemons():
-    # TODO: update/rewrote search engine
-    # Thread(target=search_indexing_daemon,   args=(TermFrequency, app, files),   daemon=True).start()
-    Thread(target=process_pool_purger, args=(PROCESS_POOL,),                        daemon=True).start()
-    Thread(target=tmp_file_purger,     args=(TmpFile,),                             daemon=True).start()
-    Thread(target=tmp_folder_purger,   args=(TmpFolder,),                           daemon=True).start()
-    Thread(target=blob_purger,         args=(Blob, BlobDependent.__subclasses__()), daemon=True).start()
+    Thread(target=search_indexing_daemon, args=(index_item, File, Pen),                daemon=True).start()
+    Thread(target=search_index_purger,    args=(SearchResult,),                        daemon=True).start()
+    Thread(target=process_pool_purger,    args=(PROCESS_POOL,),                        daemon=True).start()
+    Thread(target=tmp_file_purger,        args=(TmpFile,),                             daemon=True).start()
+    Thread(target=tmp_folder_purger,      args=(TmpFolder,),                           daemon=True).start()
+    Thread(target=blob_purger,            args=(Blob, BlobDependent.__subclasses__()), daemon=True).start()
 
 def run_app(debug=True):
     run_daemons()

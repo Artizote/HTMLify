@@ -1,25 +1,40 @@
 {# Search Result #}
 {% extends "base.html" %}
-{% from "macros.html" import file_card %}
-{% block title %}HTMLify Search - {{ q }}{% endblock %}
+{% from "macros.html" import search_result_card %}
+{% block title %}HTMLify Search - {{ g.q }}{% endblock %}
 {% block head_content %}
-    <link href="/static/css/file-card.css" rel="stylesheet">
+    <link href="/static/css/components/search-result-card.css" rel="stylesheet">
+    <link href="/static/css/components/pagination.css" rel="stylesheet">
 {% endblock %}
 {% block content %}
-<h1>HTMLify</h1>
-    <form class="filter-form" action="" method="POST">
-    <div class="filter-label">Filter Options:</div>
-    <label class="filter-option">
-    <input type="checkbox" name="file-modes" value="s" {% if 's' in session["filter-file-modes"] %}checked{% endif %}> Source
-    </label>
-    <label class="filter-option">
-    <input type="checkbox" name="file-modes" value="r" {% if 'r' in session["filter-file-modes"] %}checked{% endif %}> Render
-    </label>
-    <button class="filter-button" type="submit">Filter</button>
-    </form>
+<h1>HTMLify Search - {{ g.q }}</h1>
+    <!-- <form class="filter-form" action="" method="POST"> -->
+    <!-- <div class="filter-label">Filter Options:</div> -->
+    <!-- <label class="filter-option"> -->
+    <!-- <input type="checkbox" name="file-modes" value="s" {% if 's' in session["filter-file-modes"] %}checked{% endif %}> Source -->
+    <!-- </label> -->
+    <!-- <label class="filter-option"> -->
+    <!-- <input type="checkbox" name="file-modes" value="r" {% if 'r' in session["filter-file-modes"] %}checked{% endif %}> Render -->
+    <!-- </label> -->
+    <!-- <button class="filter-button" type="submit">Filter</button> -->
+    <!-- </form> -->
 
 {% for result in results %}
-    {{ file_card(result["file"], custom_body=result["snippet"]) }}
+    {{ search_result_card(result) }}
 {% endfor %}
-<!-- impliment pagination -->
+<div class="pagination" style="align-justify:right;">
+    {% if page > 1 %}
+    <a href="?q={{ g.q }}&p={{ page - 1 }}">&lt; Prev</a>
+    {% endif %}
+    {% if page - 3 > 0 %}<a href="?q={{ g.q }}&p={{ page - 3 }}">{{ page - 3 }}</a>{% endif %}
+    {% if page - 2 > 0 %}<a href="?q={{ g.q }}&p={{ page - 2 }}">{{ page - 2 }}</a>{% endif %}
+    {% if page - 1 > 0 %}<a href="?q={{ g.q }}&p={{ page - 1 }}">{{ page - 1 }}</a>{% endif %}
+    <a class="current">{{ page }}</a>
+    {% if page + 1 <= total_pages %}<a href="?q={{ g.q }}&p={{ page + 1 }}">{{ page + 1 }}</a>{% endif %}
+    {% if page + 2 <= total_pages %}<a href="?q={{ g.q }}&p={{ page + 2 }}">{{ page + 2 }}</a>{% endif %}
+    {% if page + 3 <= total_pages %}<a href="?q={{ g.q }}&p={{ page + 3 }}">{{ page + 3 }}</a>{% endif %}
+    {% if page + 1 <= total_pages %}
+    <a href="?q={{ g.q }}&p={{ page + 1 }}">Next &gt;</a>
+    {% endif %}
+</div>
 {% endblock %}

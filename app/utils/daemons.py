@@ -4,14 +4,21 @@ from time import sleep
 from app.config import *
 
 
-def search_indexing_daemon(index_fn, File):
+def search_indexing_daemon(index_fn, *Items):
     """Index files for search engine"""
     while True:
+        sleep(300)
+        for Item in Items:
+            for item in Item.select():
+                if index_fn(item):
+                    sleep(0.1)
         sleep(SEARCH_INDEXING_TIME_DELAY)
-        for file in File.select():
-            if not file.as_guest and not file.is_locked and file.mode_s != "hidden":
-                index_fn(file)
-                sleep(1)
+
+def search_index_purger(SearchResult):
+    """Deletes indexes with non-existing items"""
+    while True:
+        sleep(300)
+        SearchResult.purge()
 
 def process_pool_purger(process_pool):
     """Removes completed process from `process_pool`"""

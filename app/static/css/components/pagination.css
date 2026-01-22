@@ -1,0 +1,27 @@
+/* Pagination Style */
+
+.pagination {
+    margin: 4px;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+
+    a {
+        display: inline-block;
+        color: var(--primary);
+        background-color: var(--bg);
+        padding: 5px 10px;
+        margin: 4px;
+        font-size: 1.5rem;
+
+        &:hover {
+            color: var(--bg);
+            background-color: var(--primary); 
+        }   text-decoration: none;
+
+        &.current {
+            color: var(--bg-soft);
+            background-color: var(--secondary);
+        }
+    }
+}

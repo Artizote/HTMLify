@@ -4,6 +4,7 @@ from .file         import File, FileMode, FileType, FileVisibility, Dir, file_db
 from .notification import Notification, notification_db
 from .pen          import Pen, pen_db
 from .revision     import Revision, revision_db
+from .search       import SearchResult, SearchResultItemType, SearchIndexStatus, search_db
 from .shortlink    import ShortLink, shortlink_db
 from .tmpfile      import TmpFile, TmpFolder, tmpfile_db
 from .user         import User, user_db
@@ -15,6 +16,7 @@ dbs = (
     notification_db,
     pen_db,
     revision_db,
+    search_db,
     shortlink_db,
     tmpfile_db,
     user_db,

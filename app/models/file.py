@@ -443,7 +443,7 @@ class File(Model, BlobDependent, metaclass=PeeweeABCMeta):
 
     @property
     def visibility_s(self) -> str:
-        match self.mode:
+        match self.visibility:
             case FileVisibility.PUBLIC:
                 return "public"
             case FileVisibility.HIDDEN:
