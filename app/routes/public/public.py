@@ -4,6 +4,7 @@ from pygments.formatters import HtmlFormatter
 
 from hashlib import md5
 from random import randint
+from math import ceil
 
 from app.services.search import search_items
 from app.models import *
@@ -94,9 +95,14 @@ def user_files(username):
 @public.route("/search", methods=["GET", "POST"])
 def search_page():
     query = request.args.get("q", "")
-    results = search_items(query)
+    page = request.args.get("p", 1, int)
+    if page < 1:
+        page = 1
+    total_results = search_items(query)
+    total_pages = ceil(total_results.count() / 100)
+    results = total_results.paginate(page, 100)
     g.q = query
-    return render_template("search-result.html", results=results)
+    return render_template("search-result.html", results=results, page=page, total_pages=total_pages)
 
 @public.route("/pastebin/<id>")
 def pastebin_data(id):

@@ -4,6 +4,7 @@
 {% block title %}HTMLify Search - {{ g.q }}{% endblock %}
 {% block head_content %}
     <link href="/static/css/components/search-result-card.css" rel="stylesheet">
+    <link href="/static/css/components/pagination.css" rel="stylesheet">
 {% endblock %}
 {% block content %}
 <h1>HTMLify Search - {{ g.q }}</h1>
@@ -21,5 +22,19 @@
 {% for result in results %}
     {{ search_result_card(result) }}
 {% endfor %}
-<!-- impliment pagination -->
+<div class="pagination" style="align-justify:right;">
+    {% if page > 1 %}
+    <a href="?q={{ g.q }}&p={{ page - 1 }}">&lt; Prev</a>
+    {% endif %}
+    {% if page - 3 > 0 %}<a href="?q={{ g.q }}&p={{ page - 3 }}">{{ page - 3 }}</a>{% endif %}
+    {% if page - 2 > 0 %}<a href="?q={{ g.q }}&p={{ page - 2 }}">{{ page - 2 }}</a>{% endif %}
+    {% if page - 1 > 0 %}<a href="?q={{ g.q }}&p={{ page - 1 }}">{{ page - 1 }}</a>{% endif %}
+    <a class="current">{{ page }}</a>
+    {% if page + 1 <= total_pages %}<a href="?q={{ g.q }}&p={{ page + 1 }}">{{ page + 1 }}</a>{% endif %}
+    {% if page + 2 <= total_pages %}<a href="?q={{ g.q }}&p={{ page + 2 }}">{{ page + 2 }}</a>{% endif %}
+    {% if page + 3 <= total_pages %}<a href="?q={{ g.q }}&p={{ page + 3 }}">{{ page + 3 }}</a>{% endif %}
+    {% if page + 1 <= total_pages %}
+    <a href="?q={{ g.q }}&p={{ page + 1 }}">Next &gt;</a>
+    {% endif %}
+</div>
 {% endblock %}
