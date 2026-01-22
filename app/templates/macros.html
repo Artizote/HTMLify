@@ -254,3 +254,50 @@
     {% endfor %}
 </div>
 {% endmacro %}
+
+{# Search Result Card #}
+{% macro search_result_card(sr) %}
+{% if not sr.item %}
+<div class="search-result-card item-not-available">
+    <h2>Item no longer available</h2>
+</div>
+{% else %}
+<div
+    class="search-result-card item-type-{{ sr.item_type_s }}"
+    onclick="window.location.href = '{{ sr.item.path }}'"
+>
+    <div class="header">
+        <div>
+            <a href="/{{ sr.item.user.username }}">
+                <img class="profile-pic" src="/dp/{{ sr.item.user.username }}" title="{{ sr.item.user.username }}">
+            </a>
+        </div>
+        <div class="item-info">
+            <b class="item-title">{{ sr.item.title }}</b>
+            <span class="item-path">{{ sr.item.path }}</span>
+        </div>
+        <div class="meta">
+            <div>{{ sr.item.views }} Views</div>
+        </div>
+    </div>
+
+    {% if sr.item_type_s == "file" %}
+    <pre>{{ sr.item.preview() }}</pre>
+    {% elif sr.item_type_s == "pen" %}
+    <pre>{{ "\n".join([sr.item.body_content, sr.item.css_content, sr.item.js_content]) }}</pre>
+    {% endif %}
+
+    <div class="action-buttons">
+        <a href="{{ sr.item.path }}" title="View">
+            <button><img src="/static/svg/eye.svg"></button>
+        </a>
+        <a href="/src{{ sr.item.path }}" title="Source">
+            <button><img src="/static/svg/code.svg"></button>
+        </a>
+        <a href="{{ sr.item.path }}#run-button" title="Run">
+            <button><img src="/static/svg/play.svg"></button>
+        </a>
+    </div>
+</div>
+{% endif %}
+{% endmacro %}
