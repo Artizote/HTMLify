@@ -281,11 +281,13 @@
         </div>
     </div>
 
-    {% if sr.item_type_s == "file" %}
-    <pre>{{ sr.item.preview() }}</pre>
-    {% elif sr.item_type_s == "pen" %}
-    <pre>{{ "\n".join([sr.item.body_content, sr.item.css_content, sr.item.js_content]) }}</pre>
-    {% endif %}
+    <div class="body">
+        {% if sr.item_type_s == "file" %}
+        {{ sr.item.preview() }}
+        {% elif sr.item_type_s == "pen" %}
+        {{ "\n".join([sr.item.body_content, sr.item.css_content, sr.item.js_content]) }}
+        {% endif %}
+    </div>
 
     <div class="action-buttons">
         <a href="{{ sr.item.path }}" title="View">

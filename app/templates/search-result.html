@@ -8,6 +8,13 @@
 {% endblock %}
 {% block content %}
 <h1>HTMLify Search - {{ g.q }}</h1>
+<div style="padding:4px;">
+    <p>
+        <span {% if total_results_count == 0 %}style="color:gray;"{% endif %}>{{ total_results_count }}</span> Results in
+        <span style="color: {% if time_took < 5 %}green;{% else %}red;{% endif %}"> {{ time_took | round(2) }}</span> seconds.
+    </p>
+</div>
+<hr>
     <!-- <form class="filter-form" action="" method="POST"> -->
     <!-- <div class="filter-label">Filter Options:</div> -->
     <!-- <label class="filter-option"> -->
@@ -29,7 +36,7 @@
     {% if page - 3 > 0 %}<a href="?q={{ g.q }}&p={{ page - 3 }}">{{ page - 3 }}</a>{% endif %}
     {% if page - 2 > 0 %}<a href="?q={{ g.q }}&p={{ page - 2 }}">{{ page - 2 }}</a>{% endif %}
     {% if page - 1 > 0 %}<a href="?q={{ g.q }}&p={{ page - 1 }}">{{ page - 1 }}</a>{% endif %}
-    <a class="current">{{ page }}</a>
+    {% if total_pages > 1 %}<a class="current">{{ page }}</a>{% endif %}
     {% if page + 1 <= total_pages %}<a href="?q={{ g.q }}&p={{ page + 1 }}">{{ page + 1 }}</a>{% endif %}
     {% if page + 2 <= total_pages %}<a href="?q={{ g.q }}&p={{ page + 2 }}">{{ page + 2 }}</a>{% endif %}
     {% if page + 3 <= total_pages %}<a href="?q={{ g.q }}&p={{ page + 3 }}">{{ page + 3 }}</a>{% endif %}

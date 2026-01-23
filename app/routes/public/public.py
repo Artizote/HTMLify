@@ -6,7 +6,7 @@ from hashlib import md5
 from random import randint
 from math import ceil
 
-from app.services.search import search_items
+from app.services.search import search_items_with_timedelta
 from app.models import *
 from app.utils import file_path, pastebin_fetch
 from app.config import *
@@ -96,13 +96,22 @@ def user_files(username):
 def search_page():
     query = request.args.get("q", "")
     page = request.args.get("p", 1, int)
+    page_size = 32
     if page < 1:
         page = 1
-    total_results = search_items(query)
-    total_pages = ceil(total_results.count() / 100)
-    results = total_results.paginate(page, 100)
+    total_results, time_took = search_items_with_timedelta(query)
+    total_results_count = total_results.count()
+    total_pages = ceil(total_results_count / page_size)
+    results = total_results.paginate(page, page_size)
     g.q = query
-    return render_template("search-result.html", results=results, page=page, total_pages=total_pages)
+    kwargs = {
+        "results": results,
+        "page": page,
+        "total_pages": total_pages,
+        "total_results_count": total_results_count,
+        "time_took": time_took
+    }
+    return render_template("search-result.html", **kwargs)
 
 @public.route("/pastebin/<id>")
 def pastebin_data(id):
