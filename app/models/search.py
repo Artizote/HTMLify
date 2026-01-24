@@ -26,9 +26,10 @@ class SearchIndexStatus(Model):
     class Meta:
         database = search_db
 
-    item_type:  int      | IntegerField   = IntegerField() # SearchResultItemType
-    item_id:    str      | CharField      = CharField()
-    last_index: datetime | TimestampField = TimestampField(default=datetime.fromtimestamp(0))
+    item_type:        int      | IntegerField   = IntegerField() # SearchResultItemType
+    item_id:          str      | CharField      = CharField()
+    last_index_time:  datetime | TimestampField = TimestampField(default=datetime.fromtimestamp(0))
+    last_index_views: int      | IntegerField   = IntegerField(default=0)
 
     @classmethod
     def get_status(cls, item: File | Pen):
@@ -52,7 +53,11 @@ class SearchIndexStatus(Model):
         return status
 
     def update_last_index_time(self):
-        self.last_index = datetime.now(UTC)
+        self.last_index_time = datetime.now(UTC)
+        self.save()
+
+    def update_last_index_views(self, views: int):
+        self.last_index_views = views
         self.save()
 
 

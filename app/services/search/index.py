@@ -35,7 +35,10 @@ def should_index(item: File | Pen) -> bool:
 
     index_status = SearchIndexStatus.get_status(item)
 
-    if index_status.last_index.timestamp() > item.modified.timestamp():
+    views_increased = item.views > index_status.last_index_views * 2
+    item_modified = item.modified.timestamp() > index_status.last_index_time.timestamp()
+
+    if not (views_increased or item_modified):
         return False
 
     if isinstance(item, File):
@@ -77,6 +80,10 @@ def get_content(item: File | Pen) -> str:
     return content
 
 
+def get_views(item: File | Pen) -> int:
+    return int(item.views)
+
+
 def index_item(item: File | Pen) -> bool:
     """Index `item` into search index."""
 
@@ -102,6 +109,7 @@ def index_item(item: File | Pen) -> bool:
 
     meta = get_meta(item)
     content = get_content(item)
+    views = get_views(item)
 
     meta_tokens = tokenize_string(meta)
     content_tokens = tokenize_string(content)
@@ -111,6 +119,7 @@ def index_item(item: File | Pen) -> bool:
 
     meta_weigth = 3.0
     content_weigth = 1.0
+    views_weight = 0.1
 
     tokens = meta_tokens + content_tokens
 
@@ -129,8 +138,9 @@ def index_item(item: File | Pen) -> bool:
 
         meta_score = meta_weigth * math.log(1 + normlised_meta_freq)
         content_score = content_weigth * math.log(1 + normlised_content_freq)
+        views_score = views_weight * math.log(1 + views)
 
-        score = meta_score + content_score
+        score = meta_score + content_score + views_score
 
         SearchResult.create(
             token = token,
@@ -139,6 +149,7 @@ def index_item(item: File | Pen) -> bool:
             item_id = item_id
         )
 
+    index_status.update_last_index_views(item.views)
     index_status.update_last_index_time()
     return True
 
