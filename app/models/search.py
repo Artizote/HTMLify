@@ -70,7 +70,11 @@ class SearchResult(Model):
         rs = cls.select()
         for r in rs:
             if not r.item:
-                r.delete_instance()
+                cls.delete().where(
+                    cls.item_type==r.item_type
+                    ).where(
+                    cls.item_id==cls.item_id
+                    ).execute()
 
     @classmethod
     def for_item(cls, item: File | Pen):
