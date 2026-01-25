@@ -6,8 +6,8 @@ from app.config import *
 
 def search_indexing_daemon(index_fn, *Items):
     """Index files for search engine"""
+    sleep(300)
     while True:
-        sleep(300)
         for Item in Items:
             for item in Item.select():
                 if index_fn(item):
@@ -16,9 +16,10 @@ def search_indexing_daemon(index_fn, *Items):
 
 def search_index_purger(SearchResult):
     """Deletes indexes with non-existing items"""
+    sleep(300)
     while True:
-        sleep(300)
         SearchResult.purge()
+        sleep(3600)
 
 def process_pool_purger(process_pool):
     """Removes completed process from `process_pool`"""

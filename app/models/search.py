@@ -1,6 +1,7 @@
 from peewee import SqliteDatabase, Model, CharField, IntegerField, FloatField, TimestampField
 
 from datetime import datetime, UTC
+from time import sleep
 
 from .file import File
 from .pen import Pen
@@ -80,6 +81,7 @@ class SearchResult(Model):
                     ).where(
                     cls.item_id==cls.item_id
                     ).execute()
+            sleep(0.1)
 
     @classmethod
     def for_item(cls, item: File | Pen):
