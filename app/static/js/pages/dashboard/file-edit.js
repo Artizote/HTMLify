@@ -347,7 +347,8 @@ async function init_editor() {
 }
 
 async function save() {
-    content_loaded = true;
+    if (editor.getValue())
+        content_loaded = true;
     dump_content();
 
     let data = {
@@ -432,6 +433,26 @@ async function view() {
     }
 }
 
+async function clone_file(file_id) {
+    let res = await publicApi.file.get(file_id, "", true);
+    if (res.success) {
+        let file = res.file;
+        content = file.content;
+        title_field.value = file.title;
+        file_type = file.type;
+        if (file.type === "text") {
+            switch_to_text_editor();
+            update_editor_mode();
+            load_content();
+        } else {
+            switch_to_text_editor();
+            update_editor_mode();
+        }
+    } else {
+        showToast("Attempt to clone non-existing file", "error");
+    }
+}
+
 
 // EventListeners
 
@@ -457,6 +478,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (file_type === "text") {
         switch_to_text_editor();
         update_editor_mode();
+    }
+    let params = new URL(window.location.href).searchParams;
+    let clone_id = params.get("clone");
+    if (clone_id) {
+        await clone_file(clone_id);
     }
 });
 

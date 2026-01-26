@@ -87,10 +87,7 @@
         <a href="/raw{{ file.path }}"><button>View Raw</button></a>
         <a href="/raw{{ file.path }}" download><button>Download File<span class="file-size">({{ file.sizef() }})</span></button></a>
         <button id="embedcodebutton" onclick="embedcode()">Embed Code</button>        
-        <form method="POST" action="/edit" style="display:inline-block;">
-            <input type="hidden" name="clone" value="{{ file.id }}"/>
-            <button>Clone</button>
-        </form>
+        <button onclick="clone()">Clone</button>
         </div>
 
         <!-- New comment method will be intrduce
@@ -139,6 +136,10 @@ function embedcode() {
 
 function shortlink(){
     document.getElementById("shortlinkbutton").outerHTML = `<input type="text" id="shortlink" value="{{ file.shortlink().url }}" readonly><button onclick="copycontent('shortlink')">Copy</button>`;
+}
+
+function clone() {
+    window.location.href = "{{ SCHEME }}://my.{{ SERVER_NAME }}/files/edit?clone={{ file.id }}";
 }
 
 function add_mention(username){
