@@ -190,7 +190,10 @@ except:
     exit(1)
 
 for requirement in requirements:
-    spec = importlib.util.find_spec(requirement)
+    if requirement == "pillow":
+        spec = importlib.util.find_spec("PIL")
+    else:
+        spec = importlib.util.find_spec(requirement)
     if spec:
         setup_print("Requirement satisfied: " + requirement, "success")
         continue

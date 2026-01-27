@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, session
 from flask_jwt_extended import JWTManager
 from werkzeug.exceptions import HTTPException
 
@@ -36,6 +36,7 @@ def context_processor():
 
 @app.before_request
 def before_request():
+    session.permanent = True
     connect_all_dbs()
 
 @app.teardown_request
