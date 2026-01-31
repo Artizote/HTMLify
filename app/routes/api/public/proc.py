@@ -1,4 +1,4 @@
-from app.executors import execute
+# from app.executors import execute
 from .api import *
 
 
@@ -16,7 +16,7 @@ def start_exec_():
     if not (code or executor):
         return error_respones_dict(APIErrors.MISSING_PARAMETERS)
 
-    ce = execute(code, executor)
+    ce = None#execute(code, executor)
     if not ce:
         return error_respones_dict(APIErrors.INVALID_PARAMETERS)
 
