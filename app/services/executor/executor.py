@@ -27,6 +27,7 @@ class CodeExecution(subprocess.Popen):
     EXECUTIONS = []
 
     def __init__(self, image_tag: str, timeout: int | float = 300):
+        self.id = image_tag
         self.image_tag = image_tag
         self.timeout   = timeout
 
@@ -196,6 +197,21 @@ class CodeExecution(subprocess.Popen):
         self.writing_combined_buffer = True
         self.combined_buffer += text
         self.writing_combined_buffer = False
+
+    def to_dict(self, show_auth_code=False) -> dict:
+        auth_code = None
+        if show_auth_code:
+            auth_code = self.auth_code
+        pid = None
+        if hasattr(self, "pid"):
+            pid = self.pid
+
+        return {
+            "id": self.id,
+            "pid": pid,
+            "image_tag": self.image_tag,
+            "auth_code": auth_code
+        }
 
 
 
