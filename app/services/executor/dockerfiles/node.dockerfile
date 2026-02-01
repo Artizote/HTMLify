@@ -2,8 +2,8 @@
 
 FROM node:16-slim
 
-WORKDIR /home/root
+WORKDIR /root
 
-COPY app.js /home/root
+COPY file /root/app.js
 
 CMD ["node", "app.js"]
