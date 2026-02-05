@@ -1,3 +1,7 @@
+
+import eventlet         # eventlet monkey patching position is
+eventlet.monkey_patch() # recommended by flask_socketio documentation
+
 from flask import Flask, render_template, session
 from flask_jwt_extended import JWTManager
 from werkzeug.exceptions import HTTPException
@@ -6,8 +10,8 @@ from datetime import timedelta
 from threading import Thread
 
 from .routes import register_blueprints
-from .routes.public import PROCESS_POOL
 from .services.search import index_item
+from .sockets import socketio
 # from .executors import *
 from .models import *
 from .models.base import BlobDependent
@@ -20,6 +24,8 @@ app.secret_key = SECRET_KEY
 
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=28)
 app.config["SERVER_NAME"] = SERVER_NAME
+
+socketio.init_app(app, cors_allowed_origins=SCHEME+"://"+SERVER_NAME)
 
 jwt = JWTManager(app)
 
@@ -61,9 +67,13 @@ def run_daemons():
     Thread(target=tmp_folder_purger,      args=(TmpFolder,),                           daemon=True).start()
     Thread(target=blob_purger,            args=(Blob, BlobDependent.__subclasses__()), daemon=True).start()
 
-def run_app(debug=True):
+def run_app(debug=not PROD):
     run_daemons()
-    app.run(debug=debug)
+    socketio.run(
+        app,
+        host = SERVER_NAME.split(":")[0],
+        debug = debug
+    )
 
 if __name__ == "__main__":
     run_app()

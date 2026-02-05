@@ -5,7 +5,7 @@ import subprocess
 from time import time, sleep
 from threading import Thread
 from io import TextIOWrapper
-from typing import Callable
+from typing import Callable, Optional
 
 from app.utils import randstr, file_path
 from app.config import *
@@ -33,12 +33,13 @@ class CodeExecution(subprocess.Popen):
 
         self.auth_code = randstr(8)
 
-        self.started:          bool         = False
+        self._started: bool = False
+        self._ended:   bool = False
+
         self.creation_time:    int  | float = time()
         self.start_time:       int  | float = 0
         self.end_time:         int  | float = 0
         self.termination_time: int  | float = 0
-        self.ended:            bool         = False
 
         # STDIN
         self.stdin:           TextIOWrapper
@@ -53,6 +54,9 @@ class CodeExecution(subprocess.Popen):
         self.stderr_callback: Callable | None = None
         self.stderr_buffer:   str      = ""
 
+        self.start_callback: Callable | None = None
+        self.end_callback:   Callable | None = None
+
         self.combined_buffer:          str  = ""
         self.writing_combined_buffer: bool = False
 
@@ -64,6 +68,12 @@ class CodeExecution(subprocess.Popen):
             return f"<CodeExcution  tag:{self.image_tag} pid:{self.pid}>"
         else:
             return f"<CodeExcution  tag:{self.image_tag}>"
+
+    @classmethod
+    def by_id(cls, id: str) -> Optional["CodeExecution"]:
+        for ce in cls.EXECUTIONS:
+            if ce.id == id:
+                return ce
 
     @classmethod
     def purge(cls):
@@ -80,6 +90,9 @@ class CodeExecution(subprocess.Popen):
             break
 
     def start(self):
+        if self.started:
+            return
+
         self.start_time = time()
         self.termination_time = self.start_time + self.timeout
         super().__init__(
@@ -114,6 +127,12 @@ class CodeExecution(subprocess.Popen):
         subprocess.run([DOCKER_COMMAND_PATH, "rm", "-f", self.image_tag], capture_output=True)
         subprocess.run([DOCKER_COMMAND_PATH, "rmi", "-f", self.image_tag], capture_output=True)
 
+    def add_start_callback(self, callback: Callable):
+        self.start_callback = callback
+
+    def remove_start_callback(self):
+        self.start_callback = None
+
     def add_stdin_callback(self, callback: Callable):
         self.stdin_callback = callback
 
@@ -131,6 +150,12 @@ class CodeExecution(subprocess.Popen):
 
     def remove_stderr_callback(self):
         self.stderr_callback = None
+
+    def add_end_callback(self, callback: Callable):
+        self.end_callback = callback
+
+    def remove_end_callback(self):
+        self.end_callback = None
 
     def clear_stdin_buffer(self):
         self.stdin_buffer = ""
@@ -212,6 +237,30 @@ class CodeExecution(subprocess.Popen):
             "image_tag": self.image_tag,
             "auth_code": auth_code
         }
+
+    @property
+    def is_running(self):
+        return self.started and not self.ended
+
+    @property
+    def started(self):
+        return self._started
+
+    @started.setter
+    def started(self, value: bool):
+        self._started = value
+        if self._started and self.start_callback:
+                self.start_callback()
+
+    @property
+    def ended(self):
+        return self._ended
+
+    @ended.setter
+    def ended(self, value: bool):
+        self._ended = value
+        if self._ended and self.end_callback:
+            self.end_callback()
 
 
 

@@ -1,6 +1,8 @@
+eventlet
 flask
 flask_cors
 flask_jwt_extended
+flask_socketio
 peewee
 pillow
 pygments
