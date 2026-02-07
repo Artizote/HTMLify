@@ -1,7 +1,7 @@
 from flask import render_template, request, g, session, send_file, abort
 
 from app.models import User, BlobType, File, FileMode, FileVisibility, Dir
-from app.executors import executors, suggest_executors
+from app.services.executor import Executor
 from .public import public
 
 
@@ -50,12 +50,9 @@ def user_file(username, path):
     if file.mode == FileMode.RENDER:
         return file.content, { "Content-Type": file.mimetype }
 
-    _executors = suggest_executors(file.path)
-    for e in executors.values():
-        if not e in _executors:
-            _executors.append(e)
+    executors = Executor.suggest_executors(file.name)
 
-    return render_template("file-src.html", file=file, executors=_executors)
+    return render_template("file-src.html", file=file, executors=executors)
 
 
 @public.route("/raw/<path:path>")
@@ -118,10 +115,7 @@ def file_src(path):
 
     file.hit()
     
-    _executors = suggest_executors(file.path)
-    for e in executors.values():
-        if not e in _executors:
-            _executors.append(e)
+    executors = Executor.suggest_executors(file.name)
 
-    return render_template("file-src.html", file=file, executors=_executors)
+    return render_template("file-src.html", file=file, executors=executors)
 

@@ -284,6 +284,63 @@ else:
 
     setup_print("Setuped vendor: codemirror", "success")
 
+xterm_dir = os.path.join("app", "static", "vendor", "xterm")
+
+if os.path.exists(xterm_dir):
+    setup_print("Vendor exists: xterm", "success")
+else:
+    xterm_tmp_dir = os.path.join(tmp_dir, "xterm")
+    if not os.path.exists(xterm_tmp_dir):
+        os.mkdir(xterm_tmp_dir)
+    xterm_css_path = os.path.join(xterm_tmp_dir, "xterm.css")
+    xterm_js_path = os.path.join(xterm_tmp_dir, "xterm.js")
+    xterm_js_map_path = os.path.join(xterm_tmp_dir, "xterm.js.map")
+    setup_print("Setting up xterm")
+
+    setup_print("Downloading xterm")
+    try:
+        urllib.request.urlretrieve("https://cdn.jsdelivr.net/npm/xterm/css/xterm.css", xterm_css_path)
+        urllib.request.urlretrieve("https://cdn.jsdelivr.net/npm/xterm/lib/xterm.js", xterm_js_path)
+        urllib.request.urlretrieve("https://cdn.jsdelivr.net/npm/xterm/lib/xterm.js.map", xterm_js_map_path)
+    except Exception as e:
+        setup_print("Error while downoalding", "error", indent=3)
+        setup_print(str(e), "error")
+        setup_print("exiting...", "error")
+        exit(1)
+
+    shutil.copytree(xterm_tmp_dir, xterm_dir)
+    shutil.rmtree(xterm_tmp_dir)
+
+    setup_print("Setuped vendor: xterm", "success")
+
+socketio_dir = os.path.join("app", "static", "vendor", "socketio")
+
+if os.path.exists(socketio_dir):
+    setup_print("Vendor exists: socketio", "success")
+else:
+    socketio_tmp_dir = os.path.join(tmp_dir, "socketio")
+    if not os.path.exists(socketio_tmp_dir):
+        os.mkdir(socketio_tmp_dir)
+    socketio_js_path = os.path.join(socketio_tmp_dir, "socket.io.min.js")
+    socketio_js_map_path = os.path.join(socketio_tmp_dir, "socket.io.min.js.map")
+    setup_print("Setting up socketio")
+
+    setup_print("Downloading socketio")
+    try:
+        urllib.request.urlretrieve("https://cdn.socket.io/4.8.0/socket.io.min.js", socketio_js_path)
+        urllib.request.urlretrieve("https://cdn.socket.io/4.8.0/socket.io.min.js.map", socketio_js_map_path)
+    except Exception as e:
+        setup_print("Error while downloading", "error", indent=3)
+        setup_print(str(e), "error")
+        setup_print("exiting...", "error")
+        exit(1)
+
+    shutil.copytree(socketio_tmp_dir, socketio_dir)
+    shutil.rmtree(socketio_tmp_dir)
+
+    setup_print("Setuped vendor: socketio", "success")
+
+
 setup_print("DONE", "success", True, 0)
 segment()
 

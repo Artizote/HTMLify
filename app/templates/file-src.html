@@ -3,43 +3,21 @@
 {% block title %}{{ file.title or file.name }}{% endblock %}
 {% block head_content %}
     <link rel="stylesheet" href="/pygments.css">
+    <link rel="stylesheet" href="/static/vendor/xterm/xterm.css">
     <style>
-        .terminal {
-            display: none; /* Hidden by default */
-            color: white;
-            background-color: black;
-            font-family: Monospace;
-            padding: 10px;
-            width: 90%;
-            height: 400px;
-            overflow-y: auto;
-            border: 1px solid #333;
-            white-space: pre; /* Preserve spacing and prevent wrapping */
-            overflow-wrap: break-word; /* Break lines character by character */
-            cursor: text; /* Indicate text entry when hovering over the terminal */
-        }
-        .line {
-            display: block;
-            width: 100%; /* Ensure lines span full terminal width */
-        }
-        .editable {
-            outline: none;
-        }
-        .error {
-            color: red;
-        }
-        #terminal-input {
-            margin: 4px;
-            display: none;
-            font-family: Monospace;
-            width: 90%;
-            height: auto;
-            cursor: text;
-        }
-        #run-button, #executor-selector {
-            padding: 2px;
-            margin: 4px;
-        }
+    #run-button {
+        padding: 5px;
+        color: #fbfbfb;
+        background-color: #28a745;
+        border: none;
+        border-right: 1px solid black;
+        border-bottom: 1px solid black;
+        font-weight: bold;
+    }
+    #executor-selector {
+        padding: 5px;
+        background-color: #fbfbfb;
+    }
     </style>
 {% endblock %}
 {% block content %}
@@ -69,16 +47,16 @@
 
         </div>
 
-        <div>
+        <div class="card">
             <button id="run-button" onclick="run()">Run &gt;</button>
             <select id="executor-selector">
                 {% for executor in executors %}
-                <option value="{{ executor["name"] }}">{{ executor["lang"] }}</option>
+                <option value="{{ executor.name }}">{{ executor.title }}</option>
                 {% endfor %}
             </select>
-            <div id="terminal" class="terminal"></div>
-            <input type="text" id="terminal-input" onkeydown="handleTerminalInput(event)" placeholder="input">
+            <div id="terminal"></div>
         </div>
+
         <div class="link-copy-box">
             <h3>Share this file:</h3>
             <input type="text" id="fileLink" value="{{ request.url }}" readonly>
@@ -122,7 +100,16 @@ use '@' for mention users." maxlength="1024" required></textarea>
         -->
     </div>
 
+{% endblock %}
+
+{% block after_body %}
+<script src="/static/vendor/xterm/xterm.js"></script>
+<script src="/static/vendor/socketio/socket.io.min.js"></script>
+<script src="/static/js/code-execution.js"></script>
+
 <script>
+let running = false;
+
 function copycontent(id) {
     var fileLinkInput = document.getElementById(id);
     fileLinkInput.select();
@@ -131,7 +118,7 @@ function copycontent(id) {
 }
 
 function embedcode() {
-    document.getElementById("embedcodebutton").outerHTML = `<input type="text" id="embedcode" value="<iframe src='{{ request.scheme }}://{{ request.host }}/api/embed?id={{ file.id }}'></iframe>" readonly><button onclick="copycontent('embedcode')">Copy</button>`;
+    document.getElementById("embedcodebutton").outerHTML = `<input type="text" id="embedcode" value="<iframe src='{{ request.scheme }}://api.{{ request.host }}/embed?id={{ file.id }}'></iframe>" readonly><button onclick="copycontent('embedcode')">Copy</button>`;
 }
 
 function shortlink(){
@@ -146,204 +133,28 @@ function add_mention(username){
     var comment_field = document.getElementById("comment-text-field");
     comment_field.value = "@"+username + " " + comment_field.value;
 }
-// TODO: Make a terminal module/library
-// Treminal emulator stuffus
-const terminal = document.getElementById('terminal');
-const terminalInput = document.getElementById("terminal-input");
-var input_buffer = "";
-var last_line_enter = false;
 
-function addLine() {
-    // Add new editable line
-    const line = document.createElement('div');
-    line.classList.add('line', 'editable');
-    line.setAttribute('contenteditable', 'true');
-    terminal.appendChild(line);
-
-    line.focus();
-
-    terminal.scrollTop = terminal.scrollHeight;
-}
-
-function focusLineAtEnd(line) {
-    line.focus();
-
-    const range = document.createRange();
-    const selection = window.getSelection();
-    range.selectNodeContents(line);
-    range.collapse(false);
-    selection.removeAllRanges();
-    selection.addRange(range);
-}
-
-function addOutputLine(content) {
-    const currentLine = document.querySelector('.line.editable');
-    const line = document.createElement("div");
-    line.innerText = content;
-    line.classList.add("line");
-    terminal.removeChild(currentLine);
-    terminal.appendChild(line);
-    terminal.appendChild(currentLine);
-    terminal.scrollTop = terminal.scrollHeight;
-    focusLineAtEnd(currentLine);
-    lockLine(line);
-}
-
-function appendLastLine(content) { 
-    // Append content on last output line, create in not found
-    const lastLine = document.querySelector('.terminal .line:last-child');
-    if (lastLine) {
-        lastLine.innerText += content;
-    } else {
-        addOutputLine(content);
-    }
-    lockLine(lastline);
-}
-
-function appendOutput(content) {
-    let lastLine = terminal.querySelector('.line:last-child');
-
-    if (!lastLine || lastLine.innerText.endsWith("\n")) {
-        // Create a new output line
-        let newLine = document.createElement("div");
-        newLine.classList.add("line");
-        newLine.innerText = content;
-        terminal.appendChild(newLine);
-    } else {
-        // Append to last line
-        lastLine.innerText += content;
-    }
-
-    terminal.scrollTop = terminal.scrollHeight; // Auto-scroll
-}
-
-function appendError(content) {
-    // same as appendOutput, but adds error class to the line
-    let lastLine = terminal.querySelector('.line:last-child');
-    if (!lastLine || lastLine.innerText.endsWith("\n")) {
-        let newLine = document.createElement("div");
-        newLine.classList.add("line");
-        newLine.classList.add("error");
-        newLine.innerText = content;
-        terminal.appendChild(newLine);
-    } else {
-        lastLine.innerText += content;
-    }
-    terminal.scrollTop = terminal.scrollHeight;
-}
-
-function lockLine(line) {
-    // Lock the previous line to make it non-editable
-    line.removeAttribute('contenteditable');
-    line.classList.remove('editable');
-}
-
-function handleTerminalInput(event) {
-    let inputField = document.getElementById("terminal-input");
-    
-    if (event.key === "Enter") {
-        event.preventDefault();
-        
-        let inputText = inputField.value + "\n";
-        input_buffer += '\n';
-        console.log(input_buffer);
-        inputField.value = ""; // Clear input field
-        appendOutput('\n');
-    } else if (event.key.length === 1) {
-        input_buffer += event.key;
-        appendOutput(event.key);
-    }
-}
-
-function run() {
-    let executor = document.getElementById("executor-selector").value;
-    if (!executor) {
-        alert("Please select an executor");
+async function run() {
+    if (running)
         return
+    running = true;
+
+    document.getElementById("run-button").style.display = "none";
+    document.getElementById("executor-selector").style.display = "none";
+
+    let executor = document.getElementById("executor-selector").value;
+    if (!executor || executor === "") {
+        alert("Select an executor");
+        return;
     }
-
-    let file_id = {{ file.id }};
-    let encoded_data;
-    let raw_code;
-
-    publicApi.file.get(file_id, "", true)
-        .then(data => {
-            console.log("data", data);
-            encoded_data = data.file.content; 
-            console.log("encoded data", encoded_data);
-            raw_code = atob(encoded_data);
-            console.log("raw code", raw_code);
-
-            const formdata = new FormData();
-            formdata.append("code", raw_code);
-            formdata.append("executor", executor);
-
-            fetch("/exec", {
-                method: "POST",
-                body: formdata
-            })
-                .then(response => response.json())
-                .then(data => {
-                    let pid = data.pid;
-
-                    if (!pid) {
-                        return;
-                    }
-
-                    terminal.style.display = "block";
-                    terminalInput.style.display = "block";
-                    poll(pid);
-                });
-        });
-    
-    addLine();
+    let raw_url = "{{ SCHEME }}://{{ SERVER_NAME }}/raw{{ file.path }}";
+    let res = await fetch(raw_url);
+    let code = await res.text();
+    let execution = new CodeExecution(code, executor, document.getElementById("terminal"));
+    await execution.ready;
+    execution.join();
+    execution.start();
 }
-
-function poll(pid) {
-    let intervalid = setInterval(() => {
-        const formdata = new FormData();
-        let user_input = input_buffer;
-        console.log(input_buffer);
-        input_buffer = "";
-
-        if (user_input) {
-            formdata.append("input", user_input);
-        }
-
-        fetch(`/proc/${pid}/communicate`, {
-            method: "POST",
-            body: formdata
-        })
-        .then(response => response.json())
-        .then(proc => {
-            if (!('pid' in proc)) return;
-
-            let stdout = proc.stdout;
-            let stderr = proc.stderr;
-
-            if (stdout) {
-                appendOutput(stdout);
-            }
-
-            if (stderr) {
-                appendError(stderr);
-            }
-
-            if (!proc.running) {
-                clearInterval(intervalid);
-            }
-
-        })
-        .catch(error => {
-            console.error('Polling Error:', error);
-        });
-    }, 100);
-
-    setTimeout(() => {
-        clearInterval(intervalid);
-    }, 64000);
-}
-
 
 </script>
 {% endblock %}

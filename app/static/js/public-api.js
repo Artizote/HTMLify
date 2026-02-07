@@ -148,6 +148,21 @@ const publicApi = {
         }
     },
 
+    codeExecution: {
+        async create(code, executor) {
+            return await publicApi.fetchJson("/exec", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    code: code,
+                    executor: executor
+                })
+            });
+        }
+    },
+
     qr: {
         get_url(url, fg=null, bg=null) {
             let params = new URLSearchParams();

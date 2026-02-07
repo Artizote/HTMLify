@@ -1,0 +1,26 @@
+{
+    "c": {
+        "name": "c",
+        "title": "C",
+        "lang": "C",
+        "extensions": [".c"]
+    },
+    "cat": {
+        "name": "cat",
+        "title": "Cat",
+        "lang": "Plaintext",
+        "extensions": ["*"]
+    },
+    "node": {
+        "name": "node",
+        "title": "Node",
+        "lang": "JavaScript",
+        "extensions": [".js"]
+    },
+    "python": {
+        "name": "python",
+        "title": "Python",
+        "lang": "Python",
+        "extensions": [".py"]
+    }
+}

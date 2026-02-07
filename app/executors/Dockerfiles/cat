@@ -1,9 +1,0 @@
-# cat Dockerfile
-
-FROM ubuntu:latest
-
-WORKDIR /home/root/
-
-COPY file .
-
-CMD ["cat", "file"]

@@ -21,13 +21,12 @@ def search_index_purger(SearchResult):
         SearchResult.purge()
         sleep(3600)
 
-def process_pool_purger(process_pool):
+def process_pool_purger(CodeExecution):
     """Removes completed process from `process_pool`"""
+    sleep(300)
     while True:
-        sleep(60)
-        for p in process_pool:
-            if p["proc"].poll() is not None:
-                process_pool.remove(p)
+        CodeExecution.purge()
+        sleep(3000)
 
 def tmp_file_purger(TmpFile):
     """Deletes expire temp files"""

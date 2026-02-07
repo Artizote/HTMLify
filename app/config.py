@@ -13,6 +13,7 @@ MAX_FILES_ON_HOME = 128
 SEARCH_INDEXING_TIME_DELAY = 3600
 SERVER_NAME = "localhost:5000"
 SCHEME = "http"
+PROD = False
 
 config_vars = [
     ("SECRET_KEY", str),
@@ -25,6 +26,7 @@ config_vars = [
     ("SEARCH_INDEXING_TIME_DELAY", int),
     ("SERVER_NAME", str),
     ("SCHEME", str),
+    ("PROD", bool),
 ]
 
 # Config loading
@@ -42,3 +44,7 @@ if config:
         var, t = var_and_type
         globals()[var] = t(config.get(var, globals()[var]))
 
+if __name__ == "__main__":
+    for var_and_type in config_vars:
+        var, _ = var_and_type
+        print(var + " "*(32-len(var)), ":",globals()[var])
