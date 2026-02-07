@@ -1,4 +1,10 @@
 {
+    "c": {
+        "name": "c",
+        "title": "C",
+        "lang": "C",
+        "extensions": [".c"]
+    },
     "cat": {
         "name": "cat",
         "title": "Cat",
