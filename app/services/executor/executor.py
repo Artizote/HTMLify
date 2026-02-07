@@ -183,7 +183,12 @@ class CodeExecution(subprocess.Popen):
     def stdout_handler(self):
         while not self.ended:
             sleep(0.1)
-            capture = self.stdout.read(1)
+            capture = os.read(self.stdout.fileno(), 4096)
+            if isinstance(capture, bytes):
+                try:
+                    capture = capture.decode()
+                except:
+                    capture = ""
             if not capture:
                 continue
 
@@ -201,7 +206,12 @@ class CodeExecution(subprocess.Popen):
     def stderr_handler(self):
         while not self.ended:
             sleep(0.1)
-            capture = self.stderr.read(1)
+            capture = os.read(self.stderr.fileno(), 4096)
+            if isinstance(capture, bytes):
+                try:
+                    capture = capture.decode()
+                except:
+                    capture = ""
             if not capture:
                 continue
 
