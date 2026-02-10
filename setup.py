@@ -327,8 +327,8 @@ else:
 
     setup_print("Downloading socketio")
     try:
-        urllib.request.urlretrieve("https://cdn.socket.io/4.8.0/socket.io.min.js", socketio_js_path)
-        urllib.request.urlretrieve("https://cdn.socket.io/4.8.0/socket.io.min.js.map", socketio_js_map_path)
+        urllib.request.urlretrieve("https://cdn.socket.io/4.8.1/socket.io.min.js", socketio_js_path)
+        urllib.request.urlretrieve("https://cdn.socket.io/4.8.1/socket.io.min.js.map", socketio_js_map_path)
     except Exception as e:
         setup_print("Error while downloading", "error", indent=3)
         setup_print(str(e), "error")

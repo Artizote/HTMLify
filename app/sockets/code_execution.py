@@ -41,20 +41,10 @@ class CodeExecutionNamespace(Namespace):
             self.emit("ended", to=self.ce_room_name(ce))
         return end_callback
 
-    def ce_stdin_callback(self, ce) -> Callable:
-        def stdin_callback(i: str):
-            self.emit("stdin", i, to=self.ce_room_name(ce))
-        return stdin_callback
-
-    def ce_stdout_callback(self, ce) -> Callable:
-        def stdout_callback(o: str):
-            self.emit("stdout", o, to=self.ce_room_name(ce))
-        return stdout_callback
-
-    def ce_stderr_callback(self, ce) -> Callable:
-        def stderr_callback(e: str):
-            self.emit("stderr", e, to=self.ce_room_name(ce))
-        return stderr_callback
+    def ce_stream_callback(self, ce) -> Callable:
+        def stream_callback(b: bytes):
+            self.emit("stream", b, to=self.ce_room_name(ce))
+        return stream_callback
 
     def on_connect(self):
         pass
@@ -74,9 +64,7 @@ class CodeExecutionNamespace(Namespace):
             return
         ce.add_start_callback(self.ce_start_callback(ce))
         ce.add_end_callback(self.ce_end_callback(ce))
-        ce.add_stdin_callback(self.ce_stdin_callback(ce))
-        ce.add_stdout_callback(self.ce_stdout_callback(ce))
-        ce.add_stderr_callback(self.ce_stderr_callback(ce))
+        ce.add_stream_callback(self.ce_stream_callback(ce))
         ce.start()
 
     def on_input(self, data: dict):

@@ -9,7 +9,7 @@ class CodeExecution {
         this.executor = executor;
         this.element = element;
         this.terminal = new Terminal();
-        this.socket = io("/code-execution");
+        this.socket = io("/code-execution", { transports: ["websocket"] });
 
         this.ready = new Promise(resolve => {
             this.resolveReady = resolve;
@@ -37,10 +37,10 @@ class CodeExecution {
 
     setupSocket() {
         this.socket.on("started", async () => { await this.terminal.clear(); });
-        this.socket.on("stdin",   async (data) => { await this.writeToTerminal(data); });
-        this.socket.on("stdout",  async (data) => { await this.writeToTerminal(data); });
-        this.socket.on("stderr",  async (data) => { await this.writeToTerminal(data); });
-        // this.socket.on("ended",   async () => { await this.terminal.writeln("--ENDED--"); });
+        this.socket.on("stream", (data) => {
+            const uint8Array = new Uint8Array(data);
+            this.terminal.write(uint8Array);
+        });
     }
 
     setupTerminal() {
@@ -64,57 +64,7 @@ class CodeExecution {
         });
     }
 
-    processOutput(data) {
-        let processed = ""
-        for (let i=0; i<data.length; i++) {
-            let char = data[i];
-            switch (char) {
-                case "\r": {
-                    processed += "\r\n";
-                    break;
-                }
-                case "\n": {
-                    processed += "\r\n";
-                    break;
-                }
-                default: {
-                    processed += char;
-                }
-            }
-        }
-        return processed;
-    }
-
-    async writeToTerminal(data) {
-        data = this.processOutput(data);
-        await this.terminal.write(data);
-    }
-
-    processInput(data) {
-        let processed = ""
-        for (let i=0; i<data.length; i++) {
-            let char = data[i];
-            switch (char) {
-                case "\r": {
-                    processed += "\n";
-                    break
-                }
-                // backspaces are not handled
-                // by backend correctly
-                case "\x7f": {
-                    processed += "\b";
-                    break
-                }
-                default: {
-                    processed += char;
-                }
-            }
-        }
-        return processed;
-    }
-
     input = (input) => {
-        input = this.processInput(input);
         this.socket.emit("input", {
             id: this.id,
             auth_code: this.auth_code,
