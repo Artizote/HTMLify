@@ -1,15 +1,17 @@
 import os
+import pty
 import json
+import fcntl
 import shutil
+import struct
+import termios
 import subprocess
 from time import time, sleep
 from threading import Thread
-from io import TextIOWrapper
 from typing import Callable, Optional
 
 from app.utils import randstr, file_path
 from app.config import *
-
 
 ## Executor Meta Scheema
 # "name": {
@@ -41,24 +43,20 @@ class CodeExecution(subprocess.Popen):
         self.end_time:         int  | float = 0
         self.termination_time: int  | float = 0
 
-        # STDIN
-        self.stdin:           TextIOWrapper
-        self.stdin_callback:  Callable | None = None
-        self.stdin_buffer:    str      = ""
-        # STDOUT
-        self.stdout:          TextIOWrapper
-        self.stdout_callback: Callable | None = None
-        self.stdout_buffer:   str      = ""
-        # STDERR
-        self.stderr:          TextIOWrapper
-        self.stderr_callback: Callable | None = None
-        self.stderr_buffer:   str      = ""
-
-        self.start_callback: Callable | None = None
-        self.end_callback:   Callable | None = None
+        self.start_callback:  Callable | None = None
+        self.stream_callback: Callable | None = None
+        self.end_callback:    Callable | None = None
 
         self.combined_buffer:          str  = ""
         self.writing_combined_buffer: bool = False
+
+        self.master_fd, self.slave_fd = pty.openpty()
+        self.stream_buffer: bytes = bytes()
+
+        os.set_blocking(self.master_fd, True)
+        os.set_blocking(self.slave_fd, True)
+
+        self.set_pty_size(24, 80)
 
         CodeExecution.EXECUTIONS.append(self)
 
@@ -103,25 +101,28 @@ class CodeExecution(subprocess.Popen):
                 "--cpus", "0.1",          # limit the CPU usage
                 "-m", "512m",             # limit the memory usage
                 '-q',                     # queite
-                "-i",                     # intractive
+                "-it",                    # intractive
                 "--name", self.image_tag, # tag the container
                 self.image_tag
             ],
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            stdin=self.slave_fd,
+            stdout=self.slave_fd,
+            stderr=self.slave_fd,
             text=True
         )
         self.started = True
         Thread(target=self.termination_thread).start()
-        Thread(target=self.stdout_handler).start()
-        Thread(target=self.stderr_handler).start()
+        Thread(target=self.stream_handler).start()
+
+    def end(self):
+        self.terminate()
+        self.kill()
+        self.ended = True
 
     def termination_thread(self):
         while self.poll() is None:
             if self.termination_time < time():
-                self.terminate()
-                self.kill()
+                self.end()
             sleep(0.1)
         self.ended = True
         subprocess.run([DOCKER_COMMAND_PATH, "rm", "-f", self.image_tag], capture_output=True)
@@ -133,23 +134,11 @@ class CodeExecution(subprocess.Popen):
     def remove_start_callback(self):
         self.start_callback = None
 
-    def add_stdin_callback(self, callback: Callable):
-        self.stdin_callback = callback
+    def add_stream_callback(self, callback: Callable):
+        self.stream_callback = callback
 
-    def remove_stdin_callback(self):
-        self.stdin_callback = None
-
-    def add_stdout_callback(self, callback: Callable):
-        self.stdout_callback = callback
-
-    def remove_stdout_callback(self):
-        self.stdout_callback = None
-
-    def add_stderr_callback(self, callback: Callable):
-        self.stderr_callback = callback
-
-    def remove_stderr_callback(self):
-        self.stderr_callback = None
+    def remove_stream_callback(self):
+        self.stream_callback = None
 
     def add_end_callback(self, callback: Callable):
         self.end_callback = callback
@@ -157,81 +146,36 @@ class CodeExecution(subprocess.Popen):
     def remove_end_callback(self):
         self.end_callback = None
 
-    def clear_stdin_buffer(self):
-        self.stdin_buffer = ""
+    def clear_stream_buffer(self):
+        self.stream_buffer = b""
 
-    def clear_stdout_buffer(self):
-        self.stdout_buffer = ""
+    def set_pty_size(self, rows: int, cols: int):
+        winsize = struct.pack("HHHH", rows, cols, 0, 0)
+        fcntl.ioctl(self.slave_fd, termios.TIOCSWINSZ, winsize)
 
-    def clear_stderr_buffer(self):
-        self.stderr_buffer = ""
+    def send_input(self, input: bytes | str):
+        if isinstance(input, str):
+            input = input.encode()
+        os.write(self.master_fd, input)
 
-    def clear_combined_buffer(self):
-        self.combined_buffer = ""
-
-    def send_input(self, input: str):
-        if self.stdin_callback:
-            self.stdin_callback(input)
-        self.stdin_buffer += input
-        self.stdin.write(input)
-        try:
-            self.stdin.flush()
-        except:
-            pass
-        self.append_to_combined_buffer(input)
-
-    def stdout_handler(self):
+    def stream_handler(self):
         while not self.ended:
-            sleep(0.1)
-            capture = os.read(self.stdout.fileno(), 4096)
-            if isinstance(capture, bytes):
-                try:
-                    capture = capture.decode()
-                except:
-                    capture = ""
+            sleep(0.01)
+            capture = os.read(self.master_fd, 1)
             if not capture:
-                continue
+                break
+            self.stream_buffer += capture
+            if self.stream_callback:
+                self.stream_callback(capture)
 
-            self.stdout_buffer += capture
-            if self.stdout_callback:
-                self.stdout_callback(capture)
-            self.append_to_combined_buffer(capture)
-
-        leftover = self.stdout.read()
-        self.stdout_buffer += leftover
-        if self.stdout_callback:
-            self.stdout_callback(leftover)
-        self.append_to_combined_buffer(leftover)
-
-    def stderr_handler(self):
-        while not self.ended:
-            sleep(0.1)
-            capture = os.read(self.stderr.fileno(), 4096)
-            if isinstance(capture, bytes):
-                try:
-                    capture = capture.decode()
-                except:
-                    capture = ""
+        while True:
+            sleep(0.01)
+            capture = os.read(self.master_fd, 1)
             if not capture:
-                continue
-
-            self.stderr_buffer += capture
-            if self.stderr_callback:
-                self.stderr_callback(capture)
-            self.append_to_combined_buffer(capture)
-
-        leftover = self.stderr.read()
-        self.stderr_buffer += leftover
-        if self.stderr_callback:
-            self.stderr_callback(leftover)
-        self.append_to_combined_buffer(leftover)
-
-    def append_to_combined_buffer(self, text: str):
-        while self.writing_combined_buffer:
-            sleep(0.1)
-        self.writing_combined_buffer = True
-        self.combined_buffer += text
-        self.writing_combined_buffer = False
+                break
+            self.stream_buffer += capture
+            if self.stream_callback:
+                self.stream_callback(capture)
 
     def to_dict(self, show_auth_code=False) -> dict:
         auth_code = None
