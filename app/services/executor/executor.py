@@ -7,7 +7,7 @@ import struct
 import termios
 import subprocess
 from time import time, sleep
-from threading import Thread
+from threading import Thread, Lock
 from typing import Callable, Optional
 
 from app.utils import randstr, file_path
@@ -52,6 +52,8 @@ class CodeExecution(subprocess.Popen):
 
         self.master_fd, self.slave_fd = pty.openpty()
         self.stream_buffer: bytes = bytes()
+
+        self.stream_buffer_lock = Lock()
 
         os.set_blocking(self.master_fd, True)
         os.set_blocking(self.slave_fd, True)
@@ -112,6 +114,7 @@ class CodeExecution(subprocess.Popen):
         )
         self.started = True
         Thread(target=self.termination_thread).start()
+        Thread(target=self.stream_reader_thread).start()
         Thread(target=self.stream_handler).start()
 
     def end(self):
@@ -158,24 +161,34 @@ class CodeExecution(subprocess.Popen):
             input = input.encode()
         os.write(self.master_fd, input)
 
-    def stream_handler(self):
+    def stream_reader_thread(self):
         while not self.ended:
             sleep(0.01)
-            capture = os.read(self.master_fd, 1)
+            capture = os.read(self.master_fd, 1024)
             if not capture:
                 break
-            self.stream_buffer += capture
-            if self.stream_callback:
-                self.stream_callback(capture)
+            with self.stream_buffer_lock:
+                self.stream_buffer += capture
 
         while True:
-            sleep(0.01)
-            capture = os.read(self.master_fd, 1)
+            capture = os.read(self.master_fd, 1024)
             if not capture:
                 break
-            self.stream_buffer += capture
-            if self.stream_callback:
-                self.stream_callback(capture)
+            with self.stream_buffer_lock:
+                self.stream_buffer += capture
+
+    def stream_handler(self):
+        attemp_reading = 5
+        while attemp_reading:
+            sleep(0.01)
+            with self.stream_buffer_lock:
+                if self.stream_buffer:
+                    if self.stream_callback:
+                        self.stream_callback(self.stream_buffer)
+                    self.clear_stream_buffer()
+            if self.ended:
+                attemp_reading -= 1
+                sleep(0.5)
 
     def to_dict(self, show_auth_code=False) -> dict:
         auth_code = None
