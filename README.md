@@ -61,3 +61,10 @@ Contributions are welcome! To contribute:
 5. Create a Pull Request.
 
 While contributing, please follow the coding conventions according to the language and the part of the project you are modifying.
+
+
+## Community
+
+We are committed to fostering a welcoming and safe environment for all contributors. 
+
+* **Code of Conduct**: Please review our [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) to understand the standards we uphold.
