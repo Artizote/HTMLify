@@ -5,22 +5,53 @@
         "lang": "C",
         "extensions": [".c"]
     },
+
+    "cpp": {
+        "name": "cpp",
+        "title": "C++",
+        "lang": "C",
+        "extensions": [".cpp"]
+    },
+
     "cat": {
         "name": "cat",
         "title": "Cat",
         "lang": "Plaintext",
         "extensions": ["*"]
     },
+
+    "go": {
+        "name": "go",
+        "title": "Go",
+        "lang": "Go",
+        "extensions": [".go"]
+    },
+
     "node": {
         "name": "node",
         "title": "Node",
         "lang": "JavaScript",
         "extensions": [".js"]
     },
+
     "python": {
         "name": "python",
         "title": "Python",
         "lang": "Python",
         "extensions": [".py"]
+    },
+
+    "ruby": {
+        "name": "ruby",
+        "title": "Ruby",
+        "lang": "Ruby",
+        "extensions": [".rb"]
+    },
+
+    "rust": {
+        "name": "rust",
+        "title": "Rust",
+        "lang": "Rust",
+        "extensions": [".rs"]
     }
 }
