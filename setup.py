@@ -295,13 +295,18 @@ else:
     xterm_css_path = os.path.join(xterm_tmp_dir, "xterm.css")
     xterm_js_path = os.path.join(xterm_tmp_dir, "xterm.js")
     xterm_js_map_path = os.path.join(xterm_tmp_dir, "xterm.js.map")
+    xterm_addon_fit_js_path = os.path.join(xterm_tmp_dir, "xterm-addon-fit.js")
+    xterm_addon_fit_js_map_path = os.path.join(xterm_tmp_dir, "xterm-addon-fit.js.map")
     setup_print("Setting up xterm")
 
     setup_print("Downloading xterm")
     try:
-        urllib.request.urlretrieve("https://cdn.jsdelivr.net/npm/xterm/css/xterm.css", xterm_css_path)
-        urllib.request.urlretrieve("https://cdn.jsdelivr.net/npm/xterm/lib/xterm.js", xterm_js_path)
-        urllib.request.urlretrieve("https://cdn.jsdelivr.net/npm/xterm/lib/xterm.js.map", xterm_js_map_path)
+        urllib.request.urlretrieve("https://cdn.jsdelivr.net/npm/xterm@4.14.0/css/xterm.css", xterm_css_path)
+        urllib.request.urlretrieve("https://cdn.jsdelivr.net/npm/xterm@4.14.0/lib/xterm.js", xterm_js_path)
+        urllib.request.urlretrieve("https://cdn.jsdelivr.net/npm/xterm@4.14.0/lib/xterm.js.map", xterm_js_map_path)
+        urllib.request.urlretrieve("https://cdn.jsdelivr.net/npm/xterm@4.14.0/lib/xterm.js.map", xterm_js_map_path)
+        urllib.request.urlretrieve("https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.3.0/lib/xterm-addon-fit.js", xterm_addon_fit_js_path)
+        urllib.request.urlretrieve("https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.3.0/lib/xterm-addon-fit.js.map", xterm_addon_fit_js_map_path)
     except Exception as e:
         setup_print("Error while downoalding", "error", indent=3)
         setup_print(str(e), "error")

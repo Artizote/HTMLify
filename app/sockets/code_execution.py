@@ -74,6 +74,17 @@ class CodeExecutionNamespace(Namespace):
         input = data.get("input", "")
         ce.send_input(input)
 
+    def on_resize(self, data: dict):
+        ce, auth = self.get_and_auth_ce(data)
+        if not ce or not auth:
+            return
+        try:
+            rows = int(data.get("rows", 24))
+            cols = int(data.get("cols", 80))
+            ce.set_pty_size(rows, cols);
+        except:
+            pass
+
     def on_stop(self, data: dict):
         ce, auth = self.get_and_auth_ce(data)
         if not ce or not auth:

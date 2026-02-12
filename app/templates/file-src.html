@@ -104,6 +104,7 @@ use '@' for mention users." maxlength="1024" required></textarea>
 
 {% block after_body %}
 <script src="/static/vendor/xterm/xterm.js"></script>
+<script src="/static/vendor/xterm/xterm-addon-fit.js"></script>
 <script src="/static/vendor/socketio/socket.io.min.js"></script>
 <script src="/static/js/code-execution.js"></script>
 
@@ -150,10 +151,14 @@ async function run() {
     let raw_url = "{{ SCHEME }}://{{ SERVER_NAME }}/raw{{ file.path }}";
     let res = await fetch(raw_url);
     let code = await res.text();
-    let execution = new CodeExecution(code, executor, document.getElementById("terminal"));
+    let execution = new CodeExecution(code, executor, document.getElementById("terminal"), ["fit"]);
     await execution.ready;
+    execution.fit();
     execution.join();
     execution.start();
+
+    window.addEventListener("resize", execution.fit);
+    return execution; // this return is for debug purposes
 }
 
 </script>
