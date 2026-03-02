@@ -23,5 +23,35 @@ def login_for_access_token(
             headers={"WWW-Authenticate": "Bearer"}
         )
     access_token = AuthService.create_access_token({"sub": user.username})
-    return TokenResponse(access_token=access_token, token_type="bearer")
+    refresh_token = AuthService.create_refresh_token({"sub": user.username})
+    return TokenResponse(access_token=access_token, refresh_token=refresh_token)
+
+@router.get("/auth/refresh")
+def refresh_access_token(data: RefreshTokenRequest):
+    try:
+        jwt_data = AuthService.jwt_decode(data.refresh_token)
+    except Exception as e:
+        print(e)
+        raise HTTPException(
+            status.HTTP_401_UNAUTHORIZED,
+            "Invalid or expired token"
+        )
+
+    type = jwt_data.get("type")
+    if not type or type != "refresh":
+        raise HTTPException(
+            status.HTTP_401_UNAUTHORIZED,
+            "Invalid token type"
+        )
+
+    username = jwt_data.get("sub")
+    if not username:
+        raise HTTPException(
+            status.HTTP_401_UNAUTHORIZED,
+            "Invald token"
+        )
+
+    access_token = AuthService.create_access_token({"sub": username})
+
+    return RefreshTokenResponse(access_token=access_token)
 

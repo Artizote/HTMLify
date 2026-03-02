@@ -7,7 +7,7 @@ from app.services.user_service import *
 from ..schemas.user import *
 
 
-router = APIRouter()
+router = APIRouter(tags=["User"])
 
 
 @router.post("/users")

@@ -37,24 +37,33 @@ class AuthService:
         return None
 
     @staticmethod
-    def create_access_token(data: dict, expire_delta: timedelta | None = None) -> str:
+    def jwt_encode(to_encode: dict):
+        return jwt.encode(to_encode, AuthService.SECRET_KEY, algorithm=AuthService.ALGORITHM)
+
+    @staticmethod
+    def jwt_decode(token: str | bytes):
+        return jwt.decode(token, AuthService.SECRET_KEY, algorithms=[AuthService.ALGORITHM])
+
+    @staticmethod
+    def create_access_token(data: dict) -> str:
         to_encode = data.copy()
-        if expire_delta:
-            expire = datetime.now(timezone.utc) + expire_delta
-        else:
-            expire = datetime.now(timezone.utc) + timedelta(minutes=15)
-        to_encode.update({"exp": expire})
-        encoded_jwt = jwt.encode(to_encode, AuthService.SECRET_KEY, algorithm=AuthService.ALGORITHM)
+        expire = datetime.now(timezone.utc) + timedelta(minutes=15)
+        to_encode.update({"exp": expire, "type": "access"})
+        encoded_jwt = AuthService.jwt_encode(to_encode)
+        return encoded_jwt
+
+    @staticmethod
+    def create_refresh_token(data: dict) -> str:
+        to_encode = data.copy()
+        expire = datetime.now(timezone.utc) + timedelta(days=15)
+        to_encode.update({"exp": expire, "type": "refresh"})
+        encoded_jwt = AuthService.jwt_encode(to_encode)
         return encoded_jwt
 
     @staticmethod
     def get_user_by_token(token: str):
         try:
-            payload = jwt.decode(
-                token,
-                AuthService.SECRET_KEY,
-                algorithms=[AuthService.ALGORITHM],
-            )
+            payload = AuthService.jwt_decode(token)
             username = payload.get("sub")
             if not username:
                 return None
