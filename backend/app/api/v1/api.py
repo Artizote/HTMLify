@@ -3,6 +3,7 @@ from fastapi import APIRouter
 from .routes import (
     auth,
     blob,
+    file,
     pen,
     qrcode,
     search,
@@ -15,6 +16,7 @@ router = APIRouter()
 
 router.include_router(auth.router)
 router.include_router(blob.router)
+router.include_router(file.router)
 router.include_router(pen.router)
 router.include_router(qrcode.router)
 router.include_router(search.router)

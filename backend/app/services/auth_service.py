@@ -88,4 +88,15 @@ class AuthService:
 
         return user
 
+    @staticmethod
+    def get_or_none_current_user(
+        token: str | None = Security(oauth2_scheme),
+        api_key: str | None = Security(api_key_scheme),
+    ) -> Optional[User]:
+        user = None
+        if token:
+            user = AuthService.get_user_by_token(token)
+        if not user and api_key:
+            user = AuthService.get_user_by_api_key(api_key)
+        return user
 
