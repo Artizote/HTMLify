@@ -1,0 +1,27 @@
+# byte compilet files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environment-specific files
+.env
+.env.*
+*.log
+
+# Virtual environment directory
+venv/
+env/
+.venv/
+
+# Database directory
+instance/
+
+# App files
+files/
+
+# Config files
+config.json
+
+# Shared Objects
+*.so
