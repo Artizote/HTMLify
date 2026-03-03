@@ -1,13 +1,10 @@
 import os
 import subprocess
 import json
-import shutil
 import importlib.util
-import urllib.request
 import sys
 from random import randint
 from time import sleep
-from zipfile import ZipFile
 from textwrap import TextWrapper
 
 
@@ -96,7 +93,7 @@ if os.path.exists("config.json"):
 if not os.path.exists("config.json"):
     setup_print("config.json not found")
     config_file = open("config.json", "w")
-    session_key = str(randint(0, 10**10-1)).zfill(10)
+    session_key = str(randint(0, 10**256-1)).zfill(10)
     config_dict = {
         "SECRET_KEY": session_key,
         "SERVER_NAME": "localhost:5000",
@@ -192,6 +189,10 @@ except:
 for requirement in requirements:
     if requirement == "pillow":
         spec = importlib.util.find_spec("PIL")
+    elif requirement == "pyjwt":
+        spec = importlib.util.find_spec("jwt")
+    elif requirement == "python-multipart":
+        spec = importlib.util.find_spec("python_multipart")
     else:
         spec = importlib.util.find_spec(requirement)
     if spec:
@@ -222,7 +223,6 @@ segment()
 setup_print("DIRECTORIES", "info", True, 0)
 
 for r_dir in [
-        ["app", "static", "vendor"],
         ["files"],
         ["files", "blob"],
         ["files", "dp"],
@@ -237,114 +237,6 @@ for r_dir in [
         setup_print("Directory created: " + d, "success")
     else:
         setup_print("Directory exists: " + d, "success")
-
-setup_print("DONE", "success", True, 0)
-segment()
-
-
-# VENDORS
-
-setup_print("VENDORS", "info", True, 0)
-
-tmp_dir = os.path.join("files", "tmp")
-codemirror_dir = os.path.join("app", "static", "vendor", "codemirror")
-
-if os.path.exists(codemirror_dir):
-    setup_print("Vendor exists: codemirror", "success")
-else:
-    setup_print("Setting up codemirror")
-    setup_print("Downloading codemirror", indent=2)
-    try:
-        codemirror_zip_path, _ = urllib.request.urlretrieve("https://codemirror.net/5/codemirror.zip")
-    except Exception as e:
-        setup_print("Error while downoalding", "error", indent=3)
-        setup_print(str(e), "error")
-        setup_print("exiting...", "error")
-        exit(1)
-
-    setup_print("Downloaded codemirror", indent=2)
-    setup_print("Extracting codemirror", indent=2)
-    try:
-        codemirror_tmp_dir = os.path.join(tmp_dir, "codemirror")
-        try:
-            shutil.rmtree(codemirror_tmp_dir)
-        except:
-            pass
-        codemirror_zip = ZipFile(codemirror_zip_path, "r")
-        codemirror_zip.extractall(codemirror_tmp_dir)
-        main_dir = os.listdir(codemirror_tmp_dir)[0]
-        shutil.move(os.path.join(codemirror_tmp_dir, main_dir), codemirror_dir)
-        shutil.rmtree(codemirror_tmp_dir)
-    except Exception as e:
-        setup_print("Error while extracting", "error", indent=3)
-        setup_print(str(e), "error")
-        setup_print("exiting...", "error")
-        exit(1)
-    setup_print("Extracted codemirror", indent=2)
-
-    setup_print("Setuped vendor: codemirror", "success")
-
-xterm_dir = os.path.join("app", "static", "vendor", "xterm")
-
-if os.path.exists(xterm_dir):
-    setup_print("Vendor exists: xterm", "success")
-else:
-    xterm_tmp_dir = os.path.join(tmp_dir, "xterm")
-    if not os.path.exists(xterm_tmp_dir):
-        os.mkdir(xterm_tmp_dir)
-    xterm_css_path = os.path.join(xterm_tmp_dir, "xterm.css")
-    xterm_js_path = os.path.join(xterm_tmp_dir, "xterm.js")
-    xterm_js_map_path = os.path.join(xterm_tmp_dir, "xterm.js.map")
-    xterm_addon_fit_js_path = os.path.join(xterm_tmp_dir, "xterm-addon-fit.js")
-    xterm_addon_fit_js_map_path = os.path.join(xterm_tmp_dir, "xterm-addon-fit.js.map")
-    setup_print("Setting up xterm")
-
-    setup_print("Downloading xterm")
-    try:
-        urllib.request.urlretrieve("https://cdn.jsdelivr.net/npm/xterm@4.14.0/css/xterm.css", xterm_css_path)
-        urllib.request.urlretrieve("https://cdn.jsdelivr.net/npm/xterm@4.14.0/lib/xterm.js", xterm_js_path)
-        urllib.request.urlretrieve("https://cdn.jsdelivr.net/npm/xterm@4.14.0/lib/xterm.js.map", xterm_js_map_path)
-        urllib.request.urlretrieve("https://cdn.jsdelivr.net/npm/xterm@4.14.0/lib/xterm.js.map", xterm_js_map_path)
-        urllib.request.urlretrieve("https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.3.0/lib/xterm-addon-fit.js", xterm_addon_fit_js_path)
-        urllib.request.urlretrieve("https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.3.0/lib/xterm-addon-fit.js.map", xterm_addon_fit_js_map_path)
-    except Exception as e:
-        setup_print("Error while downoalding", "error", indent=3)
-        setup_print(str(e), "error")
-        setup_print("exiting...", "error")
-        exit(1)
-
-    shutil.copytree(xterm_tmp_dir, xterm_dir)
-    shutil.rmtree(xterm_tmp_dir)
-
-    setup_print("Setuped vendor: xterm", "success")
-
-socketio_dir = os.path.join("app", "static", "vendor", "socketio")
-
-if os.path.exists(socketio_dir):
-    setup_print("Vendor exists: socketio", "success")
-else:
-    socketio_tmp_dir = os.path.join(tmp_dir, "socketio")
-    if not os.path.exists(socketio_tmp_dir):
-        os.mkdir(socketio_tmp_dir)
-    socketio_js_path = os.path.join(socketio_tmp_dir, "socket.io.min.js")
-    socketio_js_map_path = os.path.join(socketio_tmp_dir, "socket.io.min.js.map")
-    setup_print("Setting up socketio")
-
-    setup_print("Downloading socketio")
-    try:
-        urllib.request.urlretrieve("https://cdn.socket.io/4.8.1/socket.io.min.js", socketio_js_path)
-        urllib.request.urlretrieve("https://cdn.socket.io/4.8.1/socket.io.min.js.map", socketio_js_map_path)
-    except Exception as e:
-        setup_print("Error while downloading", "error", indent=3)
-        setup_print(str(e), "error")
-        setup_print("exiting...", "error")
-        exit(1)
-
-    shutil.copytree(socketio_tmp_dir, socketio_dir)
-    shutil.rmtree(socketio_tmp_dir)
-
-    setup_print("Setuped vendor: socketio", "success")
-
 
 setup_print("DONE", "success", True, 0)
 segment()
