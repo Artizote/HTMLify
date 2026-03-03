@@ -6,4 +6,5 @@ pyjwt
 python-multipart
 qrcode
 requests
+uvicorn
 werkzeug
