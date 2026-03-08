@@ -41,7 +41,7 @@ def lookup_shortlink(
 
 @router.post("/shortlinks", description="Create ShortLink")
 def create_shortlink(body: ShortLinkCreate) -> ShortLinkRead:
-    shortlink = ShortLinkService.create(body.href, body.new)
+    shortlink = ShortLinkService.create(body.href.encoded_string(), body.new.__bool__())
     return ShortLinkRead(**shortlink.to_dict())
 
 @router.get("/shortlinks/{short}")
