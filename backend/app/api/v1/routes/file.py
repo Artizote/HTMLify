@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, Query, Body
+from fastapi.responses import FileResponse
 from starlette import status
 
 from typing import Optional
@@ -50,9 +51,32 @@ def get_file_by_id(
         if password:
             if file.password == password:
                 return FileRead.from_orm(file, show_content, True, False)
-    if file.visibility_s != "public":
+    if file.visibility_s != "public" and file.visibility_s != "once":
             return FileRead.from_orm(file, False, False, False)
     return FileRead.from_orm(file, show_content, True, False)
+
+@router.get("/files/{id}/content", description="Get File Content")
+def get_file_content(
+    id: int,
+    user: Optional[User] = Depends(AuthService.get_or_none_current_user),
+    password: Optional[str] = Query(None)
+) -> FileResponse:
+    file = FileService.get_file_by_id(id)
+    if not file:
+        raise HTTPException(404, detail="Not Found")
+    if user:
+        if file.user == user:
+            return FileResponse(file.blob.filepath, filename=file.name, content_disposition_type="inline")
+    if file.is_locked:
+        if not password:
+            raise HTTPException(status.HTTP_401_UNAUTHORIZED, "File is locked")
+        if password:
+            if file.password != password:
+                raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Wrong password, File is locked")
+            return FileResponse(file.blob.filepath, filename=file.name, content_disposition_type="inline")
+    if file.visibility_s != "public" and file.visibility_s != "once":
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "File is hidden")
+    return FileResponse(file.blob.filepath, filename=file.name, content_disposition_type="inline")
 
 @router.patch("/files/{id}")
 def update_file_by_id(
