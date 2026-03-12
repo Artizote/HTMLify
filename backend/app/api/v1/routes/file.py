@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query, Body
+from fastapi import APIRouter, Depends, Query, Body, UploadFile
 from fastapi.responses import FileResponse
 from starlette import status
 
@@ -57,13 +57,10 @@ def get_file_by_id(
 
 @router.get("/files/{id}/content", description="Get File Content")
 def get_file_content(
-    id: int,
+    file: File = Depends(FileService.file_from_path_dependency),
     user: Optional[User] = Depends(AuthService.get_or_none_current_user),
     password: Optional[str] = Query(None)
 ) -> FileResponse:
-    file = FileService.get_file_by_id(id)
-    if not file:
-        raise HTTPException(404, detail="Not Found")
     if user:
         if file.user == user:
             return FileResponse(file.blob.filepath, filename=file.name, content_disposition_type="inline")
@@ -103,6 +100,17 @@ def delete_file_by_id(
     user: User = Depends(AuthService.get_current_user),
 ):
     FileService.delete_file(user, file)
+
+@router.put("/files/{id}/content", status_code=status.HTTP_204_NO_CONTENT)
+def update_file_content_by_id(
+    content: UploadFile,
+    file: File = Depends(FileService.file_from_path_dependency),
+    user: User = Depends(AuthService.get_current_user),
+):
+    if file.user != user:
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "You are not allowed for this operation")
+    file.content = content.file.read()
+    file.save()
 
 @router.get("/folders")
 def get_folder(path: str = Query(None)) -> FolderRead:
