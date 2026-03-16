@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query, Body, UploadFile
+from fastapi import APIRouter, Depends, Query, Body, UploadFile, File as FFile, Form
 from fastapi.responses import FileResponse
 from starlette import status
 
@@ -34,6 +34,28 @@ def create_file(
 ) -> FileRead:
     file = FileService.create_file( user, **data.model_dump())
     return FileRead.from_orm(file)
+
+@router.post("/files/upload")
+async def create_file_by_upload(
+    file: UploadFile = FFile(),
+    title: Optional[str] = Form(None),
+    path: Optional[str] = Form(None),
+    password: Optional[str] = Form(""),
+    mode: FileModeEnum = Form("source"),
+    visibility: FileVisibilityEnum = Form("public"),
+    user: User = Depends(AuthService.get_current_user)
+) -> FileRead:
+    content = await file.read()
+    _file = FileService.create_file(
+        user,
+        title=title or "",
+        path=path or "",
+        content=content,
+        password=password,
+        mode=mode,
+        visibility=visibility,
+        )
+    return FileRead.from_orm(_file)
 
 @router.get("/files/{id}")
 def get_file_by_id(
