@@ -1,5 +1,8 @@
+"use client"
+
 import * as React from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Search, ArrowRight, Menu } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -9,6 +12,17 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+    CommandDialog,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+} from "@/components/ui/command"
+
+
+import { SITE_NAME } from "@/lib/config"
 
 const NAV_LINKS = [
     { name: "Dashboard", href: "/dashboard" },
@@ -18,16 +32,72 @@ const NAV_LINKS = [
     { name: "API", href: "/api" },
 ]
 
+function NavbarSearch() {
+    const [open, setOpen] = React.useState(false)
+    const router = useRouter()
+
+    React.useEffect(() => {
+        const down = (e: KeyboardEvent) => {
+            if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
+                e.preventDefault()
+                setOpen((open) => !open)
+            }
+        }
+
+        document.addEventListener("keydown", down)
+        return () => document.removeEventListener("keydown", down)
+    }, [])
+
+    return (
+        <>
+            <button
+                onClick={() => setOpen(true)}
+                className="flex items-center justify-between gap-1 sm:gap-2 rounded-full bg-muted/30 px-3 py-1.5 hover:bg-muted/50 transition-colors group border border-transparent"
+            >
+                <div className="flex items-center gap-2">
+                    <Search className="h-4 w-4 text-muted-foreground" />
+                    <span className="w-20 md:w-32 hidden md:block text-left bg-transparent text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
+                        Type here...
+                    </span>
+                </div>
+                <kbd className="pointer-events-none hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex text-muted-foreground">
+                    <span className="text-[10px]">⌘</span>K
+                </kbd>
+            </button>
+            <CommandDialog open={open} onOpenChange={setOpen}>
+                <CommandInput placeholder="Type a command or search..." />
+                <CommandList>
+                    <CommandEmpty>No results found.</CommandEmpty>
+                    <CommandGroup heading="Links">
+                        {NAV_LINKS.map((link) => (
+                            <CommandItem
+                                key={link.href}
+                                value={link.name}
+                                onSelect={() => {
+                                    router.push(link.href)
+                                    setOpen(false)
+                                }}
+                            >
+                                <span>{link.name}</span>
+                            </CommandItem>
+                        ))}
+                    </CommandGroup>
+                </CommandList>
+            </CommandDialog>
+        </>
+    )
+}
+
 export function Navbar() {
     return (
-        <nav className="flex w-full sticky top-0 items-center justify-between py-4 px-8 bg-foreground/5  rounded-full text-foreground">
+        <nav className="flex backdrop-blur-3xl sticky top-4 z-50 w-full items-center justify-between py-4 px-8 bg-foreground/5 rounded-full text-foreground">
             <Link href="/" className="flex items-center gap-3">
-                <div className="flex h-6 w-6 items-center justify-center  bg-foreground text-background">
+                <div className="flex h-6 w-6 items-center justify-center bg-foreground text-background">
                 </div>
-                <span className="text-lg font-bold tracking-tight text-foreground">HTMLify</span>
+                <span className="text-lg font-bold tracking-tight text-foreground">{SITE_NAME}</span>
             </Link>
 
-            <div className="hidden md:flex items-center gap-6 rounded-full bg-muted/40 px-6 py-2.5">
+            <div className="hidden lg:flex items-center gap-6 rounded-full bg-muted/40 px-6 py-2.5">
                 {NAV_LINKS.map((link, index) => (
                     <Link
                         key={index}
@@ -41,14 +111,7 @@ export function Navbar() {
             </div>
 
             <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2 rounded-full bg-muted/30 px-3 py-1.5 focus-within:ring-1 focus-within:ring-ring">
-                    <Search className="h-4 w-4 text-muted-foreground" />
-                    <input
-                        type="text"
-                        placeholder="Type here"
-                        className="w-32 sm:w-40 bg-transparent text-sm font-medium text-foreground placeholder:text-muted-foreground focus:outline-none"
-                    />
-                </div>
+                <NavbarSearch />
 
                 <div className="hidden md:block">
                     <Button className="h-9 rounded-full px-5 text-sm font-medium">

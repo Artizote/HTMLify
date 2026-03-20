@@ -20,6 +20,7 @@
     "hooks": "@/hooks"
   },
   "registries": {
-    "@magicui": "https://magicui.design/r/{name}"
+    "@magicui": "https://magicui.design/r/{name}",
+    "@ai-elements": "https://ai-sdk.dev/elements/api/registry/{name}.json"
   }
 }
