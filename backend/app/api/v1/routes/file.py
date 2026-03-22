@@ -33,7 +33,7 @@ def create_file(
     user: User = Depends(AuthService.get_current_user)
 ) -> FileRead:
     file = FileService.create_file( user, **data.model_dump())
-    return FileRead.from_orm(file)
+    return FileRead.from_orm(file, show_password=True)
 
 @router.post("/files/upload")
 async def create_file_by_upload(
@@ -55,7 +55,7 @@ async def create_file_by_upload(
         mode=mode,
         visibility=visibility,
         )
-    return FileRead.from_orm(_file)
+    return FileRead.from_orm(_file, show_password=True)
 
 @router.get("/files/{id}")
 def get_file_by_id(
@@ -114,7 +114,7 @@ def update_file_by_id(
         visibility=data.visibility,
         overwrite=data.overwrite,
     )
-    return FileRead.from_orm(updated_file)
+    return FileRead.from_orm(updated_file, show_password=True)
 
 @router.delete("/files/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_file_by_id(

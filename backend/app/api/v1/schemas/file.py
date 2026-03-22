@@ -25,6 +25,7 @@ class FileBase(BaseModel):
     mode: str 
     visibility: str 
     password: Optional[str] = None
+    locked: bool
     as_guest: bool 
     modified: datetime 
 
@@ -39,6 +40,7 @@ class FileBase(BaseModel):
             blob_hash=file.blob_hash,
             mode=file.mode_s,
             visibility=file.visibility_s,
+            locked=file.is_locked,
             as_guest=file.as_guest,
             modified=file.modified
         )
