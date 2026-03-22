@@ -1,12 +1,18 @@
 "use client"
 import { FileDropzone } from '@/components/file/file-dropzone'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
+import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from 'react-hook-form'
 import z from 'zod'
+
+import { zodToFormData } from '@/lib/utils'
+import { useUploadFile } from '@/lib/hooks/use-files'
+import { toast } from 'sonner'
+import { UserFullInfo } from '@/shared/types'
 
 
 const fileFormSchema = z.object({
@@ -18,18 +24,42 @@ const fileFormSchema = z.object({
     visibility: z.string().optional().default('public'),
 })
 
-export const FileForm = () => {
+interface InitialDataProps {
+    name: string
+    path: string
+    password: string
+    mode: "source" | "render"
+    visibility: string
+}
+
+export const FileForm = ({ user, initialData }: { user: UserFullInfo, initialData?: InitialDataProps }) => {
+    const { mutate: uploadFile, isPending } = useUploadFile()
     const form = useForm<z.infer<typeof fileFormSchema>>({
         resolver: zodResolver(fileFormSchema),
         defaultValues: {
-            name: '',
-            password: '',
+            name: initialData?.name || "",
+            password: initialData?.password || "",
             file: undefined,
-            path: '/{username}/',
-            mode: 'source',
-            visibility: 'public'
+            path: initialData?.path || `/${user.username}/`,
+            mode: initialData?.mode || 'source',
+            visibility: initialData?.visibility || 'public'
         }
     })
+
+    const onSubmit = (data: z.infer<typeof fileFormSchema>) => {
+        const formData = zodToFormData(data);
+
+        uploadFile(formData, {
+            onSuccess: () => {
+                toast.success("File uploaded successfully")
+                form.reset()
+            },
+            onError: (error) => {
+                toast.error(error instanceof Error ? error.message : "Failed to upload file")
+            }
+        })
+    };
+
     return (
         <Card className='w-full max-w-7xl mx-auto'>
             <CardHeader>
@@ -38,7 +68,7 @@ export const FileForm = () => {
                 </CardTitle>
             </CardHeader>
             <CardContent>
-                <form action="" className=''>
+                <form onSubmit={form.handleSubmit(onSubmit)}>
                     <FieldGroup >
                         <Controller
                             name='file'
@@ -88,9 +118,13 @@ export const FileForm = () => {
                                         <FieldLabel>
                                             Path
                                         </FieldLabel>
+                                        <FieldDescription>
+                                            make sure the path is starts with /{user.username}/
+                                        </FieldDescription>
                                         <Input
-                                            id='form-file-path'
-                                            {...field} placeholder='enter the file path'
+                                            {...field}
+                                            placeholder="enter the file path"
+                                            className="border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 rounded-l-none"
                                         />
                                         {
                                             fieldState.invalid && <FieldError errors={[fieldState.error]}></FieldError>
@@ -145,6 +179,9 @@ export const FileForm = () => {
                             />
                         </div>
                     </FieldGroup>
+                    <Button type="submit" className='mt-2' disabled={isPending}>
+                        {isPending ? "Uploading..." : "Upload"}
+                    </Button>
                 </form>
             </CardContent>
 

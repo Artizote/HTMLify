@@ -1,6 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
-import { getFileIDByPath, getFileContentById } from "../actons/file";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { QUERY_KEYS } from "@/shared/query-keys";
+import { getFileIDByPath, getFileContentById, uploadFile } from "@/lib/actons/file";
 
 export const useFileId = (path: string) => {
     return useQuery({
@@ -22,5 +22,16 @@ export const useFileContent = (path: string) => {
             return response.text();
         },
         enabled: !!fileId,
+    });
+};
+
+export const useUploadFile = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (formData: FormData) => uploadFile(formData),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.files.all });
+        },
     });
 };

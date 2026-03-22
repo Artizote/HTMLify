@@ -1,5 +1,5 @@
 import jwt
-from fastapi import Security, HTTPException
+from fastapi import Security, HTTPException, Request
 from fastapi.security import OAuth2PasswordBearer, APIKeyHeader
 from starlette import status
 
@@ -102,6 +102,39 @@ class AuthService:
         token: str | None = Security(oauth2_scheme),
         api_key: str | None = Security(api_key_scheme),
     ) -> Optional[User]:
+        user = None
+        if token:
+            user = AuthService.get_user_by_token(token)
+        if not user and api_key:
+            user = AuthService.get_user_by_api_key(api_key)
+        return user
+
+    @staticmethod
+    def get_current_user_from_cookie(
+        request: Request,
+        api_key: str | None = Security(api_key_scheme),
+    ) -> User:
+        """Auth dependency that reads access_token from httponly cookie."""
+        user = None
+        token = request.cookies.get("access_token")
+        if token:
+            user = AuthService.get_user_by_token(token)
+        if not user and api_key:
+            user = AuthService.get_user_by_api_key(api_key)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid authentication credentials",
+            )
+        return user
+
+    @staticmethod
+    def get_or_none_current_user_from_cookie(
+        request: Request,
+        api_key: str | None = Security(api_key_scheme),
+    ) -> Optional[User]:
+        """Optional cookie-based auth dependency."""
+        token = request.cookies.get("access_token")
         user = None
         if token:
             user = AuthService.get_user_by_token(token)

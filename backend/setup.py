@@ -111,7 +111,7 @@ segment()
 
 setup_print("COMMANDS/UTILITES", "info", True, 0)
 
-def check_command(command):
+def check_command(command : str):
     try:
         subprocess.run(
             [command, "--version"],
