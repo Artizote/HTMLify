@@ -13,7 +13,7 @@ const StaticServe = async ({ params }: { params: Promise<{ path: string[] }> }) 
     const filename = joinedPath
 
     const response = await getFileContentByPath(joinedPath)
-    
+
     if (!response) {
         return (
             <div className="flex flex-col h-[70vh] items-center justify-center text-destructive">
@@ -25,7 +25,7 @@ const StaticServe = async ({ params }: { params: Promise<{ path: string[] }> }) 
     const code = await response.text()
 
     return (
-        <div className="flex flex-col h-[70vh]">
+        <div className="flex flex-col max-h-[70vh]">
             <CodeBlockContainer language={language} >
                 <CodeBlockHeader>
                     <CodeBlockTitle className="w-full">
@@ -37,7 +37,7 @@ const StaticServe = async ({ params }: { params: Promise<{ path: string[] }> }) 
                     </CodeBlockActions>
                 </CodeBlockHeader>
 
-                <div className="overflow-auto h-[70vh] min-h-0">
+                <div className="overflow-auto max-h-[70vh] min-h-0">
                     <CodeBlockContent
                         code={code}
                         showLineNumbers
