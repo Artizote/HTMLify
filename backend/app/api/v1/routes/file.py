@@ -165,6 +165,10 @@ async def update_file_by_id_with_form(
     return FileRead.from_orm(updated_file, show_password=True)
 
 @router.get("/folders")
-def get_folder(path: str = Query(None)) -> FolderRead:
+def get_folder(
+    path: str = Query(None),
+    expand: bool = Query(False),
+    expand_depth: int = Query(1, ge=0),
+) -> FolderRead:
     folder = FileService.get_folder(path)
-    return FolderRead.from_orm(folder, True)
+    return FolderRead.from_orm(folder, expand, expand_depth)
