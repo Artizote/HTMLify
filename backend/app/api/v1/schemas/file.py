@@ -14,6 +14,17 @@ class FileVisibilityEnum(StrEnum):
     HIDDEN = "hidden"
     ONEC = "once"
 
+class FileTypeEnum(StrEnum):
+    UNKNOWN = "unknown"
+    APPLICATION = "application"
+    AUDIO = "audio"
+    CHEMICAL = "chemical"
+    FONT = "font"
+    IMAGE = "image"
+    MODEL = "model"
+    TEXT = "text"
+    VIDEO = "video"
+
 
 class FileBase(BaseModel):
     id: int
@@ -21,9 +32,11 @@ class FileBase(BaseModel):
     title: str
     path: str
     views: int
+    size: int
     blob_hash: str
-    mode: str 
-    visibility: str 
+    type: FileTypeEnum
+    mode: FileModeEnum 
+    visibility: FileVisibilityEnum
     password: Optional[str] = None
     locked: bool
     as_guest: bool 
@@ -37,7 +50,9 @@ class FileBase(BaseModel):
             title=file.title,
             path=file.path,
             views=file.views,
+            size=file.size,
             blob_hash=file.blob_hash,
+            type=file.type_s,
             mode=file.mode_s,
             visibility=file.visibility_s,
             locked=file.is_locked,
@@ -67,6 +82,7 @@ class FileCreate(BaseModel):
     content: Base64Bytes = b""
     mode: FileModeEnum
     visibility: FileVisibilityEnum
+    password: Optional[str] = None
     as_guest: bool = False
 
 class FileUpdate(BaseModel):
@@ -82,21 +98,26 @@ class FolderRead(BaseModel):
     name: str
     path: str
     items: List[Union["FolderRead", FileRead]]
+    items_count: int
+    url: str
 
     @classmethod
-    def from_orm(cls, dir, show_content=False) -> Self:
+    def from_orm(cls, dir, expand=False, expand_depth=1) -> Self:
         fr = cls(
             name=dir.name,
             path=dir.path,
-            items=[]
+            items=[],
+            items_count=dir.items_count(),
+            url=dir.url
+
         )
-        if show_content:
+        if expand and expand_depth > 0:
             items = dir.items()
             for item in items:
                 if item.is_file:
                     fr.items.append(FileRead.from_orm(item, False, False, False))
                 else:
-                    fr.items.append(cls.from_orm(item, False))
+                    fr.items.append(cls.from_orm(item, expand, expand_depth - 1))
         return fr
              
 
