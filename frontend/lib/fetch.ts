@@ -1,6 +1,6 @@
-import { BACKEND_API_URL } from "@/lib/config";
+import { clientEnv } from "@/lib/env";
 import { extractErrorMessage } from "@/lib/utils";
-import { getAccessToken } from "@/lib/actons/user";
+import { getAccessToken } from "@/lib/modules/user/user.actions";
 
 let isRefreshing = false;
 let refreshQueue: ((ok: boolean) => void)[] = [];
@@ -14,7 +14,7 @@ async function tryRefresh(): Promise<boolean> {
 
     isRefreshing = true;
     try {
-        const res = await fetch(`${BACKEND_API_URL}/v1/auth/refresh`, {
+        const res = await fetch(`${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/v1/auth/refresh`, {
             method: "GET",
             credentials: "include",
         });

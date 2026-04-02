@@ -1,5 +1,5 @@
-import { getFolderByPath } from "@/lib/actons/file";
-import { getMe } from "@/lib/actons/user";
+import { getFolderByPath } from "@/lib/modules/file/file.actions";
+import { getMe } from "@/lib/modules/user/user.actions";
 import { Button } from "@/components/ui/button";
 import { DashboardBreadcrumb } from "@/components/dashboard/dashboard-breadcrumb";
 import { FileTable } from "@/components/dashboard/file-table";

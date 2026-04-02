@@ -1,5 +1,5 @@
-import { FileIDResponse, FolderResponse } from "@/shared/types";
-import { BACKEND_API_URL } from "../config";
+import { FileIDResponse, FolderResponse } from "@/lib/modules/file/file.types";
+import { clientEnv } from "@/lib/env";
 import { apiFetch } from "@/lib/fetch";
 
 export const getFileInfoByPathOrID = async ({
@@ -18,7 +18,7 @@ export const getFileInfoByPathOrID = async ({
   } else if (id) {
     params = `id=${id}`;
   }
-  const response = await fetch(`${BACKEND_API_URL}/v1/files?${params}`);
+  const response = await fetch(`${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/v1/files?${params}`);
   if (!response.ok) {
     return null;
   }
@@ -29,7 +29,7 @@ export const getFileInfoByPathOrID = async ({
 export const getFileContentById = async (
   id: number,
 ): Promise<Response | null> => {
-  const response = await fetch(`${BACKEND_API_URL}/v1/files/${id}/content`);
+  const response = await fetch(`${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/v1/files/${id}/content`);
   if (!response.ok) {
     console.error(`Failed to fetch file content for id: ${id}`);
     return null;
@@ -46,12 +46,12 @@ export const getFileContentByPath = async (path: string) => {
 export const uploadFile = async (
   formData: FormData,
 ): Promise<FileIDResponse> => {
-  return apiFetch<FileIDResponse>(`${BACKEND_API_URL}/v1/files/upload`, {
+  return apiFetch<FileIDResponse>(`${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/v1/files/upload`, {
     method: "POST",
     body: formData,
   });
 };
 
 export const getFolderByPath = async (path: string) => {
-  return apiFetch<FolderResponse>(`${BACKEND_API_URL}/v1/folders?path=${path}`);
+  return apiFetch<FolderResponse>(`${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/v1/folders?path=${path}`);
 };

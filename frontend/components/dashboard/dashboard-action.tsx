@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
-import { FileItem, FolderItem } from "@/shared/types";
+import { FileItem, FolderItem } from "@/lib/modules/file/file.types";
 
 export function DashboardAction({
   isFolder,

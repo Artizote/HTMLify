@@ -1,6 +1,6 @@
-import { refreshTokenFromCookie } from "@/lib/actons/auth";
-import { getFileContentById, getFileInfoByPathOrID } from "@/lib/actons/file";
-import { BACKEND_API_URL } from "@/lib/config";
+import { refreshTokenFromCookie } from "@/lib/modules/auth/auth.actions";
+import { getFileContentById, getFileInfoByPathOrID } from "@/lib/modules/file/file.actions";
+import { clientEnv } from "@/lib/env";
 import { NextRequest, NextResponse } from "next/server";
 
 const excludePaths = ["/about", "/_next", "/api", "/favicon.ico", "/dashboard"];
@@ -38,7 +38,7 @@ const serverFile = async (pathname: string): Promise<NextResponse> => {
 
 async function verifyAccessToken(accessToken: string): Promise<boolean> {
   try {
-    const res = await fetch(`${BACKEND_API_URL}/v1/users/me`, {
+    const res = await fetch(`${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/v1/users/me`, {
       headers: { Cookie: `access_token=${accessToken}` },
       cache: "no-store",
     });

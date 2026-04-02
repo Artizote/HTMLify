@@ -4,7 +4,7 @@ import {
   getFileInfoByPathOrID,
   getFileContentById,
   uploadFile,
-} from "@/lib/actons/file";
+} from "@/lib/modules/file/file.actions";
 
 export const useFileId = (path: string) => {
   return useQuery({

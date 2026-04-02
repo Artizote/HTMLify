@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/command"
 
 
-import { SITE_NAME } from "@/lib/config"
+import { clientEnv } from "@/lib/env"
 
 const NAV_LINKS = [
     { name: "Dashboard", href: "/dashboard" },
@@ -94,7 +94,7 @@ export function Navbar() {
             <Link href="/" className="flex items-center gap-3">
                 <div className="flex h-6 w-6 items-center justify-center bg-foreground text-background">
                 </div>
-                <span className="text-lg font-bold tracking-tight text-foreground">{SITE_NAME}</span>
+                <span className="text-lg font-bold tracking-tight text-foreground">{clientEnv.NEXT_PUBLIC_SITE_NAME}</span>
             </Link>
 
             <div className="hidden lg:flex items-center gap-6 rounded-full bg-muted/40 px-6 py-2.5">

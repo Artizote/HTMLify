@@ -6,12 +6,12 @@ import {
   CodeBlockHeader,
   CodeBlockTitle,
 } from "@/components/ai-elements/code-block";
-import { RunCodeDrawer } from "@/components/playgroud/code-terminal";
 import { Button } from "@/components/ui/button";
 import { FileIcon } from "lucide-react";
 import { BundledLanguage } from "shiki";
-import { getFileContentByPath } from "@/lib/actons/file";
+import { getFileContentByPath } from "@/lib/modules/file/file.actions";
 import { CodePlayground } from "@/components/playgroud/code-playground";
+import { getLanguageByPath } from "@/lib/modules/playgournd/editor.utils";
 
 const getFileContentType = (
   filename: string,
@@ -44,7 +44,7 @@ const StaticServe = async ({
   const { path } = await params;
   let joinedPath = path.join("/");
   joinedPath = joinedPath.startsWith("/") ? joinedPath : `/${joinedPath}`;
-  const language = "bash";
+  const language = getLanguageByPath(joinedPath);
   const filename = joinedPath;
 
   const response = await getFileContentByPath(joinedPath);

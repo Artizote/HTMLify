@@ -8,7 +8,7 @@ import { Controller, useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import Link from "next/link"
 import { useAuth } from "@/lib/hooks/use-login"
-import { AuthPayload, loginSchema, LoginSchema, signUpSchema, SignUpSchema } from "@/shared/types"
+import { AuthPayload, loginSchema, LoginSchema, signUpSchema, SignUpSchema } from "@/lib/modules/auth/auth.schema"
 
 const modeConfig = {
     signin: {

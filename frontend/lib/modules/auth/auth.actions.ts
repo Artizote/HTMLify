@@ -1,11 +1,11 @@
-import { BACKEND_API_URL } from "@/lib/config";
+import { clientEnv } from "@/lib/env";
 import { extractErrorMessage, zodToFormData } from "@/lib/utils";
-import { LoginSchema, SignUpSchema } from "@/shared/types";
+import { LoginSchema, SignUpSchema } from "@/lib/modules/auth/auth.schema";
 
 
 export const refreshToken = async (): Promise<boolean> => {
     try {
-        const res = await fetch(`${BACKEND_API_URL}/v1/auth/refresh`, {
+        const res = await fetch(`${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/v1/auth/refresh`, {
             method: "GET",
             credentials: "include",
         });
@@ -18,7 +18,7 @@ export const refreshToken = async (): Promise<boolean> => {
 
 export const refreshTokenFromCookie = async (refreshToken: string): Promise<string | null> => {
     try {
-        const res = await fetch(`${BACKEND_API_URL}/v1/auth/refresh`, {
+        const res = await fetch(`${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/v1/auth/refresh`, {
             method: "GET",
             headers: { Cookie: `refresh_token=${refreshToken}` },
             cache: "no-store",
@@ -37,7 +37,7 @@ export const refreshTokenFromCookie = async (refreshToken: string): Promise<stri
 
 
 export const signOut = async (): Promise<void> => {
-    await fetch(`${BACKEND_API_URL}/v1/auth/logout`, {
+    await fetch(`${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/v1/auth/logout`, {
         method: "POST",
         credentials: "include",
     });
@@ -51,7 +51,7 @@ export const signIn = async (data: LoginSchema) => {
     let response: Response;
 
     try {
-        response = await fetch(`${BACKEND_API_URL}/v1/auth/token`, {
+        response = await fetch(`${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/v1/auth/token`, {
             method: "POST",
             body: formData,
             credentials: "include",
@@ -70,7 +70,7 @@ export const signUp = async (data: SignUpSchema) => {
     let response: Response;
 
     try {
-        response = await fetch(`${BACKEND_API_URL}/v1/users`, {
+        response = await fetch(`${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/v1/users`, {
             method: "POST",
             credentials: "include",
             headers: {

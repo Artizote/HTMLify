@@ -1,4 +1,4 @@
-import { AUTH_ONLY_ROUTES, excludePaths, hadleAuthOrProtectedRoute, PROTECTED_ROUTES, PUBLIC_ROUTES, serverFile } from '@/lib/actons/proxy-utils'
+import { AUTH_ONLY_ROUTES, excludePaths, hadleAuthOrProtectedRoute, PROTECTED_ROUTES, PUBLIC_ROUTES, serverFile } from '@/lib/modules/proxy/proxy.utils'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 

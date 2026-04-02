@@ -26,7 +26,7 @@ import z from "zod";
 import { zodToFormData } from "@/lib/utils";
 import { useUploadFile } from "@/lib/hooks/use-files";
 import { toast } from "sonner";
-import { UserFullInfo } from "@/shared/types";
+import { UserFullInfo } from "@/lib/modules/user/user.types";
 import { CodePlayground } from "@/components/playgroud/code-playground";
 import { getLanguageByPath } from "@/lib/modules/playgournd/editor.utils";
 

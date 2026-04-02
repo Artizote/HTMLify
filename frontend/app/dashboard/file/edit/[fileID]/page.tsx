@@ -1,6 +1,6 @@
 import { FileForm } from "@/components/file/form";
-import { getFileContentById, getFileInfoByPathOrID } from "@/lib/actons/file";
-import { getMe } from "@/lib/actons/user";
+import { getFileContentById, getFileInfoByPathOrID } from "@/lib/modules/file/file.actions";
+import { getMe } from "@/lib/modules/user/user.actions";
 
 export default async function NewFileCreatePage({
   params,

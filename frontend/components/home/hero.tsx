@@ -1,7 +1,7 @@
 import { ArrowRight, Github } from "lucide-react";
 
 import { WordRotate } from "@/components/ui/word-rotate";
-import { SITE_NAME } from "@/lib/config";
+import { clientEnv } from "@/lib/env";
 import { Button } from "@/components/ui/button";
 
 export function Hero() {
@@ -14,7 +14,7 @@ export function Hero() {
                     A New
                     <WordRotate
                         className="text-4xl md:text-6xl font-bold text-primary ml-4"
-                        words={["Life", "Meaning", "Style", SITE_NAME]}
+                        words={["Life", "Meaning", "Style", clientEnv.NEXT_PUBLIC_SITE_NAME]}
                     />
                 </h1>
 

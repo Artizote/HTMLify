@@ -1,13 +1,13 @@
 "use server";
 
 import { cookies } from "next/headers";
-import { BACKEND_API_URL } from "@/lib/config";
-import { refreshTokenFromCookie } from "@/lib/actons/auth";
-import { UserFullInfo } from "@/shared/types";
+import { clientEnv } from "@/lib/env";
+import { refreshTokenFromCookie } from "@/lib/modules/auth/auth.actions";
+import { UserFullInfo } from "@/lib/modules/user/user.types";
 
 
 async function fetchMe(accessToken: string): Promise<UserFullInfo | null> {
-    const res = await fetch(`${BACKEND_API_URL}/v1/users/me`, {
+    const res = await fetch(`${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/v1/users/me`, {
         headers: { Cookie: `access_token=${accessToken}` },
         cache: "no-store",
     });

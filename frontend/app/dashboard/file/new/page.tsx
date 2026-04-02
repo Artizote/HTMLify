@@ -1,5 +1,5 @@
 import { FileForm } from "@/components/file/form";
-import { getMe } from "@/lib/actons/user";
+import { getMe } from "@/lib/modules/user/user.actions";
 
 export default async function NewFileCreatePage() {
     const user = await getMe()

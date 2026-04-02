@@ -1,6 +1,6 @@
-import { signIn, signOut, signUp } from "@/lib/actons/auth";
+import { signIn, signOut, signUp } from "@/lib/modules/auth/auth.actions";
 import { QUERY_KEYS } from "@/shared/query-keys";
-import { AuthPayload } from "@/shared/types";
+import { AuthPayload } from "@/lib/modules/auth/auth.schema";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
