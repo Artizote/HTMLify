@@ -22,7 +22,12 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${jetbrainsMono.variable} font-mono antialiased`}>
-        <Providers attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+        <Providers
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
           {children}
           <Toaster richColors />
         </Providers>

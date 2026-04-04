@@ -1,4 +1,4 @@
-.PHONY: install install-frontend install-backend run run-frontend run-backend build lint clean
+.PHONY: install install-frontend install-backend run run-frontend run-backend build lint format format-check clean
 
 PYTHON_CMD := $(shell command -v python3 >/dev/null 2>&1 && echo python3 || echo python)
 PIP_CMD := $(shell command -v uv >/dev/null 2>&1 && echo "uv pip" || echo "pip")
@@ -35,6 +35,14 @@ build:
 lint:
 	@echo "Linting frontend..."
 	cd frontend && pnpm lint
+
+format:
+	@echo "Formatting frontend..."
+	cd frontend && pnpm format:fix
+
+format-check:
+	@echo "Checking formatting..."
+	cd frontend && pnpm format:check
 
 clean:
 	@echo "Cleaning project..."
