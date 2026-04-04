@@ -10,21 +10,26 @@ from ..schemas.auth import *
 
 router = APIRouter(tags=["Auth"])
 
+COOKIE_DOMAIN= "localhost"
+SAMESITE="lax"
+SECURE=False
+
+
 
 def _set_auth_cookies(response: Response, access_token: str, refresh_token: str) -> None:
     response.set_cookie(
         key="access_token",
         value=access_token,
         httponly=True,
-        secure=False,
-        samesite="lax",
+        secure=SECURE,
+        samesite=SAMESITE,
         max_age=1800,
     )
     response.set_cookie(
         key="refresh_token",
         value=refresh_token,
         httponly=True,
-        secure=False,
+        secure=SECURE,
         samesite="lax",
         max_age=7 * 24 * 60 * 60,
     )

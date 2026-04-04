@@ -7,6 +7,7 @@ const clientSchema = z.object({
   NEXT_PUBLIC_BACKEND_API_URL: z
     .string()
     .min(1, "NEXT_PUBLIC_BACKEND_API_URL is required"),
+  NEXT_PUBLIC_SUBDOMAIN: z.string().min(1, "NEXT_PUBLIC_SUBDOMAIN is required"),
 });
 
 function parseSchema<T extends z.ZodTypeAny>(schema: T, data: unknown) {
@@ -27,4 +28,8 @@ export const serverEnv =
     ? parseSchema(serverSchema, process.env)
     : ({} as z.infer<typeof serverSchema>);
 
-export const clientEnv = parseSchema(clientSchema, process.env);
+export const clientEnv = parseSchema(clientSchema, {
+  NEXT_PUBLIC_SITE_NAME: process.env.NEXT_PUBLIC_SITE_NAME,
+  NEXT_PUBLIC_BACKEND_API_URL: process.env.NEXT_PUBLIC_BACKEND_API_URL,
+  NEXT_PUBLIC_SUBDOMAIN: process.env.NEXT_PUBLIC_SUBDOMAIN,
+});

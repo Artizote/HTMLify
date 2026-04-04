@@ -26,7 +26,10 @@ const languageExtensionMap: Record<SupportedLanguage, Extension> = {
 };
 
 export function getLanguageExtension(language: string): Extension {
-  return languageExtensionMap[language.toLowerCase() as SupportedLanguage] ?? javascript();
+  return (
+    languageExtensionMap[language.toLowerCase() as SupportedLanguage] ??
+    javascript()
+  );
 }
 
 export function getLanguageByPath(path: string): SupportedLanguage {

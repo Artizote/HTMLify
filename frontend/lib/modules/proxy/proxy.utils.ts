@@ -1,5 +1,8 @@
 import { refreshTokenFromCookie } from "@/lib/modules/auth/auth.actions";
-import { getFileContentById, getFileInfoByPathOrID } from "@/lib/modules/file/file.actions";
+import {
+  getFileContentById,
+  getFileInfoByPathOrID,
+} from "@/lib/modules/file/file.actions";
 import { clientEnv } from "@/lib/env";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -38,20 +41,72 @@ const serverFile = async (pathname: string): Promise<NextResponse> => {
 
 async function verifyAccessToken(accessToken: string): Promise<boolean> {
   try {
-    const res = await fetch(`${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/v1/users/me`, {
-      headers: { Cookie: `access_token=${accessToken}` },
-      cache: "no-store",
-    });
+    const res = await fetch(
+      `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/v1/users/me`,
+      {
+        headers: { Cookie: `access_token=${accessToken}` },
+        cache: "no-store",
+      },
+    );
     return res.ok;
   } catch {
     return false;
   }
 }
 
-const hadleAuthOrProtectedRoute = async (
+export function getSubdomain(request: NextRequest): string {
+  const host = request.headers.get("host") || "";
+  const hostname = host.split(":")[0]; // strip port
+
+  const parts = hostname.split(".");
+
+  // e.g. "app.localhost" → ["app", "localhost"] → "app"
+  // e.g. "app.example.com" → ["app", "example", "com"] → "app"
+  // e.g. "localhost" or "example.com" → no subdomain → ""
+  if (parts.length <= 1) return "";
+
+  const isLocalhost = parts[parts.length - 1] === "localhost";
+
+  if (isLocalhost) {
+    // app.localhost → subdomain is everything before "localhost"
+    return parts.slice(0, -1).join(".");
+  }
+
+  // For real domains, subdomain is everything before the last two parts
+  // e.g. app.example.com → parts = ["app", "example", "com"] → "app"
+  // e.g. a.b.example.com → "a.b"
+  if (parts.length <= 2) return ""; // no subdomain (e.g. "example.com")
+
+  return parts.slice(0, -2).join(".");
+}
+
+export function redirectToSubdomain(
+  request: NextRequest,
+  subdomain: string,
+): NextResponse {
+  const host = request.headers.get("host") || "";
+  const hostname = host.split(":")[0];
+  const port = host.includes(":") ? `:${host.split(":")[1]}` : "";
+
+  const prefix = subdomain != "" ? `${subdomain}.` : "";
+
+  const newHostname = `${prefix}${hostname.replace(/^[^.]+\./, "")}`;
+
+  const newUrl = new URL(request.url);
+  newUrl.host = `${newHostname}${port}`;
+
+  console.log({ newUrl });
+  return NextResponse.redirect(newUrl);
+}
+
+const handleAuthOrProtectedRoute = async (
   request: NextRequest,
   pathname: string,
 ): Promise<NextResponse> => {
+  if (getSubdomain(request) !== clientEnv.NEXT_PUBLIC_SUBDOMAIN) {
+    return redirectToSubdomain(request, clientEnv.NEXT_PUBLIC_SUBDOMAIN);
+  }
+
   const isAuthOnlyRoute = AUTH_ONLY_ROUTES.some((r) => pathname.startsWith(r));
   const isProtectedRoute = !PUBLIC_ROUTES.some((r) => pathname.startsWith(r));
 
@@ -73,13 +128,13 @@ const hadleAuthOrProtectedRoute = async (
     newAccessToken = await refreshTokenFromCookie(refreshToken);
     isAuthenticated = newAccessToken !== null;
   }
-  if (!isAuthenticated) {
+  if (!isAuthenticated && isProtectedRoute) {
     const url = request.nextUrl.clone();
     url.pathname = "/signin";
     return NextResponse.redirect(url);
   }
 
-  if (isAuthOnlyRoute) {
+  if (isAuthenticated && isAuthOnlyRoute) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     return NextResponse.redirect(url);
@@ -102,7 +157,7 @@ const hadleAuthOrProtectedRoute = async (
 
 export {
   serverFile,
-  hadleAuthOrProtectedRoute,
+  handleAuthOrProtectedRoute,
   verifyAccessToken,
   excludePaths,
   PUBLIC_ROUTES,

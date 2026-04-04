@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import Link from "next/link";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -6,27 +6,29 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb'
+} from "@/components/ui/breadcrumb";
 
 interface Props {
-  path: string
+  path: string;
 }
 
 export function DashboardBreadcrumb({ path }: Props) {
-  const segments = path.split('/').filter(Boolean)
+  const segments = path.split("/").filter(Boolean);
 
   return (
     <Breadcrumb>
       <BreadcrumbList>
         <BreadcrumbItem>
           <BreadcrumbLink asChild>
-            <Link href="/dashboard" className="font-mono">~</Link>
+            <Link href="/dashboard" className="font-mono">
+              ~
+            </Link>
           </BreadcrumbLink>
         </BreadcrumbItem>
 
         {segments.map((seg, i) => {
-          const href = '/dashboard?path=/' + segments.slice(0, i + 1).join('/')
-          const isLast = i === segments.length - 1
+          const href = "/dashboard?path=/" + segments.slice(0, i + 1).join("/");
+          const isLast = i === segments.length - 1;
 
           return (
             <BreadcrumbItem key={`${seg}-${i}`}>
@@ -39,9 +41,9 @@ export function DashboardBreadcrumb({ path }: Props) {
                 </BreadcrumbLink>
               )}
             </BreadcrumbItem>
-          )
+          );
         })}
       </BreadcrumbList>
     </Breadcrumb>
-  )
+  );
 }

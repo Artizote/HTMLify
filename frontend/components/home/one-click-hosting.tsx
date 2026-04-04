@@ -1,19 +1,33 @@
-import { GoLang, HTML, JavaScript, Python, Rust, TypeScript } from "@/components/icons";
+import {
+  GoLang,
+  HTML,
+  JavaScript,
+  Python,
+  Rust,
+  TypeScript,
+} from "@/components/icons";
 import { Card, CardContent } from "@/components/ui/card";
 
-const icons = [{
-  icon: Python
-}, {
-  icon: HTML
-}, {
-  icon: GoLang
-}, {
-  icon: JavaScript
-}, {
-  icon: TypeScript
-}, {
-  icon: Rust
-}]
+const icons = [
+  {
+    icon: Python,
+  },
+  {
+    icon: HTML,
+  },
+  {
+    icon: GoLang,
+  },
+  {
+    icon: JavaScript,
+  },
+  {
+    icon: TypeScript,
+  },
+  {
+    icon: Rust,
+  },
+];
 
 export function OneClickHosting() {
   return (
@@ -21,7 +35,10 @@ export function OneClickHosting() {
       <h1 className="text-4xl text-center font-bold leading-tight">
         Share anything. In any language. Instantly.
       </h1>
-      <p>One platform for every stack — no config headaches, no lock-in, just one click.</p>
+      <p>
+        One platform for every stack — no config headaches, no lock-in, just one
+        click.
+      </p>
       <div className="flex gap-4 flex-wrap items-center justify-center">
         {icons.map((icon, index) => (
           <Card key={index}>

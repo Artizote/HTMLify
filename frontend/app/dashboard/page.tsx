@@ -15,14 +15,14 @@ const DashboardPage = async ({
   const user = await getMe();
 
   if (!user) {
-    redirect("/login");
+    redirect("/signin");
   }
 
   if (!path) {
     path = `/${user.username}`;
   }
 
-  const data = await getFolderByPath(path);
+  const data = await getFolderByPath(path, true);
   const items = data?.items ?? [];
 
   console.log("items", items);

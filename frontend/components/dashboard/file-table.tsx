@@ -1,7 +1,11 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { FileItem, FolderItem, isFolderItem } from "@/lib/modules/file/file.types";
+import {
+  FileItem,
+  FolderItem,
+  isFolderItem,
+} from "@/lib/modules/file/file.types";
 import { DataTable } from "@/components/ui/data-table";
 import { FileIcon } from "./file-icon";
 import { Globe, Lock, Eye, Folder } from "lucide-react";
