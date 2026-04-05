@@ -7,9 +7,8 @@ import {
   getFileInfoByPathOrID,
 } from "@/lib/modules/file/file.actions";
 
-const excludePaths = ["/about", "/_next", "/api", "/favicon.ico", "/dashboard"];
+const excludePaths = ["/about", "/_next", "/api", "/favicon.ico"];
 
-const PUBLIC_ROUTES = ["/signin", "/signup"];
 const AUTH_ONLY_ROUTES = ["/signin", "/signup"];
 const PROTECTED_ROUTES = ["/dashboard"];
 
@@ -104,57 +103,61 @@ const handleAuthOrProtectedRoute = async (
   request: NextRequest,
   pathname: string,
 ): Promise<NextResponse> => {
-  if (getSubdomain(request) !== clientEnv.NEXT_PUBLIC_SUBDOMAIN) {
-    return redirectToSubdomain(request, clientEnv.NEXT_PUBLIC_SUBDOMAIN);
-  }
-
   const isAuthOnlyRoute = AUTH_ONLY_ROUTES.some((r) => pathname.startsWith(r));
-  const isProtectedRoute = !PUBLIC_ROUTES.some((r) => pathname.startsWith(r));
+  const isProtectedRoute = PROTECTED_ROUTES.some((r) => pathname.startsWith(r));
 
-  if (!isProtectedRoute && !isAuthOnlyRoute) {
-    return NextResponse.next();
+  if (isProtectedRoute) {
+    const accessToken = request.cookies.get("access_token")?.value;
+    const refreshToken = request.cookies.get("refresh_token")?.value;
+
+    let isAuthenticated = false;
+    let newAccessToken: string | null = null;
+
+    if (accessToken) {
+      isAuthenticated = await verifyAccessToken(accessToken);
+    }
+
+    if (!isAuthenticated && refreshToken) {
+      const result = await RefreshToken();
+      newAccessToken = result.access_token;
+      isAuthenticated = newAccessToken !== null;
+    }
+
+    if (!isAuthenticated) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/signin";
+      return NextResponse.redirect(url);
+    }
+
+    const response = NextResponse.next();
+
+    if (newAccessToken) {
+      response.cookies.set("access_token", newAccessToken, {
+        httpOnly: true,
+        secure: false,
+        sameSite: "lax",
+        maxAge: 1800,
+        path: "/",
+      });
+    }
+
+    return response;
   }
 
-  const accessToken = request.cookies.get("access_token")?.value;
-  const refreshToken = request.cookies.get("refresh_token")?.value;
+  if (isAuthOnlyRoute) {
+    const accessToken = request.cookies.get("access_token")?.value;
 
-  let isAuthenticated = false;
-  let newAccessToken: string | null = null;
-
-  if (accessToken) {
-    isAuthenticated = await verifyAccessToken(accessToken);
+    if (accessToken) {
+      const isAuthenticated = await verifyAccessToken(accessToken);
+      if (isAuthenticated) {
+        const url = request.nextUrl.clone();
+        url.pathname = "/dashboard";
+        return NextResponse.redirect(url);
+      }
+    }
   }
 
-  if (!isAuthenticated && refreshToken && isProtectedRoute) {
-    const result = await RefreshToken();
-    newAccessToken = result.access_token;
-    isAuthenticated = newAccessToken !== null;
-  }
-  if (!isAuthenticated && isProtectedRoute) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/signin";
-    return NextResponse.redirect(url);
-  }
-
-  if (isAuthenticated && isAuthOnlyRoute) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
-    return NextResponse.redirect(url);
-  }
-
-  const response = NextResponse.next();
-
-  if (newAccessToken) {
-    response.cookies.set("access_token", newAccessToken, {
-      httpOnly: true,
-      secure: false,
-      sameSite: "lax",
-      maxAge: 1800,
-      path: "/",
-    });
-  }
-
-  return response;
+  return NextResponse.next();
 };
 
 export {
@@ -162,7 +165,6 @@ export {
   excludePaths,
   handleAuthOrProtectedRoute,
   PROTECTED_ROUTES,
-  PUBLIC_ROUTES,
   serverFile,
   verifyAccessToken,
 };

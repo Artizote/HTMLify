@@ -33,7 +33,7 @@ const navMan = [
   },
   {
     title: "Git Clone",
-    url: "#",
+    url: "/dashboard/file/git-clone",
     icon: GitBranch,
   },
 ];
