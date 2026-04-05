@@ -1,6 +1,8 @@
 import { Code2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+
+import { CodeTerminal } from "@/components/code-share/code-terminal";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Drawer,
   DrawerClose,
@@ -10,7 +12,6 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { CodeTerminal } from "@/components/code-share/code-terminal";
 
 interface CodeSidebarProps {
   code: string;

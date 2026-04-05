@@ -1,10 +1,10 @@
 import {
-  FileText,
-  Folder,
+  FileAudio,
   FileCode,
   FileImage,
-  FileAudio,
+  FileText,
   FileVideo,
+  Folder,
 } from "lucide-react";
 
 interface Props {

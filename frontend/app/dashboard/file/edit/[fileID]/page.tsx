@@ -23,7 +23,11 @@ export default async function NewFileCreatePage({
   const content = await fileContentResp?.text();
   return (
     <div className="container mx-auto pt-10 px-4">
-      <FileForm user={user} initialData={{ ...fileInfo, content }} />
+      <FileForm
+        mode="edit"
+        user={user}
+        initialData={{ ...fileInfo, content }}
+      />
     </div>
   );
 }

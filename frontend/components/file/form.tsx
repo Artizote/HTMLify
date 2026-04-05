@@ -1,5 +1,12 @@
 "use client";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Controller, useForm } from "react-hook-form";
+import { toast } from "sonner";
+import z from "zod";
+
 import { FileDropzone } from "@/components/file/file-dropzone";
+import CodeEditor from "@/components/playgroud/code-editor";
+import { CodePlayground } from "@/components/playgroud/code-playground";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -19,16 +26,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, useForm } from "react-hook-form";
-import z from "zod";
-
-import { zodToFormData } from "@/lib/utils";
 import { useUploadFile } from "@/lib/hooks/use-files";
-import { toast } from "sonner";
-import { UserFullInfo } from "@/lib/modules/user/user.types";
-import { CodePlayground } from "@/components/playgroud/code-playground";
 import { getLanguageByPath } from "@/lib/modules/playgournd/editor.utils";
+import { UserFullInfo } from "@/lib/modules/user/user.types";
+import { zodToFormData } from "@/lib/utils";
 
 const fileFormSchema = z.object({
   file: z.instanceof(File),
@@ -53,11 +54,14 @@ interface InitialDataProps {
 export const FileForm = ({
   user,
   initialData,
+  mode = "upload",
 }: {
+  mode: "upload" | "edit";
   user: UserFullInfo;
   initialData?: InitialDataProps;
 }) => {
   const { mutate: uploadFile, isPending } = useUploadFile();
+  const modeText = mode.charAt(0).toUpperCase() + mode.slice(1);
   const form = useForm<z.infer<typeof fileFormSchema>>({
     resolver: zodResolver(fileFormSchema),
     defaultValues: {
@@ -89,29 +93,19 @@ export const FileForm = ({
   return (
     <Card className="w-full max-w-7xl mx-auto">
       <CardHeader>
-        <CardTitle>Upload File</CardTitle>
+        <CardTitle>{modeText} File</CardTitle>
       </CardHeader>
       <CardContent>
+        {mode === "edit" && (
+          <CodeEditor
+            code={initialData?.content || ""}
+            onChange={() => {}}
+            path={initialData?.path || ""}
+            language={getLanguageByPath(initialData?.path || "")}
+          />
+        )}
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <FieldGroup>
-            <Controller
-              name="file"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field>
-                  <FieldLabel>File</FieldLabel>
-                  <FileDropzone
-                    maxSize={10 * 1024 * 1024}
-                    maxFiles={1}
-                    value={field.value}
-                    onChange={field.onChange}
-                  />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]}></FieldError>
-                  )}
-                </Field>
-              )}
-            />
             <div className="w-full grid gap-4 md:grid-cols-2 grid-cols-1">
               <Controller
                 name="title"
@@ -197,7 +191,26 @@ export const FileForm = ({
                 )}
               />
             </div>
+            <Controller
+              name="file"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field>
+                  <FieldLabel>File</FieldLabel>
+                  <FileDropzone
+                    maxSize={10 * 1024 * 1024}
+                    maxFiles={1}
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]}></FieldError>
+                  )}
+                </Field>
+              )}
+            />
           </FieldGroup>
+
           <div className="flex items-center justify-center mt-2 gap-4 w-fit">
             <CodePlayground
               code={initialData?.content || ""}
@@ -208,7 +221,7 @@ export const FileForm = ({
             </CodePlayground>
 
             <Button type="submit" disabled={isPending}>
-              {isPending ? "Uploading..." : "Upload"}
+              {isPending ? "Submiting..." : "Submit"}
             </Button>
           </div>
         </form>

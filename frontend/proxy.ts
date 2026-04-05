@@ -1,3 +1,6 @@
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+
 import {
   AUTH_ONLY_ROUTES,
   excludePaths,
@@ -6,8 +9,6 @@ import {
   PUBLIC_ROUTES,
   serverFile,
 } from "@/lib/modules/proxy/proxy.utils";
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;

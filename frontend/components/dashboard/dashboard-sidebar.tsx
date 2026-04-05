@@ -1,7 +1,19 @@
 "use client";
+import {
+  Bell,
+  Briefcase,
+  CirclePlus,
+  Command,
+  GitBranch,
+  Home,
+  LogOut,
+  PenTool,
+  PlusSquare,
+  Upload,
+} from "lucide-react";
 import React from "react";
-import { NavMain } from "@/components/dashboard/nav-mian";
 
+import { NavMain } from "@/components/dashboard/nav-mian";
 import {
   Sidebar,
   SidebarContent,
@@ -10,18 +22,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import {
-  Upload,
-  GitBranch,
-  Briefcase,
-  PenTool,
-  PlusSquare,
-  Bell,
-  Home,
-  LogOut,
-  Command,
-  CirclePlus,
-} from "lucide-react";
 
 const navMan = [
   {

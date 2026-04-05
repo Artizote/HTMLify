@@ -1,17 +1,20 @@
-import { apiFetch } from "@/lib/fetch";
-import { clientEnv } from "@/lib/env";
-import { QUERY_KEYS } from "@/shared/query-keys";
-import { UserFullInfo } from "@/lib/modules/user/user.types";
 import { useQuery } from "@tanstack/react-query";
+
+import { clientEnv } from "@/lib/env";
+import { ClientAPICall } from "@/lib/fetch/client";
+import { UserFullInfo } from "@/lib/modules/user/user.types";
+import { QUERY_KEYS } from "@/shared/query-keys";
 
 export function useCurrentUser() {
   const query = useQuery<UserFullInfo | null>({
     queryKey: QUERY_KEYS.auth.me,
     queryFn: async () => {
       try {
-        return await apiFetch<UserFullInfo>(
+        const res = await ClientAPICall(
           `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/v1/users/me`,
         );
+        if (!res.ok) return null;
+        return res.json() as Promise<UserFullInfo>;
       } catch {
         return null;
       }

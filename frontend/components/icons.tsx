@@ -204,5 +204,5 @@ const Rust = (props: React.ComponentProps<"svg">) => {
   );
 };
 
-export { Python, HTML, GoLang, JavaScript, Java as TypeScript, Rust };
+export { GoLang, HTML, JavaScript, Python, Rust, Java as TypeScript };
 import type React from "react";

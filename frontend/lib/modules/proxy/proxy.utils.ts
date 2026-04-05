@@ -1,10 +1,11 @@
-import { refreshTokenFromCookie } from "@/lib/modules/auth/auth.actions";
+import { NextRequest, NextResponse } from "next/server";
+
+import { clientEnv } from "@/lib/env";
+import { RefreshToken } from "@/lib/modules/auth/auth.actions";
 import {
   getFileContentById,
   getFileInfoByPathOrID,
 } from "@/lib/modules/file/file.actions";
-import { clientEnv } from "@/lib/env";
-import { NextRequest, NextResponse } from "next/server";
 
 const excludePaths = ["/about", "/_next", "/api", "/favicon.ico", "/dashboard"];
 
@@ -125,7 +126,8 @@ const handleAuthOrProtectedRoute = async (
   }
 
   if (!isAuthenticated && refreshToken && isProtectedRoute) {
-    newAccessToken = await refreshTokenFromCookie(refreshToken);
+    const result = await RefreshToken();
+    newAccessToken = result.access_token;
     isAuthenticated = newAccessToken !== null;
   }
   if (!isAuthenticated && isProtectedRoute) {
@@ -156,11 +158,11 @@ const handleAuthOrProtectedRoute = async (
 };
 
 export {
-  serverFile,
-  handleAuthOrProtectedRoute,
-  verifyAccessToken,
-  excludePaths,
-  PUBLIC_ROUTES,
   AUTH_ONLY_ROUTES,
+  excludePaths,
+  handleAuthOrProtectedRoute,
   PROTECTED_ROUTES,
+  PUBLIC_ROUTES,
+  serverFile,
+  verifyAccessToken,
 };

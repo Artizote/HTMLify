@@ -1,4 +1,8 @@
 "use client";
+import { useState } from "react";
+
+import { CodeTerminal } from "@/components/code-share/code-terminal";
+import CodeEditor from "@/components/playgroud/code-editor";
 import { Button } from "@/components/ui/button";
 import {
   Drawer,
@@ -8,9 +12,6 @@ import {
   DrawerHeader,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { CodeTerminal } from "@/components/code-share/code-terminal";
-import { useState } from "react";
-import CodeEditor from "@/components/playgroud/code-editor";
 
 interface CodeSidebarProps {
   code: string;

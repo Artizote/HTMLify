@@ -1,87 +1,53 @@
-import { extractErrorMessage, zodToFormData } from "@/lib/utils";
-import { LoginSchema, SignUpSchema } from "@/lib/modules/auth/auth.schema";
+import { cookies } from "next/headers";
 
-export const refreshToken = async (): Promise<boolean> => {
-  try {
-    const res = await fetch(`/api/auth/refresh`, {
-      method: "GET",
-      credentials: "include",
-    });
-    return res.ok;
-  } catch {
-    return false;
-  }
-};
+import { clientEnv } from "@/lib/env";
 
-export const refreshTokenFromCookie = async (
-  refreshToken: string,
-): Promise<string | null> => {
-  try {
-    const res = await fetch(`/api/auth/refresh`, {
-      method: "GET",
-      headers: { Cookie: `refresh_token=${refreshToken}` },
-      cache: "no-store",
-    });
-    if (!res.ok) return null;
+interface RefreshTokenResponse {
+  access_token: string | null;
+  status: number;
+  error: string;
+}
 
-    const setCookie = res.headers.get("set-cookie");
-    if (!setCookie) return null;
-
-    const match = setCookie.match(/access_token=([^;]+)/);
-    return match ? match[1] : null;
-  } catch {
-    return null;
-  }
-};
-
-export const signOut = async (): Promise<void> => {
-  await fetch(`/api/auth/logout`, {
-    method: "POST",
-    credentials: "include",
-  });
-};
-
-export const signIn = async (data: LoginSchema) => {
-  const formData = zodToFormData(data);
-  formData.append("grant_type", "password");
-
-  let response: Response;
+export async function RefreshToken(): Promise<RefreshTokenResponse> {
+  const cookieStore = await cookies();
+  const refreshToken = cookieStore.get("refresh_token")?.value;
+  if (!refreshToken)
+    return {
+      access_token: null,
+      status: 401,
+      error: "No refresh token provided",
+    };
 
   try {
-    response = await fetch(`/api/auth/token`, {
-      method: "POST",
-      body: formData,
-      credentials: "include",
-    });
-  } catch (error) {
-    throw new Error(await extractErrorMessage(error));
-  }
-
-  if (!response.ok) {
-    throw new Error(await extractErrorMessage(response));
-  }
-
-  return response.json();
-};
-export const signUp = async (data: SignUpSchema) => {
-  let response: Response;
-
-  try {
-    response = await fetch(`/api/auth/signup`, {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
+    const response = await fetch(
+      `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/v1/auth/refresh`,
+      {
+        method: "GET",
+        headers: { Cookie: `refresh_token=${refreshToken}` },
       },
-      body: JSON.stringify(data),
-    });
+    );
+
+    if (!response.ok) {
+      return {
+        access_token: null,
+        status: response.status,
+        error: "Failed to refresh token",
+      };
+    }
+
+    const data: { access_token: string } = await response.json();
+
+    return {
+      access_token: data.access_token,
+      status: 200,
+      error: "",
+    };
   } catch (error) {
-    throw new Error(await extractErrorMessage(error));
+    console.error("RefreshToken function error:", error);
+    return {
+      access_token: null,
+      status: 500,
+      error: "An unexpected error occurred",
+    };
   }
-
-  if (!response.ok) {
-    throw new Error(await extractErrorMessage(response));
-  }
-
-  return response.json();
-};
+}

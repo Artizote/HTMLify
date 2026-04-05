@@ -1,10 +1,11 @@
 "use client";
 
-import { useCallback, useState, useMemo } from "react";
-import { useDropzone, type FileRejection, type Accept } from "react-dropzone";
-import { cn } from "@/lib/utils";
-import { CloudUpload, File as FileIcon, X, AlertCircle } from "lucide-react";
+import { AlertCircle, CloudUpload, File as FileIcon, X } from "lucide-react";
+import { useCallback, useMemo, useState } from "react";
+import { type Accept, type FileRejection, useDropzone } from "react-dropzone";
+
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface FileDropzoneProps {
   value?: File | File[] | null;

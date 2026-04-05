@@ -1,17 +1,11 @@
 "use client";
 
-import * as React from "react";
+import { ArrowRight, Menu, Search } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Search, ArrowRight, Menu } from "lucide-react";
+import * as React from "react";
 
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   CommandDialog,
   CommandEmpty,
@@ -20,7 +14,12 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { clientEnv } from "@/lib/env";
 
 const NAV_LINKS = [

@@ -1,9 +1,10 @@
-import { signIn, signOut, signUp } from "@/lib/modules/auth/auth.actions";
-import { QUERY_KEYS } from "@/shared/query-keys";
-import { AuthPayload } from "@/lib/modules/auth/auth.schema";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+
+import { AuthPayload } from "@/lib/modules/auth/auth.schema";
+import { signIn, signOut, signUp } from "@/lib/modules/auth/client.actons";
+import { QUERY_KEYS } from "@/shared/query-keys";
 
 export const useAuth = () => {
   const queryClient = useQueryClient();
