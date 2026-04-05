@@ -56,7 +56,6 @@ export const uploadFile = async (
     {
       method: "POST",
       body: formData,
-      credentials: "include",
     },
   );
 
@@ -64,6 +63,23 @@ export const uploadFile = async (
     throw new Error("Failed to upload file");
   }
 
+  return response.json() as Promise<FileIDResponse>;
+};
+
+export const updateFile = async (
+  id: number,
+  formData: FormData,
+): Promise<FileIDResponse> => {
+  const response = await ServerAPICall(
+    `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/v1/files/${id}/update`,
+    {
+      method: "PATCH",
+      body: formData,
+    },
+  );
+  if (!response.ok) {
+    throw new Error("Failed to update file");
+  }
   return response.json() as Promise<FileIDResponse>;
 };
 

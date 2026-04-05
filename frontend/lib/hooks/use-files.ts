@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   getFileContentById,
   getFileInfoByPathOrID,
+  updateFile,
   uploadFile,
 } from "@/lib/modules/file/file.actions";
 import { QUERY_KEYS } from "@/shared/query-keys";
@@ -30,11 +31,18 @@ export const useFileContent = (path: string) => {
   });
 };
 
+type FilePayload =
+  | { formData: FormData; mode: "upload" }
+  | { formData: FormData; mode: "update"; id: number };
+
 export const useUploadFile = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (formData: FormData) => uploadFile(formData),
+    mutationFn: (data: FilePayload) =>
+      data.mode === "upload"
+        ? uploadFile(data.formData)
+        : updateFile(data.id, data.formData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.files.all });
     },

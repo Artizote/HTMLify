@@ -1,3 +1,6 @@
+type FileVisibility = "public" | "private" | "once";
+type FileMode = "source" | "render";
+
 type FileIDResponse = {
   id: number;
   user: string;
@@ -5,8 +8,8 @@ type FileIDResponse = {
   path: string;
   views: number;
   blob_hash: string;
-  mode: "source" | "render";
-  visibility: "public" | "private" | string;
+  mode: FileMode;
+  visibility: FileVisibility;
   password: string | null;
   locked: boolean;
   as_guest: boolean;
@@ -21,8 +24,8 @@ type FileItem = {
   path: string;
   views: number;
   blob_hash: string | null;
-  mode: "render" | "source";
-  visibility: "public" | "private" | string;
+  mode: FileMode;
+  visibility: FileVisibility;
   password: string | null;
   locked: boolean;
   as_guest: boolean;
