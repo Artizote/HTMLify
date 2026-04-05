@@ -14,4 +14,4 @@ type AuthPayload =
   | { mode: "signin"; credentials: LoginSchema }
   | { mode: "signup"; credentials: SignUpSchema };
 
-export type { AuthPayload,LoginSchema, SignUpSchema };
+export type { AuthPayload, LoginSchema, SignUpSchema };

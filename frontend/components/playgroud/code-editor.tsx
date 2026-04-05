@@ -2,7 +2,7 @@
 import { MergeView } from "@codemirror/merge";
 import { EditorState } from "@codemirror/state";
 import { oneDark } from "@codemirror/theme-one-dark";
-import { basicSetup,EditorView } from "codemirror";
+import { basicSetup, EditorView } from "codemirror";
 import { useEffect, useRef } from "react";
 
 import type { CodeEditorProps } from "@/lib/modules/playgournd/editor.types";

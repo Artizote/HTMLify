@@ -1,8 +1,8 @@
 "use client";
 
-import { AlertCircle,CloudUpload, File as FileIcon, X } from "lucide-react";
-import { useCallback, useMemo,useState } from "react";
-import { type Accept,type FileRejection, useDropzone } from "react-dropzone";
+import { AlertCircle, CloudUpload, File as FileIcon, X } from "lucide-react";
+import { useCallback, useMemo, useState } from "react";
+import { type Accept, type FileRejection, useDropzone } from "react-dropzone";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";

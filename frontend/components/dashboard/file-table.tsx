@@ -1,7 +1,7 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { Eye, Folder,Globe, Lock } from "lucide-react";
+import { Eye, Folder, Globe, Lock } from "lucide-react";
 import Link from "next/link";
 
 import { DashboardAction } from "@/components/dashboard/dashboard-action";
