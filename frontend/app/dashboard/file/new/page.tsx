@@ -6,7 +6,7 @@ export default async function NewFileCreatePage() {
     return "oh shit";
   }
   return (
-    <div className="container mx-auto pt-10 px-4">
+    <div className="w-full max-w-7xl mx-auto pt-10 px-4">
       <FileForm mode="upload" user={user} />
     </div>
   );

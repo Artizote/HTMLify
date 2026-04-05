@@ -11,9 +11,11 @@ import {
   PlusSquare,
   Upload,
 } from "lucide-react";
+import Link from "next/link";
 import React from "react";
 
 import { NavMain } from "@/components/dashboard/nav-mian";
+import { Logo } from "@/components/logo";
 import {
   Sidebar,
   SidebarContent,
@@ -26,7 +28,7 @@ import {
 const navMan = [
   {
     title: "Upload",
-    url: "#",
+    url: "/dashboard/file/new",
     icon: Upload,
   },
   {
@@ -80,26 +82,16 @@ export const DashboardSidebar = ({
               asChild
               className="data-[slot=sidebar-menu-button]:p-1.5!"
             >
-              <a href="#">
-                <Command className="size-5!" />
+              <Link href="/dashboard">
+                <Logo />
                 <span className="text-base font-semibold">Dashboard</span>
-              </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarMenu>
-          <SidebarMenuItem className="flex items-center gap-2">
-            <SidebarMenuButton
-              tooltip="Quick Create"
-              className="min-w-8 bg-primary text-primary-foreground duration-200 ease-linear hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground"
-            >
-              <CirclePlus />
-              <span>New File</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+        <SidebarMenu></SidebarMenu>
         <NavMain label="Files" items={navMan} />
         <NavMain label="Pens" items={navPen} />
       </SidebarContent>

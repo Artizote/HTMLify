@@ -109,8 +109,12 @@ export const FileForm = ({
           },
       {
         onSuccess: () => {
-          toast.success("File uploaded successfully");
-          form.reset();
+          toast.success(
+            `File ${mode === "update" ? "updated" : "uploaded"} successfully`,
+          );
+          if (mode === "upload") {
+            form.reset();
+          }
         },
         onError: (error) => {
           toast.error(

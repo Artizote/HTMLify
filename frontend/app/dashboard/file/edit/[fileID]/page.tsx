@@ -22,7 +22,7 @@ export default async function NewFileCreatePage({
   const fileContentResp = await getFileContentById(fileInfo.id);
   const content = await fileContentResp?.text();
   return (
-    <div className="container mx-auto pt-10 px-4">
+    <div className="w-full max-w-7xl mx-auto pt-10 px-4">
       <FileForm
         mode="update"
         user={user}
