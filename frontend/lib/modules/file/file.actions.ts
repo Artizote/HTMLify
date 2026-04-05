@@ -1,37 +1,38 @@
-import { FileIDResponse, FolderResponse } from "@/lib/modules/file/file.types";
+"use server";
+
 import { clientEnv } from "@/lib/env";
-import { apiFetch } from "@/lib/fetch";
+import { ServerAPICall } from "@/lib/fetch/server";
+import { FileIDResponse, FolderResponse } from "@/lib/modules/file/file.types";
+type FileInfoParams =
+  | { path: string; id?: never }
+  | { path?: never; id: number };
 
 export const getFileInfoByPathOrID = async ({
   path,
   id,
-}: {
-  path?: string;
-  id?: number;
-}): Promise<FileIDResponse | null> => {
-  if (!path && !id) {
-    return null;
-  }
+}: FileInfoParams): Promise<FileIDResponse | null> => {
   let params = "";
+
   if (path) {
     params = `path=${path}`;
   } else if (id) {
     params = `id=${id}`;
   }
-  const response = await fetch(
+
+  const response = await ServerAPICall(
     `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/v1/files?${params}`,
   );
+
   if (!response.ok) {
     return null;
   }
-  const data: FileIDResponse = await response.json();
-  return data;
+  return response.json() as Promise<FileIDResponse>;
 };
 
 export const getFileContentById = async (
   id: number,
 ): Promise<Response | null> => {
-  const response = await fetch(
+  const response = await ServerAPICall(
     `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/v1/files/${id}/content`,
   );
   if (!response.ok) {
@@ -50,17 +51,30 @@ export const getFileContentByPath = async (path: string) => {
 export const uploadFile = async (
   formData: FormData,
 ): Promise<FileIDResponse> => {
-  return apiFetch<FileIDResponse>(
+  const response = await ServerAPICall(
     `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/v1/files/upload`,
     {
       method: "POST",
       body: formData,
+      credentials: "include",
     },
   );
+
+  if (!response.ok) {
+    throw new Error("Failed to upload file");
+  }
+
+  return response.json() as Promise<FileIDResponse>;
 };
 
 export const getFolderByPath = async (path: string, expand: boolean = true) => {
-  return apiFetch<FolderResponse>(
+  const response = await ServerAPICall(
     `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/v1/folders?path=${path}&expand=${expand}`,
   );
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch folder");
+  }
+
+  return response.json() as Promise<FolderResponse>;
 };

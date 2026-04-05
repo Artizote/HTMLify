@@ -30,11 +30,11 @@ def create_user(data: UserCreateRequest) -> UserFullInfo:
     return UserFullInfo.from_orm(user)
 
 @router.get("/users/me")
-def get_my_info(user: User = Depends(AuthService.get_current_user_from_cookie)) -> UserFullInfo:
+def get_my_info(user: User = Depends(AuthService.get_current_user)) -> UserFullInfo:
     return UserFullInfo.from_orm(user)
 
 @router.patch("/users/me")
-def update_my_info(data: UserUpdateRequest, user: User = Depends(AuthService.get_current_user_from_cookie)) -> UserFullInfo:
+def update_my_info(data: UserUpdateRequest, user: User = Depends(AuthService.get_current_user)) -> UserFullInfo:
     if data.name:
         UserService.update_user_name(str(user.username), data.name)
     if data.bio:
@@ -56,6 +56,6 @@ def get_user_info(username: str) -> UserPublicInfo:
     return UserPublicInfo.from_orm(user)
 
 @router.get("/users/me/api-key")
-def get_my_api_key(user: User = Depends(AuthService.get_current_user_from_cookie)) -> APIKeyResponse:
+def get_my_api_key(user: User = Depends(AuthService.get_current_user)) -> APIKeyResponse:
     return APIKeyResponse(api_key=str(user.api_key))
 

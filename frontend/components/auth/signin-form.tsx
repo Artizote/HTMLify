@@ -1,5 +1,8 @@
 "use client";
-import { cn } from "@/lib/utils";
+import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
+import { Controller, useForm } from "react-hook-form";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -16,17 +19,15 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Controller, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import Link from "next/link";
 import { useAuth } from "@/lib/hooks/use-login";
 import {
   AuthPayload,
-  loginSchema,
   LoginSchema,
-  signUpSchema,
+  loginSchema,
   SignUpSchema,
+  signUpSchema,
 } from "@/lib/modules/auth/auth.schema";
+import { cn } from "@/lib/utils";
 
 const modeConfig = {
   signin: {

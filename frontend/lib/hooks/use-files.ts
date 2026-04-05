@@ -1,10 +1,11 @@
-import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
-import { QUERY_KEYS } from "@/shared/query-keys";
+import { useMutation, useQuery,useQueryClient } from "@tanstack/react-query";
+
 import {
-  getFileInfoByPathOrID,
   getFileContentById,
+  getFileInfoByPathOrID,
   uploadFile,
 } from "@/lib/modules/file/file.actions";
+import { QUERY_KEYS } from "@/shared/query-keys";
 
 export const useFileId = (path: string) => {
   return useQuery({

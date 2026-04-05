@@ -1,8 +1,8 @@
 import { ArrowRight, Github } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import { WordRotate } from "@/components/ui/word-rotate";
 import { clientEnv } from "@/lib/env";
-import { Button } from "@/components/ui/button";
 
 export function Hero() {
   return (

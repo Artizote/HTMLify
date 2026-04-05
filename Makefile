@@ -36,6 +36,10 @@ lint:
 	@echo "Linting frontend..."
 	cd frontend && pnpm lint
 
+lint-fix:
+	@echo "Linting frontend..."
+	cd frontend && pnpm lint:fix
+
 format:
 	@echo "Formatting frontend..."
 	cd frontend && pnpm format:fix

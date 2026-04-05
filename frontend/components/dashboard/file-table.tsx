@@ -1,16 +1,18 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
+import { Eye, Folder,Globe, Lock } from "lucide-react";
+import Link from "next/link";
+
+import { DashboardAction } from "@/components/dashboard/dashboard-action";
+import { DataTable } from "@/components/ui/data-table";
 import {
   FileItem,
   FolderItem,
   isFolderItem,
 } from "@/lib/modules/file/file.types";
-import { DataTable } from "@/components/ui/data-table";
+
 import { FileIcon } from "./file-icon";
-import { Globe, Lock, Eye, Folder } from "lucide-react";
-import Link from "next/link";
-import { DashboardAction } from "@/components/dashboard/dashboard-action";
 
 interface Props {
   items: (FileItem | FolderItem)[];

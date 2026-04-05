@@ -1,10 +1,11 @@
-import { getFolderByPath } from "@/lib/modules/file/file.actions";
-import { getMe } from "@/lib/modules/user/user.actions";
-import { Button } from "@/components/ui/button";
-import { DashboardBreadcrumb } from "@/components/dashboard/dashboard-breadcrumb";
-import { FileTable } from "@/components/dashboard/file-table";
 import { Plus } from "lucide-react";
 import { redirect } from "next/navigation";
+
+import { DashboardBreadcrumb } from "@/components/dashboard/dashboard-breadcrumb";
+import { FileTable } from "@/components/dashboard/file-table";
+import { Button } from "@/components/ui/button";
+import { getFolderByPath } from "@/lib/modules/file/file.actions";
+import { getMe } from "@/lib/modules/user/user.actions";
 
 const DashboardPage = async ({
   searchParams,

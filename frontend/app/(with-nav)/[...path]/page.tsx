@@ -1,3 +1,6 @@
+import { FileIcon } from "lucide-react";
+import { BundledLanguage } from "shiki";
+
 import {
   CodeBlockActions,
   CodeBlockContainer,
@@ -6,11 +9,9 @@ import {
   CodeBlockHeader,
   CodeBlockTitle,
 } from "@/components/ai-elements/code-block";
-import { Button } from "@/components/ui/button";
-import { FileIcon } from "lucide-react";
-import { BundledLanguage } from "shiki";
-import { getFileContentByPath } from "@/lib/modules/file/file.actions";
 import { CodePlayground } from "@/components/playgroud/code-playground";
+import { Button } from "@/components/ui/button";
+import { getFileContentByPath } from "@/lib/modules/file/file.actions";
 import { getLanguageByPath } from "@/lib/modules/playgournd/editor.utils";
 
 const getFileContentType = (

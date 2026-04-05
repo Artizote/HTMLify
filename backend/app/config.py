@@ -1,11 +1,12 @@
 import json
 import os
+from typing import Any
 
 # Config Variables
-# default values
-SECRET_KEY="REPLACE_WITH_YOUR_SECRATE_KEY_OR_RUN_SETUP.PY"
-SESSION_TOKENS_LIMIT=1024
-MAX_FILE_UPLOAD_LIMIT=32
+# Default values
+SECRET_KEY = "REPLACE_WITH_YOUR_SECRET_KEY_OR_RUN_SETUP.PY"
+SESSION_TOKENS_LIMIT = 1024
+MAX_FILE_UPLOAD_LIMIT = 32
 GIT_COMMAND_PATH = "git"
 DOCKER_COMMAND_PATH = "docker"
 GCC_COMMAND_PATH = "gcc"
@@ -14,6 +15,15 @@ SEARCH_INDEXING_TIME_DELAY = 3600
 SERVER_NAME = "localhost:5000"
 SCHEME = "http"
 PROD = False
+
+# Auth Config
+ACCESS_TOKEN_EXPIRE_MINUTES = 15
+REFRESH_TOKEN_EXPIRE_DAYS = 7
+COOKIE_DOMAIN = ""
+COOKIE_SAMESITE = "lax"
+COOKIE_SECURE = False
+COOKIE_MAX_AGE_ACCESS = 1800
+COOKIE_MAX_AGE_REFRESH = 604800
 
 config_vars = [
     ("SECRET_KEY", str),
@@ -27,24 +37,40 @@ config_vars = [
     ("SERVER_NAME", str),
     ("SCHEME", str),
     ("PROD", bool),
+    ("ACCESS_TOKEN_EXPIRE_MINUTES", int),
+    ("REFRESH_TOKEN_EXPIRE_DAYS", int),
+    ("COOKIE_DOMAIN", str),
+    ("COOKIE_SAMESITE", str),
+    ("COOKIE_SECURE", bool),
+    ("COOKIE_MAX_AGE_ACCESS", int),
+    ("COOKIE_MAX_AGE_REFRESH", int),
 ]
 
 # Config loading
-config = None
+config_json = {}
 if os.path.exists("config.json"):
     try:
-        config_file = open("config.json")
-        config = json.load(config_file)
-        config_file.close()
+        with open("config.json") as config_file:
+            config_json = json.load(config_file)
     except:
-        print(">>>  Faild to load config from config.json")
+        print(">>> Failed to load config from config.json")
 
-if config:
-    for var_and_type in config_vars:
-        var, t = var_and_type
-        globals()[var] = t(config.get(var, globals()[var]))
+def get_config(var_name: str, var_type: type, default_val: Any) -> Any:
+    val = os.getenv(var_name)
+    if val is not None:
+        if var_type == bool:
+            return val.lower() in ("true", "1", "yes")
+        return var_type(val)
+    
+    if var_name in config_json:
+        return var_type(config_json[var_name])
+    
+    return default_val
+
+# Apply config
+for var, t in config_vars:
+    globals()[var] = get_config(var, t, globals()[var])
 
 if __name__ == "__main__":
-    for var_and_type in config_vars:
-        var, _ = var_and_type
-        print(var + " "*(32-len(var)), ":",globals()[var])
+    for var, _ in config_vars:
+        print(var + " " * (32 - len(var)), ":", globals()[var])

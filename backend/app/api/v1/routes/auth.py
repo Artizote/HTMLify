@@ -10,9 +10,13 @@ from ..schemas.auth import *
 
 router = APIRouter(tags=["Auth"])
 
-COOKIE_DOMAIN= "localhost"
-SAMESITE="lax"
-SECURE=False
+from app.config import (
+    COOKIE_DOMAIN,
+    COOKIE_SAMESITE,
+    COOKIE_SECURE,
+    COOKIE_MAX_AGE_ACCESS,
+    COOKIE_MAX_AGE_REFRESH,
+)
 
 
 
@@ -21,17 +25,19 @@ def _set_auth_cookies(response: Response, access_token: str, refresh_token: str)
         key="access_token",
         value=access_token,
         httponly=True,
-        secure=SECURE,
-        samesite=SAMESITE,
-        max_age=1800,
+        secure=COOKIE_SECURE,
+        samesite=COOKIE_SAMESITE,
+        max_age=COOKIE_MAX_AGE_ACCESS,
+        domain=COOKIE_DOMAIN if COOKIE_DOMAIN else None,
     )
     response.set_cookie(
         key="refresh_token",
         value=refresh_token,
         httponly=True,
-        secure=SECURE,
-        samesite="lax",
-        max_age=7 * 24 * 60 * 60,
+        secure=COOKIE_SECURE,
+        samesite=COOKIE_SAMESITE,
+        max_age=COOKIE_MAX_AGE_REFRESH,
+        domain=COOKIE_DOMAIN if COOKIE_DOMAIN else None,
     )
 
 
@@ -76,9 +82,10 @@ def refresh_access_token(request: Request, response: Response) -> RefreshTokenRe
         key="access_token",
         value=access_token,
         httponly=True,
-        secure=False,
-        samesite="lax",
-        max_age=1800,
+        secure=COOKIE_SECURE,
+        samesite=COOKIE_SAMESITE,
+        max_age=COOKIE_MAX_AGE_ACCESS,
+        domain=COOKIE_DOMAIN if COOKIE_DOMAIN else None,
     )
     return RefreshTokenResponse(access_token=access_token)
 

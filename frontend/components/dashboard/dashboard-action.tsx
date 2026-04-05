@@ -1,6 +1,7 @@
-import { Button } from "@/components/ui/button";
 import { EllipsisVertical } from "lucide-react";
+import Link from "next/link";
 
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,7 +10,6 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import Link from "next/link";
 import { FileItem, FolderItem } from "@/lib/modules/file/file.types";
 
 export function DashboardAction({
@@ -50,8 +50,13 @@ export function DashboardAction({
             )}
           </DropdownMenuItem>
           {file && "id" in file && (
-            <DropdownMenuItem>
-              <Link href={`/dashboard/file/edit/${file.id}`}>Edit</Link>
+            <DropdownMenuItem asChild>
+              <Link
+                href={`/dashboard/file/edit/${file.id}`}
+                className="w-full cursor-pointer"
+              >
+                Edit
+              </Link>
             </DropdownMenuItem>
           )}
           <DropdownMenuItem>Delete</DropdownMenuItem>
