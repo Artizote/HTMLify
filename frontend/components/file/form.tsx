@@ -1,12 +1,13 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, File as FileIcon, Folder, Lock } from "lucide-react";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import z from "zod";
 
 import { FileDropzone } from "@/components/file/file-dropzone";
+import { getSubmitData } from "@/components/file/utils";
 import CodeEditor from "@/components/playgroud/code-editor";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,6 +24,7 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from "@/components/ui/input-group";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -32,32 +34,47 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { useUploadFile } from "@/lib/hooks/use-files";
+import { fileFormSchema, FileFormType } from "@/lib/modules/file/file.schema";
 import { getLanguageByPath } from "@/lib/modules/playgournd/editor.utils";
 import { UserFullInfo } from "@/lib/modules/user/user.types";
 import { zodToFormData } from "@/lib/utils";
 
-const fileFormSchema = z
-  .object({
-    content: z.string().optional(),
-    file: z.instanceof(File).optional(),
-    title: z.string().min(1, "Title is required"),
-    path: z.string().min(1, "Path is required"),
-    password: z.string().optional(),
-    mode: z
-      .enum(["source", "render"], { required_error: "Mode is required" })
-      .default("source"),
-    visibility: z.string().optional().default("public"),
-  })
-  .superRefine((data, ctx) => {
-    if (!data.content && !data.file) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Either file or content is required",
-        path: ["file"],
-      });
-    }
-  });
+function UploadOptions({
+  mode,
+  setMode,
+}: {
+  mode: "file" | "content" | null;
+  setMode: Dispatch<SetStateAction<"file" | "content" | null>>;
+}) {
+  function handleCheck(selected: "file" | "content", checked: boolean) {
+    const newMode = checked ? selected : null;
+    setMode(newMode);
+  }
+
+  return (
+    <>
+      <div className="flex items-center space-x-2">
+        <Switch
+          id="file-mode"
+          checked={mode === "file"}
+          onCheckedChange={(e) => handleCheck("file", e)}
+        />
+        <Label htmlFor="file-mode">Update using file</Label>
+      </div>
+
+      <div className="flex items-center space-x-2">
+        <Switch
+          id="content-mode"
+          checked={mode === "content"}
+          onCheckedChange={(e) => handleCheck("content", e)}
+        />
+        <Label htmlFor="content-mode">Update using content</Label>
+      </div>
+    </>
+  );
+}
 
 interface InitialDataProps {
   id: number;
@@ -78,8 +95,12 @@ export const FileForm = ({
   mode = "upload",
 }: FileFormProps) => {
   const { mutate: uploadFile, isPending } = useUploadFile();
+  const [showPassword, setShowPassword] = useState(false);
+  const [updateMode, setUpdateMode] = useState<"file" | "content" | null>(
+    "file",
+  );
   const modeText = mode.charAt(0).toUpperCase() + mode.slice(1);
-  const form = useForm<z.infer<typeof fileFormSchema>>({
+  const form = useForm<FileFormType>({
     resolver: zodResolver(fileFormSchema),
     defaultValues: {
       content: initialData?.content || "",
@@ -92,10 +113,9 @@ export const FileForm = ({
     },
   });
 
-  const [showPassword, setShowPassword] = useState(false);
   const onSubmit = (data: z.infer<typeof fileFormSchema>) => {
+    data = getSubmitData(data, mode, updateMode);
     const formData = zodToFormData(data);
-
     uploadFile(
       mode === "update"
         ? {
@@ -275,7 +295,10 @@ export const FileForm = ({
                     maxSize={10 * 1024 * 1024}
                     maxFiles={1}
                     value={field.value}
-                    onChange={field.onChange}
+                    onChange={(value) => {
+                      field.onChange(value);
+                      setUpdateMode("file");
+                    }}
                   />
                   <FieldError errors={[fieldState.error]}></FieldError>
                 </Field>
@@ -287,6 +310,9 @@ export const FileForm = ({
             <Button type="submit" disabled={isPending}>
               {isPending ? "Submiting..." : "Submit"}
             </Button>
+            {mode === "update" && (
+              <UploadOptions setMode={setUpdateMode} mode={updateMode} />
+            )}
           </div>
         </form>
       </CardContent>
