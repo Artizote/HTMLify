@@ -94,6 +94,13 @@ class FileUpdate(BaseModel):
     password: Optional[str] = None
     overwrite: Optional[bool] = None
 
+class FileGitCloneRequest(BaseModel):
+    repo_url: str
+    folder: str
+    mode: FileModeEnum = FileModeEnum.RENDER
+    visibility: FileVisibilityEnum = FileVisibilityEnum.PUBLIC
+    overwrite: bool = True
+
 class FolderRead(BaseModel):
     name: str
     path: str

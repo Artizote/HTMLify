@@ -164,6 +164,17 @@ async def update_file_by_id_with_form(
     )
     return FileRead.from_orm(updated_file, show_password=True)
 
+@router.post("/files/git-clone")
+async def git_clone_in_files(
+    user: User = Depends(AuthService.get_current_user),
+    data: FileGitCloneRequest = Body()
+) -> FolderRead:
+    success = FileService.git_clone(user, **data.model_dump())
+    if not success:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST)
+    folder = FileService.get_folder(data.folder)
+    return FolderRead.from_orm(folder)
+
 @router.get("/folders")
 def get_folder(
     path: str = Query(None),

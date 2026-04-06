@@ -19,14 +19,13 @@ def git_clone(user, repo: str, dir: str, mode: int, visibility: int, overwrite=T
         dir = "/" + dir
     if not dir.endswith("/"):
         dir = dir + "/"
-    dir = "/" + user.username + dir
 
     if not File.is_valid_filepath(dir + "file.txt"):
         return None
  
     repo_path = Path(file_path("tmp", randstr(10)))
 
-    result = run([GIT_COMMAND_PATH, "clone", repo, repo_path])
+    result = run([GIT_COMMAND_PATH, "clone", repo, repo_path], capture_output=True)
     if result.returncode != 0:
         return None
 

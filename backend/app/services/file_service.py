@@ -4,6 +4,7 @@ from starlette import status
 from typing import Optional
 
 from app.models import File, Dir, Blob, User
+from app.utils import git_clone
 
 
 class FileService:
@@ -153,6 +154,16 @@ class FileService:
         file.update_modified_time()
 
         return file
+
+    @staticmethod
+    def git_clone(user: User, repo_url: str, folder: str, mode: int, visibility: int, overwrite=True) -> bool:
+        if not folder.startswith("/" + user.username + "/"):
+            raise HTTPException(
+                status.HTTP_403_FORBIDDEN,
+                "You are not allowed to clone in this directory"
+            )
+        success = git_clone(user.username, repo_url, folder, mode, visibility, overwrite)
+        return bool(success)
 
     @staticmethod
     def delete_file(user: User, file: File) -> bool:
