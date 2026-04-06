@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import z from "zod";
 
 import { FileDropzone } from "@/components/file/file-dropzone";
+import { ModeSelect, VisibilitySelect } from "@/components/file/select-fields";
 import { getSubmitData } from "@/components/file/utils";
 import CodeEditor from "@/components/playgroud/code-editor";
 import { Button } from "@/components/ui/button";
@@ -25,15 +26,6 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { useUploadFile } from "@/lib/hooks/use-files";
 import { fileFormSchema, FileFormType } from "@/lib/modules/file/file.schema";
@@ -113,10 +105,10 @@ export const FileForm = ({
     },
   });
 
-  const onSubmit = (data: z.infer<typeof fileFormSchema>) => {
+  const onSubmit = async (data: z.infer<typeof fileFormSchema>) => {
     data = getSubmitData(data, mode, updateMode);
     const formData = zodToFormData(data);
-    uploadFile(
+    await uploadFile(
       mode === "update"
         ? {
             mode: "update",
@@ -233,57 +225,8 @@ export const FileForm = ({
                   </Field>
                 )}
               />
-              <Controller
-                name="visibility"
-                control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field>
-                    <FieldLabel>Visibility</FieldLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <SelectTrigger className="w-full max-w-48">
-                        <SelectValue placeholder="select a mode" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          <SelectLabel>Visibility</SelectLabel>
-                          <SelectItem value="public">Public</SelectItem>
-                          <SelectItem value="private">Private</SelectItem>
-                          <SelectItem value="once">Once</SelectItem>
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                    <FieldError errors={[fieldState.error]}></FieldError>
-                  </Field>
-                )}
-              />
-              <Controller
-                name="mode"
-                control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field>
-                    <FieldLabel>Mode</FieldLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <SelectTrigger className="w-full max-w-48">
-                        <SelectValue placeholder="select a mode" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          <SelectLabel>Mode</SelectLabel>
-                          <SelectItem value="source">Source</SelectItem>
-                          <SelectItem value="render">Render</SelectItem>
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                    <FieldError errors={[fieldState.error]}></FieldError>
-                  </Field>
-                )}
-              />
+              <VisibilitySelect control={form.control} name="visibility" />
+              <ModeSelect control={form.control} name="mode" />
             </div>
             <Controller
               name="file"

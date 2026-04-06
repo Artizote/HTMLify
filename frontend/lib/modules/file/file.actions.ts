@@ -2,6 +2,7 @@
 
 import { clientEnv } from "@/lib/env";
 import { ServerAPICall } from "@/lib/fetch/server";
+import { GitCloneFormType } from "@/lib/modules/file/file.schema";
 import { FileIDResponse, FolderResponse } from "@/lib/modules/file/file.types";
 type FileInfoParams =
   | { path: string; id?: never }
@@ -93,4 +94,21 @@ export const getFolderByPath = async (path: string, expand: boolean = true) => {
   }
 
   return response.json() as Promise<FolderResponse>;
+};
+
+export const gitCLoneFile = async (data: GitCloneFormType) => {
+  const response = await ServerAPICall(
+    `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/v1/files/git-clone`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    },
+  );
+  if (!response.ok) {
+    throw new Error("Failed to clone file");
+  }
+  return response.json() as Promise<FileIDResponse>;
 };

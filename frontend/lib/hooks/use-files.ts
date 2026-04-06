@@ -3,9 +3,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   getFileContentById,
   getFileInfoByPathOrID,
+  gitCLoneFile,
   updateFile,
   uploadFile,
 } from "@/lib/modules/file/file.actions";
+import { GitCloneFormType } from "@/lib/modules/file/file.schema";
 import { QUERY_KEYS } from "@/shared/query-keys";
 
 export const useFileId = (path: string) => {
@@ -43,6 +45,19 @@ export const useUploadFile = () => {
       data.mode === "upload"
         ? uploadFile(data.formData)
         : updateFile(data.id, data.formData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.files.all });
+    },
+  });
+};
+
+export const useGitClone = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: GitCloneFormType) => {
+      return gitCLoneFile(data);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.files.all });
     },

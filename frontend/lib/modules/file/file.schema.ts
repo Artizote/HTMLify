@@ -25,3 +25,15 @@ const fileFormSchema = z
 type FileFormType = z.infer<typeof fileFormSchema>;
 
 export { fileFormSchema, type FileFormType };
+
+const gitCloneSchema = z.object({
+  repo_url: z.string().url("Please enter a valid repository URL"),
+  folder: z.string().min(1, "Folder path is required"),
+  mode: z.enum(["source", "render"]),
+  visibility: z.enum(["public", "hidden", "once"]),
+  overwrite: z.boolean(),
+});
+
+type GitCloneFormType = z.infer<typeof gitCloneSchema>;
+
+export { type GitCloneFormType, gitCloneSchema };
