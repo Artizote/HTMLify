@@ -295,7 +295,7 @@ const useAudioStore = create<AudioStore>()(
         if (prevIndex === -1 || !prevTrack) {
           if (prevIndex !== -1) {
             console.error(
-              "Inconsistency: previous index is valid but track not found"
+              "Inconsistency: previous index is valid but track not found",
             );
           }
           set({ isLoading: false, isPlaying: false, isBuffering: false });
@@ -433,7 +433,7 @@ const useAudioStore = create<AudioStore>()(
         const state = get();
         const currentQueueIds = new Set(state.queue.map((s) => s.id));
         const newTracks = tracksToAdd.filter(
-          (track) => !currentQueueIds.has(track.id)
+          (track) => !currentQueueIds.has(track.id),
         );
 
         if (newTracks.length > 0) {
@@ -488,10 +488,10 @@ const useAudioStore = create<AudioStore>()(
         }
 
         const remainingQueue = state.queue.filter(
-          (_, index) => index !== state.currentQueueIndex
+          (_, index) => index !== state.currentQueueIndex,
         );
         const shuffledRemaining = remainingQueue.sort(
-          () => Math.random() - 0.5
+          () => Math.random() - 0.5,
         );
         const newQueue = [state.currentTrack, ...shuffledRemaining];
 
@@ -579,8 +579,8 @@ const useAudioStore = create<AudioStore>()(
         insertMode: state.insertMode,
         currentQueueIndex: state.currentQueueIndex,
       }),
-    }
-  )
+    },
+  ),
 );
 
 export {

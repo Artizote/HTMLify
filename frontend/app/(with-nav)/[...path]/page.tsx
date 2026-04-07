@@ -78,7 +78,10 @@ const StaticServe = async ({
     );
   }
 
-  if (mediaUrl && (fileType === "img" || fileType === "video" || fileType === "audio")) {
+  if (
+    mediaUrl &&
+    (fileType === "img" || fileType === "video" || fileType === "audio")
+  ) {
     return (
       <div className="flex flex-col items-center max-h-[70vh]">
         <MediaViewer

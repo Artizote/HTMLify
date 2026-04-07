@@ -17,7 +17,10 @@ export default async function NewFileCreatePage({
 
   const { fileID } = await params;
 
-  let fileData: { fileInfo: Awaited<ReturnType<typeof getFileInfoByPathOrID>>; content: string | undefined } | null = null;
+  let fileData: {
+    fileInfo: Awaited<ReturnType<typeof getFileInfoByPathOrID>>;
+    content: string | undefined;
+  } | null = null;
 
   try {
     const fileInfo = await getFileInfoByPathOrID({ id: Number(fileID) });

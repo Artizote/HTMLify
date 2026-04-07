@@ -27,7 +27,10 @@ export const getFileInfoByPathOrID = async ({
   );
 
   if (!response.ok) {
-    const message = await parseServerError(response, "Failed to fetch file info");
+    const message = await parseServerError(
+      response,
+      "Failed to fetch file info",
+    );
     throw new APIError(message, response.status);
   }
 
@@ -40,7 +43,10 @@ export const getFileContentById = async (id: number): Promise<Response> => {
   );
 
   if (!response.ok) {
-    const message = await parseServerError(response, `Failed to fetch file content for id: ${id}`);
+    const message = await parseServerError(
+      response,
+      `Failed to fetch file content for id: ${id}`,
+    );
     throw new APIError(message, response.status);
   }
 
@@ -107,7 +113,9 @@ export const getFolderByPath = async (
   return response.json() as Promise<FolderResponse>;
 };
 
-export const gitCloneFile = async (data: GitCloneFormType): Promise<FileIDResponse> => {
+export const gitCloneFile = async (
+  data: GitCloneFormType,
+): Promise<FileIDResponse> => {
   const response = await ServerAPICall(
     `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/v1/files/git-clone`,
     {
@@ -120,7 +128,10 @@ export const gitCloneFile = async (data: GitCloneFormType): Promise<FileIDRespon
   );
 
   if (!response.ok) {
-    const message = await parseServerError(response, "Failed to clone repository");
+    const message = await parseServerError(
+      response,
+      "Failed to clone repository",
+    );
     throw new APIError(message, response.status);
   }
 

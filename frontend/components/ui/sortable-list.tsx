@@ -40,7 +40,7 @@ type SortableListProps<TItem extends SortableBaseItem> = {
   renderItem: (
     item: TItem,
     index: number,
-    isOverlay?: boolean
+    isOverlay?: boolean,
   ) => React.ReactNode;
   className?: string;
 };
@@ -72,7 +72,7 @@ const SortableList = <TItem extends SortableBaseItem>({
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    })
+    }),
   );
 
   const handleDragStart = ({ active: activeEvent }: DragStartEvent) => {
@@ -82,7 +82,7 @@ const SortableList = <TItem extends SortableBaseItem>({
   const handleDragEnd = ({ active: activeEvent, over }: DragEndEvent) => {
     if (over && activeEvent.id !== over.id) {
       const activeEventIndex = items.findIndex(
-        ({ id }) => id === activeEvent.id
+        ({ id }) => id === activeEvent.id,
       );
       const overIndex = items.findIndex(({ id }) => id === over.id);
 
@@ -107,7 +107,7 @@ const SortableList = <TItem extends SortableBaseItem>({
         <ul
           className={cn(
             "flex list-inside list-none list-image-none flex-col p-0",
-            className
+            className,
           )}
           role="application"
         >
@@ -125,7 +125,7 @@ const SortableList = <TItem extends SortableBaseItem>({
               ? renderItem(activeItem, activeIndex, true)
               : null}
           </Overlay>,
-          document.body
+          document.body,
         )}
     </DndContext>
   );
@@ -174,7 +174,7 @@ const useSortableItemContext = () => {
 
   if (!context) {
     throw new Error(
-      "useSortableItemContext must be used within a SortableItemContext"
+      "useSortableItemContext must be used within a SortableItemContext",
     );
   }
 
@@ -203,7 +203,7 @@ const SortableItem = <TItem extends SortableBaseItem>({
       ref: setActivatorNodeRef,
       isDragging,
     }),
-    [attributes, listeners, setActivatorNodeRef, isDragging]
+    [attributes, listeners, setActivatorNodeRef, isDragging],
   );
 
   const style: React.CSSProperties = {
@@ -241,4 +241,4 @@ const SortableDragHandle = () => {
     </Button>
   );
 };
-export { SortableDragHandle,SortableItem, SortableList };
+export { SortableDragHandle, SortableItem, SortableList };
