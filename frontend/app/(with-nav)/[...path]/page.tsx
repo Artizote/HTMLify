@@ -9,15 +9,19 @@ import {
   CodeBlockHeader,
   CodeBlockTitle,
 } from "@/components/ai-elements/code-block";
+import { MediaViewer } from "@/components/media-viewer";
 import { CodePlayground } from "@/components/playgroud/code-playground";
 import { Button } from "@/components/ui/button";
+import { APIError } from "@/lib/errors";
 import { getFileContentByPath } from "@/lib/modules/file/file.actions";
 import { getLanguageByPath } from "@/lib/modules/playgournd/editor.utils";
+
+type FileType = "img" | "video" | "audio" | "other";
 
 const getFileContentType = (
   filename: string,
   contentTypeHeader?: string | null,
-): "img" | "video" | "audio" | "other" => {
+): FileType => {
   if (contentTypeHeader) {
     if (contentTypeHeader.startsWith("image/")) return "img";
     if (contentTypeHeader.startsWith("video/")) return "video";
@@ -28,7 +32,7 @@ const getFileContentType = (
 
   const imageExts = ["jpg", "jpeg", "png", "gif", "webp", "bmp", "svg"];
   const videoExts = ["mp4", "webm", "ogg", "mov", "avi", "mkv"];
-  const audioExts = ["mp3", "wav", "ogg", "aac", "flac"];
+  const audioExts = ["mp3", "wav", "aac", "flac"];
 
   if (ext && imageExts.includes(ext)) return "img";
   if (ext && videoExts.includes(ext)) return "video";
@@ -48,26 +52,47 @@ const StaticServe = async ({
   const language = getLanguageByPath(joinedPath);
   const filename = joinedPath;
 
-  const response = await getFileContentByPath(joinedPath);
+  let contentType: string | null = null;
+  let code = "";
+  let mediaUrl: string | null = null;
+  let fileType: FileType = "other";
 
-  if (!response) {
+  try {
+    const response = await getFileContentByPath(joinedPath);
+    contentType = response.headers.get("content-type");
+    fileType = getFileContentType(filename, contentType);
+    if (fileType === "img" || fileType === "video" || fileType === "audio") {
+      mediaUrl = response.url;
+    } else {
+      code = await response.text();
+    }
+  } catch (err) {
+    const message =
+      err instanceof APIError
+        ? err.message
+        : "Failed to load file content or file not found.";
     return (
       <div className="flex flex-col h-[70vh] items-center justify-center text-destructive">
-        Failed to load file content or file not found.
+        {message}
       </div>
     );
   }
 
-  const contentType = response.headers.get("content-type");
-  const code = await response.text();
-
-  const fileType = getFileContentType(filename, contentType);
-  if (fileType === "img") {
-    return <img src={response.url} alt="" />;
+  if (mediaUrl && (fileType === "img" || fileType === "video" || fileType === "audio")) {
+    return (
+      <div className="flex flex-col items-center max-h-[70vh]">
+        <MediaViewer
+          src={mediaUrl}
+          type={fileType}
+          filename={filename}
+          contentType={contentType}
+        />
+      </div>
+    );
   }
+
   return (
     <div className="flex flex-col max-h-[70vh]">
-      {contentType}
       <CodeBlockContainer language={language}>
         <CodeBlockHeader>
           <CodeBlockTitle className="w-full">

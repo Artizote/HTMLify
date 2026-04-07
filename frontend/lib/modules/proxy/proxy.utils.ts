@@ -7,7 +7,13 @@ import {
   getFileInfoByPathOrID,
 } from "@/lib/modules/file/file.actions";
 
-const excludePaths = ["/about", "/_next", "/api", "/favicon.ico"];
+const excludePaths = [
+  "/about",
+  "/_next",
+  "/api",
+  "/favicon.ico",
+  "/.well-known",
+];
 
 const AUTH_ONLY_ROUTES = ["/signin", "/signup"];
 const PROTECTED_ROUTES = ["/dashboard"];
@@ -52,51 +58,6 @@ async function verifyAccessToken(accessToken: string): Promise<boolean> {
   } catch {
     return false;
   }
-}
-
-export function getSubdomain(request: NextRequest): string {
-  const host = request.headers.get("host") || "";
-  const hostname = host.split(":")[0]; // strip port
-
-  const parts = hostname.split(".");
-
-  // e.g. "app.localhost" → ["app", "localhost"] → "app"
-  // e.g. "app.example.com" → ["app", "example", "com"] → "app"
-  // e.g. "localhost" or "example.com" → no subdomain → ""
-  if (parts.length <= 1) return "";
-
-  const isLocalhost = parts[parts.length - 1] === "localhost";
-
-  if (isLocalhost) {
-    // app.localhost → subdomain is everything before "localhost"
-    return parts.slice(0, -1).join(".");
-  }
-
-  // For real domains, subdomain is everything before the last two parts
-  // e.g. app.example.com → parts = ["app", "example", "com"] → "app"
-  // e.g. a.b.example.com → "a.b"
-  if (parts.length <= 2) return ""; // no subdomain (e.g. "example.com")
-
-  return parts.slice(0, -2).join(".");
-}
-
-export function redirectToSubdomain(
-  request: NextRequest,
-  subdomain: string,
-): NextResponse {
-  const host = request.headers.get("host") || "";
-  const hostname = host.split(":")[0];
-  const port = host.includes(":") ? `:${host.split(":")[1]}` : "";
-
-  const prefix = subdomain != "" ? `${subdomain}.` : "";
-
-  const newHostname = `${prefix}${hostname.replace(/^[^.]+\./, "")}`;
-
-  const newUrl = new URL(request.url);
-  newUrl.host = `${newHostname}${port}`;
-
-  console.log({ newUrl });
-  return NextResponse.redirect(newUrl);
 }
 
 const handleAuthOrProtectedRoute = async (

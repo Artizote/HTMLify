@@ -22,7 +22,7 @@ run:
 
 run-frontend:
 	@echo "Starting frontend dev server..."
-	cd frontend && pnpm dev
+	cd frontend && pnpm dev -p 4000
 
 run-backend:
 	@echo "Starting backend server..."

@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   getFileContentById,
   getFileInfoByPathOrID,
-  gitCLoneFile,
+  gitCloneFile,
   updateFile,
   uploadFile,
 } from "@/lib/modules/file/file.actions";
@@ -56,7 +56,7 @@ export const useGitClone = () => {
 
   return useMutation({
     mutationFn: (data: GitCloneFormType) => {
-      return gitCLoneFile(data);
+      return gitCloneFile(data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.files.all });

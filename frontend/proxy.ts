@@ -1,14 +1,11 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
-import { clientEnv } from "@/lib/env";
 import {
   AUTH_ONLY_ROUTES,
   excludePaths,
-  getSubdomain,
   handleAuthOrProtectedRoute,
   PROTECTED_ROUTES,
-  redirectToSubdomain,
   serverFile,
 } from "@/lib/modules/proxy/proxy.utils";
 
@@ -20,11 +17,7 @@ export async function proxy(request: NextRequest) {
   }
 
   const totalExcludeRoute = AUTH_ONLY_ROUTES.concat(PROTECTED_ROUTES);
-  const subdomain = getSubdomain(request);
   if (totalExcludeRoute.some((path: string) => pathname.startsWith(path))) {
-    if (subdomain !== clientEnv.NEXT_PUBLIC_SUBDOMAIN) {
-      return redirectToSubdomain(request, clientEnv.NEXT_PUBLIC_SUBDOMAIN);
-    }
     return await handleAuthOrProtectedRoute(request, pathname);
   }
 
@@ -32,5 +25,8 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/:path*"],
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|\.well-known|.*\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|woff|woff2)$).*)",
+    "/((?!about).*)",
+  ],
 };

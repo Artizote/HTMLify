@@ -14,19 +14,26 @@ export default async function NewFileCreatePage({
   if (!user) {
     return "oh shit 2";
   }
+
   const { fileID } = await params;
-  const fileInfo = await getFileInfoByPathOrID({ id: Number(fileID) });
-  if (!fileInfo) {
+
+  let fileData: { fileInfo: Awaited<ReturnType<typeof getFileInfoByPathOrID>>; content: string | undefined } | null = null;
+
+  try {
+    const fileInfo = await getFileInfoByPathOrID({ id: Number(fileID) });
+    const fileContentResp = await getFileContentById(fileInfo.id);
+    const content = await fileContentResp.text();
+    fileData = { fileInfo, content };
+  } catch {
     return "no file found";
   }
-  const fileContentResp = await getFileContentById(fileInfo.id);
-  const content = await fileContentResp?.text();
+
   return (
     <div className="w-full max-w-7xl mx-auto pt-10 px-4">
       <FileForm
         mode="update"
         user={user}
-        initialData={{ ...fileInfo, content }}
+        initialData={{ ...fileData.fileInfo, content: fileData.content }}
       />
     </div>
   );
