@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { clientEnv } from "@/lib/env";
-import { ClientAPICall } from "@/lib/fetch/client";
+import { APICall } from "@/lib/fetch/api";
 import { UserFullInfo } from "@/lib/modules/user/user.types";
 import { QUERY_KEYS } from "@/shared/query-keys";
 
@@ -10,7 +10,7 @@ export function useCurrentUser() {
     queryKey: QUERY_KEYS.auth.me,
     queryFn: async () => {
       try {
-        const res = await ClientAPICall(
+        const res = await APICall(
           `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/v1/users/me`,
         );
         if (!res.ok) return null;

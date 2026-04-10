@@ -1,8 +1,6 @@
-"use server";
-
 import { clientEnv } from "@/lib/env";
 import { APIError, parseServerError } from "@/lib/errors";
-import { ServerAPICall } from "@/lib/fetch/server";
+import { APICall as APICall } from "@/lib/fetch/api";
 import { GitCloneFormType } from "@/lib/modules/file/file.schema";
 import { FileIDResponse, FolderResponse } from "@/lib/modules/file/file.types";
 
@@ -15,14 +13,13 @@ export const getFileInfoByPathOrID = async ({
   id,
 }: FileInfoParams): Promise<FileIDResponse> => {
   let params = "";
-
   if (path) {
     params = `path=${path}`;
   } else if (id) {
     params = `id=${id}`;
   }
 
-  const response = await ServerAPICall(
+  const response = await APICall(
     `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/v1/files?${params}`,
   );
 
@@ -33,12 +30,11 @@ export const getFileInfoByPathOrID = async ({
     );
     throw new APIError(message, response.status);
   }
-
   return response.json() as Promise<FileIDResponse>;
 };
 
 export const getFileContentById = async (id: number): Promise<Response> => {
-  const response = await ServerAPICall(
+  const response = await APICall(
     `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/v1/files/${id}/content`,
   );
 
@@ -49,7 +45,6 @@ export const getFileContentById = async (id: number): Promise<Response> => {
     );
     throw new APIError(message, response.status);
   }
-
   return response;
 };
 
@@ -61,7 +56,7 @@ export const getFileContentByPath = async (path: string): Promise<Response> => {
 export const uploadFile = async (
   formData: FormData,
 ): Promise<FileIDResponse> => {
-  const response = await ServerAPICall(
+  const response = await APICall(
     `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/v1/files/upload`,
     {
       method: "POST",
@@ -73,7 +68,6 @@ export const uploadFile = async (
     const message = await parseServerError(response, "Failed to upload file");
     throw new APIError(message, response.status);
   }
-
   return response.json() as Promise<FileIDResponse>;
 };
 
@@ -81,7 +75,7 @@ export const updateFile = async (
   id: number,
   formData: FormData,
 ): Promise<FileIDResponse> => {
-  const response = await ServerAPICall(
+  const response = await APICall(
     `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/v1/files/${id}/update`,
     {
       method: "PATCH",
@@ -93,7 +87,6 @@ export const updateFile = async (
     const message = await parseServerError(response, "Failed to update file");
     throw new APIError(message, response.status);
   }
-
   return response.json() as Promise<FileIDResponse>;
 };
 
@@ -101,7 +94,7 @@ export const getFolderByPath = async (
   path: string,
   expand: boolean = true,
 ): Promise<FolderResponse> => {
-  const response = await ServerAPICall(
+  const response = await APICall(
     `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/v1/folders?path=${path}&expand=${expand}`,
   );
 
@@ -109,14 +102,13 @@ export const getFolderByPath = async (
     const message = await parseServerError(response, "Failed to fetch folder");
     throw new APIError(message, response.status);
   }
-
   return response.json() as Promise<FolderResponse>;
 };
 
 export const gitCloneFile = async (
   data: GitCloneFormType,
 ): Promise<FileIDResponse> => {
-  const response = await ServerAPICall(
+  const response = await APICall(
     `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/v1/files/git-clone`,
     {
       method: "POST",
@@ -134,6 +126,5 @@ export const gitCloneFile = async (
     );
     throw new APIError(message, response.status);
   }
-
   return response.json() as Promise<FileIDResponse>;
 };

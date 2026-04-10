@@ -5,7 +5,7 @@ import { RefreshToken } from "@/lib/modules/auth/auth.actions";
 import {
   getFileContentById,
   getFileInfoByPathOrID,
-} from "@/lib/modules/file/file.actions";
+} from "@/lib/modules/file/file.api";
 
 const excludePaths = [
   "/about",

@@ -13,33 +13,20 @@ import { MediaViewer } from "@/components/media-viewer";
 import { CodePlayground } from "@/components/playgroud/code-playground";
 import { Button } from "@/components/ui/button";
 import { APIError } from "@/lib/errors";
-import { getFileContentByPath } from "@/lib/modules/file/file.actions";
+import {
+  getFileContentByPath,
+} from "@/lib/modules/file/file.api";
+import { getFileContentType } from "@/lib/modules/file/file.utils";
 import { getLanguageByPath } from "@/lib/modules/playgournd/editor.utils";
 
-type FileType = "img" | "video" | "audio" | "other";
-
-const getFileContentType = (
-  filename: string,
-  contentTypeHeader?: string | null,
-): FileType => {
-  if (contentTypeHeader) {
-    if (contentTypeHeader.startsWith("image/")) return "img";
-    if (contentTypeHeader.startsWith("video/")) return "video";
-    if (contentTypeHeader.startsWith("audio/")) return "audio";
-  }
-
-  const ext = filename.split(".").pop()?.toLowerCase();
-
-  const imageExts = ["jpg", "jpeg", "png", "gif", "webp", "bmp", "svg"];
-  const videoExts = ["mp4", "webm", "ogg", "mov", "avi", "mkv"];
-  const audioExts = ["mp3", "wav", "aac", "flac"];
-
-  if (ext && imageExts.includes(ext)) return "img";
-  if (ext && videoExts.includes(ext)) return "video";
-  if (ext && audioExts.includes(ext)) return "audio";
-
-  return "other";
-};
+type FileData =
+  | {
+      isMedia: true;
+      url: string;
+      fileType: "img" | "video" | "audio";
+      contentType: string | null;
+    }
+  | { isMedia: false; code: string };
 
 const StaticServe = async ({
   params,
@@ -47,45 +34,43 @@ const StaticServe = async ({
   params: Promise<{ path: string[] }>;
 }) => {
   const { path } = await params;
-  let joinedPath = path.join("/");
-  joinedPath = joinedPath.startsWith("/") ? joinedPath : `/${joinedPath}`;
-  const language = getLanguageByPath(joinedPath);
-  const filename = joinedPath;
+  const filename = `/${path.join("/")}`.replace(/^\/\//, "/");
+  const language = getLanguageByPath(filename);
 
-  let contentType: string | null = null;
-  let code = "";
-  let mediaUrl: string | null = null;
-  let fileType: FileType = "other";
+  let fileData: FileData;
+  let error: string | null = null;
 
   try {
-    const response = await getFileContentByPath(joinedPath);
-    contentType = response.headers.get("content-type");
-    fileType = getFileContentType(filename, contentType);
-    if (fileType === "img" || fileType === "video" || fileType === "audio") {
-      mediaUrl = response.url;
-    } else {
-      code = await response.text();
-    }
+    const response = await getFileContentByPath(filename);
+    const contentType = response.headers.get("content-type");
+    const fileType = await getFileContentType(filename, contentType);
+    const isMedia =
+      fileType === "img" || fileType === "video" || fileType === "audio";
+
+    fileData = isMedia
+      ? { isMedia: true, url: response.url, fileType, contentType }
+      : { isMedia: false, code: await response.text() };
   } catch (err) {
-    const message =
+    error =
       err instanceof APIError
         ? err.message
         : "Failed to load file content or file not found.";
+  }
+
+  if (error) {
     return (
       <div className="flex flex-col h-[70vh] items-center justify-center text-destructive">
-        {message}
+        {error}
       </div>
     );
   }
 
-  if (
-    mediaUrl &&
-    (fileType === "img" || fileType === "video" || fileType === "audio")
-  ) {
+  if (fileData!.isMedia) {
+    const { url, fileType, contentType } = fileData!;
     return (
       <div className="flex flex-col items-center max-h-[70vh]">
         <MediaViewer
-          src={mediaUrl}
+          src={url}
           type={fileType}
           filename={filename}
           contentType={contentType}
@@ -94,6 +79,7 @@ const StaticServe = async ({
     );
   }
 
+  const { code } = fileData! as { isMedia: false; code: string };
   return (
     <div className="flex flex-col max-h-[70vh]">
       <CodeBlockContainer language={language}>
@@ -107,9 +93,8 @@ const StaticServe = async ({
               Run
             </Button>
           </CodePlayground>
-          <CodeBlockActions></CodeBlockActions>
+          <CodeBlockActions />
         </CodeBlockHeader>
-
         <div className="overflow-auto max-h-[70vh] min-h-0">
           <CodeBlockContent
             code={code}

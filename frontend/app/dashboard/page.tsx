@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { DashboardBreadcrumb } from "@/components/dashboard/dashboard-breadcrumb";
 import { FileTable } from "@/components/dashboard/file-table";
 import { Button } from "@/components/ui/button";
-import { getFolderByPath } from "@/lib/modules/file/file.actions";
+import { getFolderByPath } from "@/lib/modules/file/file.api";
 import { getMe } from "@/lib/modules/user/user.actions";
 
 const DashboardPage = async ({

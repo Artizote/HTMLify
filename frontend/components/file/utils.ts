@@ -1,17 +1,8 @@
-import { FileFormType } from "@/lib/modules/file/file.schema";
+import { FileType } from "@/lib/modules/file/file.schema";
 
-const getSubmitData = (
-  data: FileFormType,
-  mode: string,
-  updateMode: string | null,
-) => {
-  if (mode !== "update") return data;
-
-  return {
-    ...data,
-    file: updateMode === "file" ? data.file : undefined,
-    content: updateMode === "content" ? data.content : undefined,
-  };
-};
-
-export { getSubmitData };
+export function detectFileType(file: File): FileType {
+  if (file.type.startsWith("image/")) return "img";
+  if (file.type.startsWith("video/")) return "video";
+  if (file.type.startsWith("audio/")) return "audio";
+  return "other";
+}

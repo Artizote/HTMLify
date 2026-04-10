@@ -6,7 +6,7 @@ import {
   gitCloneFile,
   updateFile,
   uploadFile,
-} from "@/lib/modules/file/file.actions";
+} from "@/lib/modules/file/file.api";
 import { GitCloneFormType } from "@/lib/modules/file/file.schema";
 import { QUERY_KEYS } from "@/shared/query-keys";
 

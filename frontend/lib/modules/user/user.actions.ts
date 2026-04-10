@@ -1,10 +1,10 @@
 import { clientEnv } from "@/lib/env";
-import { ServerAPICall } from "@/lib/fetch/server";
+import { APICall } from "@/lib/fetch/api";
 import { UserFullInfo } from "@/lib/modules/user/user.types";
 
 export async function getMe(): Promise<UserFullInfo | null> {
   try {
-    const res = await ServerAPICall(
+    const res = await APICall(
       `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/v1/users/me`,
     );
 

@@ -1,8 +1,9 @@
-import { FileForm } from "@/components/file/form";
+import { FileForm } from "@/components/file/file-upload-form";
 import {
   getFileContentById,
   getFileInfoByPathOrID,
-} from "@/lib/modules/file/file.actions";
+} from "@/lib/modules/file/file.api";
+import { getFileContentType } from "@/lib/modules/file/file.utils";
 import { getMe } from "@/lib/modules/user/user.actions";
 
 export default async function NewFileCreatePage({
@@ -20,23 +21,31 @@ export default async function NewFileCreatePage({
   let fileData: {
     fileInfo: Awaited<ReturnType<typeof getFileInfoByPathOrID>>;
     content: string | undefined;
+    mediaUrl: string | null;
   } | null = null;
 
   try {
     const fileInfo = await getFileInfoByPathOrID({ id: Number(fileID) });
     const fileContentResp = await getFileContentById(fileInfo.id);
     const content = await fileContentResp.text();
-    fileData = { fileInfo, content };
+    fileData = { fileInfo, content, mediaUrl: fileContentResp.url };
   } catch {
     return "no file found";
   }
+
+  const contentType = await getFileContentType(fileData.fileInfo.path);
 
   return (
     <div className="w-full max-w-7xl mx-auto pt-10 px-4">
       <FileForm
         mode="update"
         user={user}
-        initialData={{ ...fileData.fileInfo, content: fileData.content }}
+        initialData={{
+          ...fileData.fileInfo,
+          content: fileData.content,
+          mediaUrl: fileData.mediaUrl,
+          fileType: contentType,
+        }}
       />
     </div>
   );
