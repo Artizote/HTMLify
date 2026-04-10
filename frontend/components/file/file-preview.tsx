@@ -24,10 +24,9 @@ export function FilePreview({
   if (fileType === "img") {
     return (
       <div className="relative w-full h-[60vh] min-h-[300px] flex items-center justify-center bg-muted/20 rounded-xl border border-border/50 overflow-hidden my-4">
-        <Image
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
           className="w-full h-full object-contain p-2"
-          width={1000}
-          height={1000}
           src={mediaUrl || path}
           alt={path}
         />

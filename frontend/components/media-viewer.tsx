@@ -1,7 +1,6 @@
 "use client";
 
 import { FileAudioIcon, FileImageIcon, FileVideoIcon } from "lucide-react";
-import Image from "next/image";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -38,10 +37,9 @@ export function MediaViewer({
 
       <CardContent className="flex min-w-xl items-center justify-center p-4 bg-muted/20">
         {type === "img" && (
-          <Image
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
             src={src}
-            width={1000}
-            height={1000}
             alt={filename ?? ""}
             className="max-w-full max-h-[60vh] object-contain"
           />
