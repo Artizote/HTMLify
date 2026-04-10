@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { clientEnv } from "@/lib/env";
+import { env } from "@/lib/env";
 import { RefreshToken } from "@/lib/modules/auth/auth.actions";
 import {
   getFileContentById,
@@ -47,13 +47,10 @@ const serverFile = async (pathname: string): Promise<NextResponse> => {
 
 async function verifyAccessToken(accessToken: string): Promise<boolean> {
   try {
-    const res = await fetch(
-      `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/v1/users/me`,
-      {
-        headers: { Cookie: `access_token=${accessToken}` },
-        cache: "no-store",
-      },
-    );
+    const res = await fetch(`${env.NEXT_PUBLIC_BACKEND_API_URL}/v1/users/me`, {
+      headers: { Cookie: `access_token=${accessToken}` },
+      cache: "no-store",
+    });
     return res.ok;
   } catch {
     return false;

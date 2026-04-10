@@ -1,4 +1,4 @@
-import { clientEnv } from "@/lib/env";
+import { env } from "@/lib/env";
 import { APIError, parseServerError } from "@/lib/errors";
 import { APICall as APICall } from "@/lib/fetch/api";
 import { GitCloneFormType } from "@/lib/modules/file/file.schema";
@@ -20,7 +20,7 @@ export const getFileInfoByPathOrID = async ({
   }
 
   const response = await APICall(
-    `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/v1/files?${params}`,
+    `${env.NEXT_PUBLIC_BACKEND_API_URL}/v1/files?${params}`,
   );
 
   if (!response.ok) {
@@ -35,7 +35,7 @@ export const getFileInfoByPathOrID = async ({
 
 export const getFileContentById = async (id: number): Promise<Response> => {
   const response = await APICall(
-    `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/v1/files/${id}/content`,
+    `${env.NEXT_PUBLIC_BACKEND_API_URL}/v1/files/${id}/content`,
   );
 
   if (!response.ok) {
@@ -57,7 +57,7 @@ export const uploadFile = async (
   formData: FormData,
 ): Promise<FileIDResponse> => {
   const response = await APICall(
-    `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/v1/files/upload`,
+    `${env.NEXT_PUBLIC_BACKEND_API_URL}/v1/files/upload`,
     {
       method: "POST",
       body: formData,
@@ -76,7 +76,7 @@ export const updateFile = async (
   formData: FormData,
 ): Promise<FileIDResponse> => {
   const response = await APICall(
-    `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/v1/files/${id}/update`,
+    `${env.NEXT_PUBLIC_BACKEND_API_URL}/v1/files/${id}/update`,
     {
       method: "PATCH",
       body: formData,
@@ -95,7 +95,7 @@ export const getFolderByPath = async (
   expand: boolean = true,
 ): Promise<FolderResponse> => {
   const response = await APICall(
-    `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/v1/folders?path=${path}&expand=${expand}`,
+    `${env.NEXT_PUBLIC_BACKEND_API_URL}/v1/folders?path=${path}&expand=${expand}`,
   );
 
   if (!response.ok) {
@@ -109,7 +109,7 @@ export const gitCloneFile = async (
   data: GitCloneFormType,
 ): Promise<FileIDResponse> => {
   const response = await APICall(
-    `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/v1/files/git-clone`,
+    `${env.NEXT_PUBLIC_BACKEND_API_URL}/v1/files/git-clone`,
     {
       method: "POST",
       headers: {

@@ -35,14 +35,14 @@ export const useFileContent = (path: string) => {
 
 type FilePayload =
   | { formData: FormData; mode: "upload" }
-  | { formData: FormData; mode: "update"; id: number };
+  | { formData: FormData; mode: "update"; id?: number };
 
 export const useUploadFile = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (data: FilePayload) =>
-      data.mode === "upload"
+      data.mode === "upload" || data.id === undefined
         ? uploadFile(data.formData)
         : updateFile(data.id, data.formData),
     onSuccess: () => {

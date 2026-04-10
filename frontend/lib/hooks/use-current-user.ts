@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { clientEnv } from "@/lib/env";
+import { env } from "@/lib/env";
 import { APICall } from "@/lib/fetch/api";
 import { UserFullInfo } from "@/lib/modules/user/user.types";
 import { QUERY_KEYS } from "@/shared/query-keys";
@@ -11,7 +11,7 @@ export function useCurrentUser() {
     queryFn: async () => {
       try {
         const res = await APICall(
-          `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/v1/users/me`,
+          `${env.NEXT_PUBLIC_BACKEND_API_URL}/v1/users/me`,
         );
         if (!res.ok) return null;
         return res.json() as Promise<UserFullInfo>;

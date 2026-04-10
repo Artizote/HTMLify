@@ -130,7 +130,7 @@ export const FileForm = ({
     }
     const formData = zodToFormData(data);
     uploadFile(
-      { mode, formData, id: initialData!.id },
+      { mode, formData, id: initialData?.id },
       {
         onSuccess: () => {
           toast.success(
@@ -153,15 +153,13 @@ export const FileForm = ({
         <CardTitle>{modeText} File</CardTitle>
       </CardHeader>
       <CardContent>
-        {mode === "update" && (
-          <FilePreview
-            mediaUrl={mediaUrl}
-            fileType={currentFileType}
-            path={initialData?.path || ""}
-            code={content}
-            onChange={(code) => form.setValue("content", code)}
-          />
-        )}
+        <FilePreview
+          mediaUrl={mediaUrl}
+          fileType={currentFileType}
+          path={initialData?.path || ""}
+          code={content}
+          onChange={(code) => form.setValue("content", code)}
+        />
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <FieldGroup>
             <div className="w-full grid gap-4 md:grid-cols-2 grid-cols-1">
@@ -220,6 +218,7 @@ export const FileForm = ({
                     maxFiles={1}
                     value={field.value}
                     onChange={(value) => {
+                      if (!value) setCurrentFileType("other");
                       field.onChange(value);
                       const file = Array.isArray(value) ? value[0] : value;
                       if (file instanceof File) {

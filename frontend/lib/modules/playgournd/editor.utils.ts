@@ -62,3 +62,30 @@ export function getLanguageByPath(path: string): SupportedLanguage {
       return "javascript";
   }
 }
+const LANGUAGE_GROUPS = [
+  {
+    label: "Web",
+    languages: [
+      { value: "html", label: "HTML" },
+      { value: "css", label: "CSS" },
+      { value: "javascript", label: "JavaScript" },
+      { value: "typescript", label: "TypeScript" },
+      { value: "jsx", label: "JSX" },
+      { value: "tsx", label: "TSX" },
+    ],
+  },
+  {
+    label: "Backend",
+    languages: [{ value: "python", label: "Python" }],
+  },
+  {
+    label: "Config & Markup",
+    languages: [
+      { value: "json", label: "JSON" },
+      { value: "xml", label: "XML" },
+      { value: "markdown", label: "Markdown" },
+    ],
+  },
+] as const;
+
+export { LANGUAGE_GROUPS };

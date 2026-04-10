@@ -13,9 +13,7 @@ import { MediaViewer } from "@/components/media-viewer";
 import { CodePlayground } from "@/components/playgroud/code-playground";
 import { Button } from "@/components/ui/button";
 import { APIError } from "@/lib/errors";
-import {
-  getFileContentByPath,
-} from "@/lib/modules/file/file.api";
+import { getFileContentByPath } from "@/lib/modules/file/file.api";
 import { getFileContentType } from "@/lib/modules/file/file.utils";
 import { getLanguageByPath } from "@/lib/modules/playgournd/editor.utils";
 

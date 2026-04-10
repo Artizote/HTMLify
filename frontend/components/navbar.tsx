@@ -21,7 +21,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { clientEnv } from "@/lib/env";
+import { env } from "@/lib/env";
 
 const NAV_LINKS = [
   { name: "Dashboard", href: "/dashboard" },
@@ -93,7 +93,7 @@ export function Navbar() {
       <Link href="/" className="flex items-center gap-3">
         <Logo />
         <span className="text-lg font-bold tracking-tight text-foreground">
-          {clientEnv.NEXT_PUBLIC_SITE_NAME}
+          {env.NEXT_PUBLIC_SITE_NAME}
         </span>
       </Link>
 
