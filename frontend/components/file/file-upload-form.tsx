@@ -11,6 +11,7 @@ import {
 import { toast } from "sonner";
 import z from "zod";
 
+import { NoExtentionAlertDialog } from "@/components/file/alert-dialog";
 import { FileDropzone } from "@/components/file/file-dropzone";
 import { FilePreview } from "@/components/file/file-preview";
 import { ModeSelect, VisibilitySelect } from "@/components/file/select-fields";
@@ -40,6 +41,11 @@ import { getFileContentType } from "@/lib/modules/file/file.utils";
 import { UserFullInfo } from "@/lib/modules/user/user.types";
 import { zodToFormData } from "@/lib/utils";
 
+function isFilePath(str: string) {
+  const pathRegex =
+    /^(\/|([a-zA-Z]:\\))?([^\\\/:*?"<>|\r\n]+[\\\/])*[^\\\/:*?"<>|\r\n]+\.[a-zA-Z0-9]+$/;
+  return pathRegex.test(str);
+}
 type InputFieldConfig = {
   name: keyof FileFormType;
   label: string;
@@ -81,6 +87,8 @@ export const FileForm = ({
   const { mutate: uploadFile, isPending } = useUploadFile();
   const [showPassword, setShowPassword] = useState(false);
   const modeText = mode.charAt(0).toUpperCase() + mode.slice(1);
+  const [alertDialogOpen, setAlertDialogOpen] = useState(false);
+
   const [currentFileType, setCurrentFileType] = useState<FileType>(
     initialData?.fileType || "other",
   );
@@ -126,12 +134,20 @@ export const FileForm = ({
 
   const content = useWatch({ control: form.control, name: "content" });
 
-  const onSubmit = async (data: z.infer<typeof fileFormSchema>) => {
+  const onSubmit = async (
+    data: z.infer<typeof fileFormSchema>,
+    force = false,
+  ) => {
     if (currentFileType === "other") {
       data = {
         ...data,
         file: undefined,
       };
+    }
+
+    if (!force && !isFilePath(data.path)) {
+      setAlertDialogOpen(true);
+      return;
     }
     const formData = zodToFormData(data);
     uploadFile(
@@ -141,7 +157,11 @@ export const FileForm = ({
           toast.success(
             `File ${mode === "update" ? "updated" : "uploaded"} successfully`,
           );
-          if (mode === "upload") form.reset();
+          if (mode === "upload") {
+            form.reset();
+            setCurrentFileType("other");
+            setMediaUrl(null);
+          }
         },
         onError: (error) => {
           toast.error(
@@ -188,7 +208,12 @@ export const FileForm = ({
           code={content}
           onChange={(code) => form.setValue("content", code)}
         />
-        <form onSubmit={form.handleSubmit(onSubmit)}>
+        <NoExtentionAlertDialog
+          open={alertDialogOpen}
+          setOpen={setAlertDialogOpen}
+          onConfirm={() => onSubmit(form.getValues(), true)}
+        />
+        <form onSubmit={form.handleSubmit((value) => onSubmit(value, false))}>
           <FieldGroup>
             <div className="w-full grid gap-4 md:grid-cols-2 grid-cols-1">
               {inputFields.map(
