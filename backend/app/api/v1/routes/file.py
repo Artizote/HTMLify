@@ -38,6 +38,7 @@ def create_file(
 @router.post("/files/upload")
 async def create_file_by_upload(
     file: UploadFile = FFile(),
+    content: Optional[bytes | str] = Form(None),
     title: Optional[str] = Form(None),
     path: Optional[str] = Form(None),
     password: Optional[str] = Form(""),
@@ -45,7 +46,10 @@ async def create_file_by_upload(
     visibility: FileVisibilityEnum = Form("public"),
     user: User = Depends(AuthService.get_current_user)
 ) -> FileRead:
-    content = await file.read()
+    if file:
+        content = await file.read()
+    if content is None:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Either file or content must be provided")
     _file = FileService.create_file(
         user,
         title=title or "",
