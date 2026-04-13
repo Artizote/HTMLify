@@ -21,7 +21,6 @@ export async function APICall(
   const isServer = typeof window === "undefined";
 
   if (isServer) {
-    console.log("this is server");
     const { cookies } = await import("next/headers");
     const cookieStore = await cookies();
     let token = cookieStore.get("access_token")?.value;

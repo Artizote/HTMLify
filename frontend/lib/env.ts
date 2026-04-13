@@ -11,6 +11,7 @@ export const env = createEnv({
     NEXT_PUBLIC_BACKEND_API_URL: z.string().url(),
     NEXT_PUBLIC_SITE_URL: z.string().url(),
     NEXT_PUBLIC_SUBDOMAIN: z.string().min(1),
+    NEXT_PUBLIC_MAX_UPLOAD_SIZE_MB: z.coerce.number().min(1).default(10),
   },
   runtimeEnv: {
     REFRESH_TOKEN_EXPIRE_DAYS: process.env.REFRESH_TOKEN_EXPIRE_DAYS,
@@ -19,6 +20,7 @@ export const env = createEnv({
     NEXT_PUBLIC_BACKEND_API_URL: process.env.NEXT_PUBLIC_BACKEND_API_URL,
     NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
     NEXT_PUBLIC_SUBDOMAIN: process.env.NEXT_PUBLIC_SUBDOMAIN,
+    NEXT_PUBLIC_MAX_UPLOAD_SIZE_MB: process.env.NEXT_PUBLIC_MAX_UPLOAD_SIZE_MB,
   },
   skipValidation: !!process.env.SKIP_ENV_VALIDATION,
   emptyStringAsUndefined: true,

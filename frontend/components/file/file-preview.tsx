@@ -1,5 +1,4 @@
 import { Music } from "lucide-react";
-import Image from "next/image";
 
 import { FileType } from "@/lib/modules/file/file.schema";
 import { getLanguageByPath } from "@/lib/modules/playgournd/editor.utils";
@@ -21,9 +20,16 @@ export function FilePreview({
   onChange,
   mediaUrl,
 }: FilePreviewProps) {
+  if (fileType === "binary") {
+    return (
+      <div className="w-full p-8 flex flex-col items-center justify-center gap-6 bg-linear-to-b from-muted/50 to-muted/10 rounded-xl border border-border/50 my-4 shadow-sm">
+        <p className="text-muted-foreground">can&apos;t preview this file</p>
+      </div>
+    );
+  }
   if (fileType === "img") {
     return (
-      <div className="relative w-full h-[60vh] min-h-[300px] flex items-center justify-center bg-muted/20 rounded-xl border border-border/50 overflow-hidden my-4">
+      <div className="relative w-full h-[60vh] min-h-75 flex items-center justify-center bg-muted/20 rounded-xl border border-border/50 overflow-hidden my-4">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           className="w-full h-full object-contain p-2"
@@ -35,7 +41,7 @@ export function FilePreview({
   }
   if (fileType === "video") {
     return (
-      <div className="relative w-full h-[60vh] min-h-[300px] flex items-center justify-center bg-black/95 rounded-xl border border-border/50 overflow-hidden my-4 shadow-sm">
+      <div className="relative w-full h-[60vh] min-h-75 flex items-center justify-center bg-black/95 rounded-xl border border-border/50 overflow-hidden my-4 shadow-sm">
         <video
           src={mediaUrl || path}
           controls
@@ -46,7 +52,7 @@ export function FilePreview({
   }
   if (fileType === "audio") {
     return (
-      <div className="w-full p-8 flex flex-col items-center justify-center gap-6 bg-gradient-to-b from-muted/50 to-muted/10 rounded-xl border border-border/50 my-4 shadow-sm">
+      <div className="w-full p-8 flex flex-col items-center justify-center gap-6 bg-linear-to-b from-muted/50 to-muted/10 rounded-xl border border-border/50 my-4 shadow-sm">
         <div className="p-4 bg-background rounded-full shadow-sm border border-border/50">
           <Music className="w-8 h-8 text-primary/70" />
         </div>

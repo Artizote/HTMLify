@@ -2,7 +2,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, File as FileIcon, Folder, Lock } from "lucide-react";
 import { ReactNode, useState } from "react";
-import { Controller, useForm, useWatch } from "react-hook-form";
+import {
+  Controller,
+  ControllerRenderProps,
+  useForm,
+  useWatch,
+} from "react-hook-form";
 import { toast } from "sonner";
 import z from "zod";
 
@@ -24,16 +29,16 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from "@/components/ui/input-group";
+import { env } from "@/lib/env";
 import { useUploadFile } from "@/lib/hooks/use-files";
 import {
   fileFormSchema,
   FileFormType,
   FileType,
 } from "@/lib/modules/file/file.schema";
+import { getFileContentType } from "@/lib/modules/file/file.utils";
 import { UserFullInfo } from "@/lib/modules/user/user.types";
 import { zodToFormData } from "@/lib/utils";
-
-import { detectFileType } from "./utils";
 
 type InputFieldConfig = {
   name: keyof FileFormType;
@@ -147,6 +152,29 @@ export const FileForm = ({
     );
   };
 
+  const handleFileChange = (
+    value: File | File[] | null,
+    field: ControllerRenderProps<FileFormType, "file">,
+  ) => {
+    if (!value) setCurrentFileType("other");
+    field.onChange(value);
+    const file = Array.isArray(value) ? value[0] : value;
+    if (file instanceof File) {
+      const type = getFileContentType(file.name, file.type);
+      setCurrentFileType(type);
+      if (type === "other") {
+        setMediaUrl("");
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          form.setValue("content", e.target?.result as string);
+        };
+        reader.readAsText(file);
+        return;
+      }
+      form.setValue("content", "");
+      setMediaUrl(URL.createObjectURL(file));
+    }
+  };
   return (
     <Card className="w-full max-w-7xl mx-auto">
       <CardHeader>
@@ -214,32 +242,10 @@ export const FileForm = ({
                 <Field>
                   <FieldLabel>File</FieldLabel>
                   <FileDropzone
-                    maxSize={10 * 1024 * 1024}
+                    maxSize={env.NEXT_PUBLIC_MAX_UPLOAD_SIZE_MB * 1024 * 1024}
                     maxFiles={1}
                     value={field.value}
-                    onChange={(value) => {
-                      if (!value) setCurrentFileType("other");
-                      field.onChange(value);
-                      const file = Array.isArray(value) ? value[0] : value;
-                      if (file instanceof File) {
-                        const type = detectFileType(file);
-                        setCurrentFileType(type);
-                        if (type === "other") {
-                          setMediaUrl("");
-                          const reader = new FileReader();
-                          reader.onload = (e) => {
-                            form.setValue(
-                              "content",
-                              e.target?.result as string,
-                            );
-                          };
-                          reader.readAsText(file);
-                          return;
-                        }
-                        form.setValue("content", "");
-                        setMediaUrl(URL.createObjectURL(file));
-                      }
-                    }}
+                    onChange={(value) => handleFileChange(value, field)}
                   />
                   <FieldError errors={[fieldState.error]} />
                 </Field>

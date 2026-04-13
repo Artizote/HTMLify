@@ -35,5 +35,5 @@ const gitCloneSchema = z.object({
 });
 
 type GitCloneFormType = z.infer<typeof gitCloneSchema>;
-type FileType = "img" | "video" | "audio" | "other";
+type FileType = "img" | "video" | "audio" | "binary" | "other";
 export { type FileType, type GitCloneFormType, gitCloneSchema };
