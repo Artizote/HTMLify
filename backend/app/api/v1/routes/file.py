@@ -89,17 +89,25 @@ def get_file_content(
 ) -> FileResponse:
     if user:
         if file.user == user:
-            return FileResponse(file.blob.filepath, filename=file.name, content_disposition_type="inline")
+            return FileResponse(file.blob.filepath, filename=file.name, 
+            content_disposition_type="inline", 
+            headers={"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0"})
     if file.is_locked:
         if not password:
             raise HTTPException(status.HTTP_401_UNAUTHORIZED, "File is locked")
         if password:
             if file.password != password:
                 raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Wrong password, File is locked")
-            return FileResponse(file.blob.filepath, filename=file.name, content_disposition_type="inline")
+            return FileResponse(file.blob.filepath, 
+            filename=file.name, 
+            content_disposition_type="inline", 
+            headers={"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0"})
     if file.visibility_s != "public" and file.visibility_s != "once":
         raise HTTPException(status.HTTP_403_FORBIDDEN, "File is hidden")
-    return FileResponse(file.blob.filepath, filename=file.name, content_disposition_type="inline")
+    return FileResponse(file.blob.filepath, 
+    filename=file.name, 
+    content_disposition_type="inline", 
+    headers={"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0"})
 
 @router.patch("/files/{id}")
 def update_file_by_id(
@@ -144,7 +152,7 @@ async def update_file_by_id_with_form(
     user: User = Depends(AuthService.get_current_user),
     path: Optional[str] = Form(None),
     title: Optional[str] = Form(None),
-    content_file: Optional[UploadFile] = FFile(None),
+    file: Optional[UploadFile] = FFile(None),
     content: Optional[str | bytes] = Form(None),
     mode: Optional[FileModeEnum] = Form(None),
     visibility: Optional[FileVisibilityEnum] = Form(None),
@@ -153,8 +161,8 @@ async def update_file_by_id_with_form(
 ) -> FileRead:
     if file_to_update.user != user:
         raise HTTPException(status.HTTP_403_FORBIDDEN, "You are not allowed for this operation")
-    if content_file:
-        content = await content_file.read()
+    if file is not None:
+        content = await file.read()
     updated_file = FileService.update_file(
         user,
         file_to_update,
