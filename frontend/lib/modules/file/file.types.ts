@@ -1,5 +1,6 @@
 type FileVisibility = "public" | "private" | "once";
 type FileMode = "source" | "render";
+type FileType = "img" | "video" | "audio" | "binary" | "other";
 
 type FileIDResponse = {
   id: number;
@@ -49,5 +50,5 @@ function isFolderItem(item: FileItem | FolderItem): item is FolderItem {
   return "name" in item;
 }
 
-export type { FileIDResponse, FileItem, FolderItem, FolderResponse };
+export type { FileIDResponse, FileItem, FileType, FolderItem, FolderResponse };
 export { isFolderItem };

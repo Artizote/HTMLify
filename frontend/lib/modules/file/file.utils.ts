@@ -1,4 +1,4 @@
-import { FileType } from "@/lib/modules/file/file.schema";
+import { FileType } from "@/lib/modules/file/file.types";
 
 export const getFileContentType = (
   filename: string,
@@ -50,3 +50,11 @@ export const getFileContentType = (
 
   return "other";
 };
+
+function hasFileExtention(str: string) {
+  const pathRegex =
+    /^(\/|([a-zA-Z]:\\))?([^\\\/:*?"<>|\r\n]+[\\\/])*[^\\\/:*?"<>|\r\n]+\.[a-zA-Z0-9]+$/;
+  return pathRegex.test(str);
+}
+
+export { hasFileExtention };

@@ -1,8 +1,7 @@
 import { cookies } from "next/headers";
 
+import { setCookie } from "@/app/api/auth/utils";
 import { env } from "@/lib/env";
-
-import { setCookie } from "../utils";
 
 export async function POST(request: Request) {
   const formData = await request.formData();

@@ -32,20 +32,15 @@ import {
 } from "@/components/ui/input-group";
 import { env } from "@/lib/env";
 import { useUploadFile } from "@/lib/hooks/use-files";
+import { fileFormSchema, FileFormType } from "@/lib/modules/file/file.schema";
+import { FileType } from "@/lib/modules/file/file.types";
 import {
-  fileFormSchema,
-  FileFormType,
-  FileType,
-} from "@/lib/modules/file/file.schema";
-import { getFileContentType } from "@/lib/modules/file/file.utils";
+  getFileContentType,
+  hasFileExtention,
+} from "@/lib/modules/file/file.utils";
 import { UserFullInfo } from "@/lib/modules/user/user.types";
 import { zodToFormData } from "@/lib/utils";
 
-function isFilePath(str: string) {
-  const pathRegex =
-    /^(\/|([a-zA-Z]:\\))?([^\\\/:*?"<>|\r\n]+[\\\/])*[^\\\/:*?"<>|\r\n]+\.[a-zA-Z0-9]+$/;
-  return pathRegex.test(str);
-}
 type InputFieldConfig = {
   name: keyof FileFormType;
   label: string;
@@ -145,7 +140,7 @@ export const FileForm = ({
       };
     }
 
-    if (!force && !isFilePath(data.path)) {
+    if (!force && !hasFileExtention(data.path)) {
       setAlertDialogOpen(true);
       return;
     }
