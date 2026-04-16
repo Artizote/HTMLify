@@ -90,6 +90,22 @@ export const updateFile = async (
   return response.json() as Promise<FileIDResponse>;
 };
 
+export const deleteFile = async (id: number): Promise<void> => {
+  const response = await APICall(
+    `${env.NEXT_PUBLIC_BACKEND_API_URL}/v1/files/${id}`,
+    {
+      method: "DELETE",
+    },
+  );
+
+  if (!response.ok) {
+    const message = await parseServerError(response, "Failed to delete file");
+    throw new APIError(message, response.status);
+  }
+
+  return response.json();
+};
+
 export const getFolderByPath = async (
   path: string,
   expand: boolean = true,

@@ -2,8 +2,6 @@
 import {
   Bell,
   Briefcase,
-  CirclePlus,
-  Command,
   GitBranch,
   Home,
   LogOut,

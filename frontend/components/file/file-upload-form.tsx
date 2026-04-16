@@ -158,11 +158,6 @@ export const FileForm = ({
             setMediaUrl(null);
           }
         },
-        onError: (error) => {
-          toast.error(
-            error instanceof Error ? error.message : "Failed to upload file",
-          );
-        },
       },
     );
   };

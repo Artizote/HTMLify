@@ -8,4 +8,7 @@ export const QUERY_KEYS = {
   auth: {
     me: ["auth", "me"] as const,
   },
+  shortlink: {
+    all: ["shortlink"] as const,
+  },
 } as const;

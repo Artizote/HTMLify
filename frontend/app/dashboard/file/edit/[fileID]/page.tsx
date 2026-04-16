@@ -29,11 +29,11 @@ export default async function NewFileCreatePage({
     const fileContentResp = await getFileContentById(fileInfo.id);
     const content = await fileContentResp.text();
     fileData = { fileInfo, content, mediaUrl: fileContentResp.url };
-  } catch {
-    return "no file found";
+  } catch (err) {
+    return err instanceof Error ? err.message : "Failed to load file";
   }
 
-  const contentType = await getFileContentType(fileData.fileInfo.path);
+  const contentType = getFileContentType(fileData.fileInfo.path);
 
   return (
     <div className="w-full max-w-7xl mx-auto pt-10 px-4">

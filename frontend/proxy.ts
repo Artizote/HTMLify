@@ -7,10 +7,24 @@ import {
   handleAuthOrProtectedRoute,
   PROTECTED_ROUTES,
   serverFile,
+  serveShortlink,
 } from "@/lib/modules/proxy/proxy.utils";
+
+const shortnerPaths = ["/r"];
+const matchRoute = (route: string, routes: string[]) =>
+  routes.some((r) => route === r || route.startsWith(r + "/"));
+
+const isShortLink = (pathname: string) => matchRoute(pathname, shortnerPaths);
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  if (isShortLink(pathname)) {
+    const redirect = await serveShortlink(pathname);
+    if (redirect) {
+      return redirect;
+    }
+  }
 
   if (excludePaths.some((path) => pathname.startsWith(path))) {
     return NextResponse.next();

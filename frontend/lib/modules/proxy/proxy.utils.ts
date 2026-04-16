@@ -6,6 +6,7 @@ import {
   getFileContentById,
   getFileInfoByPathOrID,
 } from "@/lib/modules/file/file.api";
+import { getOriginalUrlFromShort } from "@/lib/modules/shortlink/shortlink.api";
 
 const excludePaths = [
   "/about",
@@ -17,6 +18,20 @@ const excludePaths = [
 
 const AUTH_ONLY_ROUTES = ["/signin", "/signup"];
 const PROTECTED_ROUTES = ["/dashboard"];
+
+export const serveShortlink = async (pathname: string) => {
+  try {
+    const short = pathname.split("/")[2] || "";
+    if (!short) {
+      return null;
+    }
+    const data = await getOriginalUrlFromShort(short);
+    return NextResponse.redirect(data.href);
+  } catch (error) {
+    console.error("Proxy error:", error);
+    return null;
+  }
+};
 
 const serverFile = async (pathname: string): Promise<NextResponse> => {
   try {

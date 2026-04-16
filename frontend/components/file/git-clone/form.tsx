@@ -45,11 +45,6 @@ export const GitCloneForm = ({ user }: { user: UserFullInfo }) => {
       onSuccess: () => {
         toast.success("Repository cloned successfully");
       },
-      onError: (error) => {
-        toast.error(
-          error instanceof Error ? error.message : "Failed to clone file",
-        );
-      },
     });
   };
 
