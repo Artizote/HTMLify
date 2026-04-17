@@ -191,3 +191,18 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Per-file "Failed to upload" bubbles */
+.uppy-DashboardItem-errorMessage {
+  display: none !important;
+}
+
+/* Bottom-right toast (the red informer) */
+.uppy-Informer {
+  display: none !important;
+}
+
+/* Status bar error text */
+.uppy-StatusBar.is-error .uppy-StatusBar-statusSecondary {
+  display: none !important;
+}

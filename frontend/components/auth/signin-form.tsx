@@ -108,7 +108,7 @@ export function SigninForm({ mode, className, ...props }: SigninFormProps) {
                         </Link>
                       )}
                     </div>
-                    <Input {...field} placeholder="Password" />
+                    <Input {...field} type="password" placeholder="Password" />
                     {fieldState.invalid && (
                       <FieldError errors={[fieldState.error]} />
                     )}
