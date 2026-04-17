@@ -1,10 +1,19 @@
-import { Check, Copy, ExternalLink, Share2 } from "lucide-react";
+"use client";
+
+import {
+  Check,
+  Clock,
+  Copy,
+  ExternalLink,
+  FileText,
+  Share2,
+} from "lucide-react";
 import React, { useEffect, useState } from "react";
 
 import { QRCode } from "@/components/shortlink/QRCode";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ShortLink } from "@/lib/modules/shortlink/shortlink.types";
+import { TmpFile } from "@/lib/modules/tmp/tmp.types";
 import { cn } from "@/lib/utils";
 
 interface UseClipboardReturn {
@@ -81,89 +90,28 @@ const ActionButton = ({
   </button>
 );
 
-interface LinkResultProps {
-  url: string;
-  sourceUrl: string;
+interface TmpResultProps extends React.HTMLAttributes<HTMLDivElement> {
+  result: TmpFile;
 }
 
-const LinkResult = ({ url, sourceUrl }: LinkResultProps) => {
-  const { copied, copy } = useClipboard(url);
-
-  const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({ url });
-    } else {
-      copy();
-    }
-  };
-
-  return (
-    <div className="flex-1 flex flex-col gap-4">
-      <div>
-        <p className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground mb-2">
-          Original link
-        </p>
-        <div className="flex items-center gap-2 rounded-xl border border-border bg-muted/10 px-4 py-2 border-dashed">
-          <ExternalLink size={12} className="text-muted-foreground shrink-0" />
-          <span className="text-xs text-muted-foreground truncate flex-1 font-mono">
-            {sourceUrl}
-          </span>
-        </div>
-      </div>
-
-      <div>
-        <p className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground mb-2">
-          Short link
-        </p>
-        <div className="flex items-center gap-2 rounded-xl border border-border bg-muted/30 px-4 py-3">
-          <div className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
-          <span className="text-sm font-mono text-foreground flex-1 truncate select-all">
-            {url}
-          </span>
-        </div>
-      </div>
-
-      <div className="flex items-center gap-5">
-        <ActionButton
-          icon={Copy}
-          successIcon={Check}
-          label="Copy"
-          onClick={copy}
-          active={copied}
-        />
-        <ActionButton
-          successIcon={Check}
-          icon={Share2}
-          label="Share"
-          onClick={handleShare}
-          active={false}
-        />
-        <ActionButton
-          successIcon={Check}
-          icon={ExternalLink}
-          label="Open"
-          onClick={() => window.open(url, "_blank")}
-          active={false}
-        />
-      </div>
-    </div>
-  );
-};
-
-interface ShortResultProps extends React.HTMLAttributes<HTMLDivElement> {
-  shortLink: ShortLink;
-}
-
-export const ShortResult = ({
-  shortLink,
-  className,
-  ...props
-}: ShortResultProps) => {
+export const TmpResult = ({ result, className, ...props }: TmpResultProps) => {
   const [fgColor, setFgColor] = useState("#000000");
   const [bgColor, setBgColor] = useState("#ffffff");
 
   const debouncedFgColor = useDebounce(fgColor, 500);
   const debouncedBgColor = useDebounce(bgColor, 500);
+
+  const { copied, copy } = useClipboard(result.url);
+
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({ url: result.url });
+    } else {
+      copy();
+    }
+  };
+
+  const expiryDate = new Date(result.expiry).toLocaleString();
 
   return (
     <div
@@ -174,11 +122,66 @@ export const ShortResult = ({
       )}
     >
       <div className="flex flex-col gap-6 md:flex-row md:gap-6 md:items-start">
-        <LinkResult url={shortLink.url} sourceUrl={shortLink.href} />
+        <div className="flex-1 flex flex-col gap-4">
+          <div>
+            <p className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground mb-2">
+              File Name
+            </p>
+            <div className="flex items-center gap-2 rounded-xl border border-border bg-muted/10 px-4 py-2 border-dashed">
+              <FileText size={12} className="text-muted-foreground shrink-0" />
+              <span className="text-xs text-muted-foreground truncate flex-1 font-mono">
+                {result.name}
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <p className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground mb-2">
+              Temporary Link
+            </p>
+            <div className="flex items-center gap-2 rounded-xl border border-border bg-muted/30 px-4 py-3">
+              <div className="w-2 h-2 rounded-full bg-primary shrink-0" />
+              <span className="text-sm font-mono text-foreground flex-1 truncate select-all">
+                {result.url}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 text-xs text-muted-foreground py-1 bg-muted/20 px-3 rounded-lg border border-border w-fit">
+            <Clock size={12} className="text-primary" />
+            <span>Expires on: {expiryDate}</span>
+          </div>
+
+          <div className="flex items-center gap-5 mt-2">
+            <ActionButton
+              icon={Copy}
+              successIcon={Check}
+              label="Copy"
+              onClick={copy}
+              active={copied}
+            />
+            <ActionButton
+              successIcon={Check}
+              icon={Share2}
+              label="Share"
+              onClick={handleShare}
+              active={false}
+            />
+            <ActionButton
+              successIcon={Check}
+              icon={ExternalLink}
+              label="Open"
+              onClick={() => window.open(result.url, "_blank")}
+              active={false}
+            />
+          </div>
+        </div>
+
         <div className="hidden md:block w-px self-stretch bg-border" />
         <div className="block md:hidden h-px w-full bg-border" />
+
         <QRCode
-          url={shortLink.url}
+          url={result.url}
           fgColor={debouncedFgColor}
           bgColor={debouncedBgColor}
         />

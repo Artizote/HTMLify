@@ -11,4 +11,7 @@ export const QUERY_KEYS = {
   shortlink: {
     all: ["shortlink"] as const,
   },
-} as const;
+  tmp: {
+    all: ["tmp"] as const,
+  },
+};

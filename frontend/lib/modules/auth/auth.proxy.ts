@@ -2,65 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { env } from "@/lib/env";
 import { RefreshToken } from "@/lib/modules/auth/auth.actions";
-import {
-  getFileContentById,
-  getFileInfoByPathOrID,
-} from "@/lib/modules/file/file.api";
-import { getOriginalUrlFromShort } from "@/lib/modules/shortlink/shortlink.api";
 
-const excludePaths = [
-  "/about",
-  "/_next",
-  "/api",
-  "/favicon.ico",
-  "/.well-known",
-];
+export const AUTH_ONLY_ROUTES = ["/signin", "/signup"];
+export const PROTECTED_ROUTES = ["/dashboard"];
 
-const AUTH_ONLY_ROUTES = ["/signin", "/signup"];
-const PROTECTED_ROUTES = ["/dashboard"];
-
-export const serveShortlink = async (pathname: string) => {
-  try {
-    const short = pathname.split("/")[2] || "";
-    if (!short) {
-      return null;
-    }
-    const data = await getOriginalUrlFromShort(short);
-    return NextResponse.redirect(data.href);
-  } catch (error) {
-    console.error("Proxy error:", error);
-    return null;
-  }
-};
-
-const serverFile = async (pathname: string): Promise<NextResponse> => {
-  try {
-    const fileInfo = await getFileInfoByPathOrID({ path: pathname });
-    if (!fileInfo || fileInfo.mode === "source") {
-      console.log("source file");
-      return NextResponse.next();
-    }
-
-    const resp = await getFileContentById(fileInfo.id);
-    if (!resp || !resp.ok) {
-      return NextResponse.next();
-    }
-
-    const contentType = resp.headers.get("content-type") || "text/html";
-    const buffer = await resp.arrayBuffer();
-
-    return new NextResponse(buffer, {
-      headers: {
-        "Content-Type": contentType,
-      },
-    });
-  } catch (error) {
-    console.error("Proxy error:", error);
-    return NextResponse.next();
-  }
-};
-
-async function verifyAccessToken(accessToken: string): Promise<boolean> {
+export async function verifyAccessToken(accessToken: string): Promise<boolean> {
   try {
     const res = await fetch(`${env.NEXT_PUBLIC_BACKEND_API_URL}/v1/users/me`, {
       headers: { Cookie: `access_token=${accessToken}` },
@@ -72,7 +18,7 @@ async function verifyAccessToken(accessToken: string): Promise<boolean> {
   }
 }
 
-const handleAuthOrProtectedRoute = async (
+export const handleAuthOrProtectedRoute = async (
   request: NextRequest,
   pathname: string,
 ): Promise<NextResponse> => {
@@ -131,13 +77,4 @@ const handleAuthOrProtectedRoute = async (
   }
 
   return NextResponse.next();
-};
-
-export {
-  AUTH_ONLY_ROUTES,
-  excludePaths,
-  handleAuthOrProtectedRoute,
-  PROTECTED_ROUTES,
-  serverFile,
-  verifyAccessToken,
 };

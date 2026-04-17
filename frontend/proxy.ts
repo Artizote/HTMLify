@@ -3,17 +3,20 @@ import { NextResponse } from "next/server";
 
 import {
   AUTH_ONLY_ROUTES,
-  excludePaths,
   handleAuthOrProtectedRoute,
   PROTECTED_ROUTES,
-  serverFile,
-  serveShortlink,
-} from "@/lib/modules/proxy/proxy.utils";
+} from "@/lib/modules/auth/auth.proxy";
+import { serverFile } from "@/lib/modules/file/file.proxy";
+import { excludePaths } from "@/lib/modules/proxy/proxy.config";
+import { serveShortlink } from "@/lib/modules/shortlink/shortlink.proxy";
+import { serveTmpFile } from "@/lib/modules/tmp/tmp.proxy";
 
 const shortnerPaths = ["/r"];
+const tmpPaths = ["/tmp"];
 const matchRoute = (route: string, routes: string[]) =>
   routes.some((r) => route === r || route.startsWith(r + "/"));
 
+const isTmp = (pathname: string) => matchRoute(pathname, tmpPaths);
 const isShortLink = (pathname: string) => matchRoute(pathname, shortnerPaths);
 
 export async function proxy(request: NextRequest) {
@@ -33,6 +36,13 @@ export async function proxy(request: NextRequest) {
   const totalExcludeRoute = AUTH_ONLY_ROUTES.concat(PROTECTED_ROUTES);
   if (totalExcludeRoute.some((path: string) => pathname.startsWith(path))) {
     return await handleAuthOrProtectedRoute(request, pathname);
+  }
+
+  if (isTmp(pathname)) {
+    const id = pathname.split("/")[2];
+    if (id) {
+      return await serveTmpFile(id);
+    }
   }
 
   return await serverFile(pathname);

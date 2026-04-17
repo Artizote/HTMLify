@@ -16,7 +16,7 @@ install-backend:
 	@echo "Installing backend dependencies..."
 	cd backend && ${PYTHON_CMD} setup.py && ${PIP_CMD} install -r requirements.txt
 
-run:
+dev:
 	@echo "Starting fullstack application..."
 	@make -j 2 run-backend run-frontend
 

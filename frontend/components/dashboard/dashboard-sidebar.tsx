@@ -25,13 +25,23 @@ import {
 
 const navMan = [
   {
-    title: "Upload",
-    url: "/dashboard/file/new",
+    title: "Upload Files",
+    url: "/dashboard/file/upload",
     icon: Upload,
+  },
+  {
+    title: "Add New File",
+    url: "/dashboard/file/new",
+    icon: PlusSquare,
   },
   {
     title: "Git Clone",
     url: "/dashboard/file/git-clone",
+    icon: GitBranch,
+  },
+  {
+    title: "Temporary File",
+    url: "/tmp",
     icon: GitBranch,
   },
 ];
