@@ -3,10 +3,12 @@ from fastapi.middleware.cors import CORSMiddleware
 
 import uvicorn
 
+from .api.internal.api import router as internal_router
 from .api.v1.api import router as v1_router
 
 app = FastAPI(title="HTMLify")
 
+app.include_router(internal_router, prefix="/internal")
 app.include_router(v1_router, prefix="/v1")
 
 origins = [
