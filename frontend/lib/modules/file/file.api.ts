@@ -113,9 +113,18 @@ export const deleteFile = async (id: number): Promise<void> => {
 export const getFolderByPath = async (
   path: string,
   expand: boolean = true,
+  page: number = 1,
+  pageSize: number = env.NEXT_PUBLIC_PAGE_SIZE,
 ): Promise<FolderResponse> => {
+  const params = new URLSearchParams({
+    path,
+    expand: expand.toString(),
+    page: page.toString(),
+    page_size: pageSize.toString(),
+  });
+
   const response = await APICall(
-    `${env.NEXT_PUBLIC_BACKEND_API_URL}/v1/folders?path=${path}&expand=${expand}`,
+    `${env.NEXT_PUBLIC_BACKEND_API_URL}/v1/folders?${params.toString()}`,
   );
 
   if (!response.ok) {

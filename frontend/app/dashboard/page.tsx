@@ -4,29 +4,39 @@ import { redirect } from "next/navigation";
 import { DashboardBreadcrumb } from "@/components/dashboard/dashboard-breadcrumb";
 import { FileTable } from "@/components/dashboard/file-table";
 import { Button } from "@/components/ui/button";
+import { env } from "@/lib/env";
 import { getFolderByPath } from "@/lib/modules/file/file.api";
 import { getMe } from "@/lib/modules/user/user.actions";
 
-const DashboardPage = async ({
-  searchParams,
-}: {
-  searchParams: Promise<{ path: string }>;
-}) => {
-  let { path } = await searchParams;
-  const user = await getMe();
+interface DashboardPageProps {
+  searchParams: Promise<{ path: string; page?: string; page_size?: string }>;
+}
 
+function max(a: number, b: number) {
+  return a > b ? a : b;
+}
+
+const DashboardPage = async ({ searchParams }: DashboardPageProps) => {
+  //eslint-disable-next-line
+  let { page, page_size, path } = await searchParams;
+
+  const user = await getMe();
   if (!user) {
     redirect("/signin");
   }
-
   if (!path) {
     path = `/${user.username}`;
   }
 
-  const data = await getFolderByPath(path, true);
-  const items = data?.items ?? [];
+  const currentPage = page ? max(parseInt(page), 1) : 1;
+  const pageSize = page_size
+    ? max(parseInt(page_size), 10)
+    : env.NEXT_PUBLIC_PAGE_SIZE;
 
-  console.log("items", items);
+  const data = await getFolderByPath(path, true, currentPage, pageSize);
+  const items = data?.items ?? [];
+  const totalItems = data?.items_count ?? 0;
+
   return (
     <div className="flex flex-col gap-4 p-6 w-full">
       <div className="flex items-center justify-between">
@@ -37,10 +47,16 @@ const DashboardPage = async ({
         </Button>
       </div>
 
-      <FileTable items={items} />
+      <FileTable
+        items={items}
+        totalItems={totalItems}
+        currentPage={currentPage}
+        pageSize={pageSize}
+      />
 
       <p className="text-xs text-muted-foreground">
-        {items.length} {items.length === 1 ? "item" : "items"}
+        Showing {items.length} of {totalItems}{" "}
+        {totalItems === 1 ? "item" : "items"}
       </p>
     </div>
   );

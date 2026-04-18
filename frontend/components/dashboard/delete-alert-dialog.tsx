@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -19,17 +20,18 @@ interface AlertDialogProps {
 }
 
 export function DeleteAlertDialog({ id, path }: AlertDialogProps) {
+  const [open, setOpen] = useState(false);
   const handleDelete = async () => {
     try {
       await deleteFile(id);
-      window.location.reload();
     } catch (e) {
       console.error(e);
       toast.error(e instanceof Error ? e.message : "Failed to delete file");
     }
+    setOpen(false);
   };
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="ghost" className="w-full justify-start pl-2 ">
           Delete

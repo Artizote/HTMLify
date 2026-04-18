@@ -1,7 +1,14 @@
-import { FileUpload } from "@/components/file/upload/files-upload";
+import { redirect } from "next/navigation";
 
-const UploadPage = () => {
-  return <FileUpload />;
+import { FileUpload } from "@/components/file/upload/files-upload";
+import { getMe } from "@/lib/modules/user/user.actions";
+
+const UploadPage = async () => {
+  const user = await getMe();
+  if (!user) {
+    redirect("/");
+  }
+  return <FileUpload user={user} />;
 };
 
 export default UploadPage;

@@ -44,6 +44,7 @@ type FolderResponse = {
   name: string;
   path: string;
   items: (FileItem | FolderItem)[];
+  items_count: number;
 };
 
 function isFolderItem(item: FileItem | FolderItem): item is FolderItem {

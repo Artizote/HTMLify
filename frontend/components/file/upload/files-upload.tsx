@@ -22,9 +22,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { env } from "@/lib/env";
 import { getMe } from "@/lib/modules/user/user.actions";
+import { UserFullInfo } from "@/lib/modules/user/user.types";
 
-export const FileUpload = () => {
-  const [folderPath, setFolderPath] = useState("");
+export const FileUpload = ({ user }: { user: UserFullInfo }) => {
+  const [folderPath, setFolderPath] = useState(`/${user.username}/`);
   const [uppy] = useState(() =>
     new Uppy({
       autoProceed: false,
@@ -145,7 +146,8 @@ export const FileUpload = () => {
                 className="h-11 bg-background/50 border-border/60 focus-visible:ring-primary/20"
               />
               <p className="text-xs text-muted-foreground ml-1">
-                Uploaded files will be organized into this path automatically.
+                Make sure the folders name starts with{" "}
+                <code className="bg-muted px-1 py-0.5 rounded">{`/${user.username}/`}</code>
               </p>
             </div>
           </div>

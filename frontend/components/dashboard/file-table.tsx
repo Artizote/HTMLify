@@ -16,6 +16,9 @@ import { FileIcon } from "./file-icon";
 
 interface Props {
   items: (FileItem | FolderItem)[];
+  totalItems: number;
+  currentPage: number;
+  pageSize: number;
 }
 
 function formatDate(dateString: string) {
@@ -30,7 +33,7 @@ function formatDate(dateString: string) {
   }
 }
 
-export function FileTable({ items }: Props) {
+export function FileTable({ items, totalItems, currentPage, pageSize }: Props) {
   const columns: ColumnDef<FileItem | FolderItem>[] = [
     {
       id: "name",
@@ -168,6 +171,9 @@ export function FileTable({ items }: Props) {
       columns={columns}
       data={items}
       searchPlaceholder="Search files and folders..."
+      pageCount={Math.ceil(totalItems / pageSize)}
+      pageIndex={currentPage - 1}
+      pageSize={pageSize}
     />
   );
 }
