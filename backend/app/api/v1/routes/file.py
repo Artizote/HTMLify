@@ -192,6 +192,16 @@ def get_folder(
     path: str = Query(None),
     expand: bool = Query(False),
     expand_depth: int = Query(1, ge=0),
+    page: Optional[int] = Query(None, description="Page number", gt=0),
+    page_size: Optional[int] = Query(None, description="Page size", gt=0),
 ) -> FolderRead:
     folder = FileService.get_folder(path)
-    return FolderRead.from_orm(folder, expand, expand_depth)
+    folder = FolderRead.from_orm(folder, expand, expand_depth)
+    if not page:
+        return folder
+    if not page_size:
+        page_size = 64
+    offset = page_size * (page - 1)
+    folder.items = folder.items[offset: offset + page_size]
+    return folder
+

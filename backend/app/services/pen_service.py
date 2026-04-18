@@ -14,6 +14,15 @@ class PenService:
         return pen
 
     @staticmethod
+    def get_pen_by_path(path: str) -> Optional[Pen]:
+        path = path.rstrip("/")
+        if not path.startswith("/pen/"):
+            return None
+        id = path[5:]
+        pen = Pen.by_id(id)
+        return pen
+
+    @staticmethod
     def get_user_pens(username: str) -> list[Pen]:
         user = UserService.get_user(username)
         if not user:

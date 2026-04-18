@@ -9,7 +9,7 @@ from app.utils import hash_sha256, rgb_hex_to_int, file_path
 class QRCodeService:
 
     @staticmethod
-    def create(data: str, fg: str | None = None, bg: str | None = None) -> str:
+    def create(data: str | bytes, fg: str | None = None, bg: str | None = None) -> str:
         data_hash = hash_sha256(data)
 
         if fg or bg:
@@ -43,4 +43,17 @@ class QRCodeService:
             qr.save(qr_image_filepath)
 
         return qr_image_filepath
+
+    @staticmethod
+    def create_as_json(data: str | bytes) -> dict:
+        qrc = qrcode.QRCode()
+        qrc.add_data(data)
+        qrc.make()
+        json = {}
+        json["version"] = qrc.version
+        modules = []
+        for module in qrc.modules:
+            modules.append(module.copy())
+        json["modules"] = modules
+        return json
 
