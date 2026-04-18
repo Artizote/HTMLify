@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { FileDropzone } from "@/components/file/file-dropzone";
+import { TmpResult } from "@/components/tmp/tmp-result";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,7 +17,6 @@ import {
 import { useTmpFile } from "@/lib/modules/tmp/tmp.quries";
 import { TmpFile } from "@/lib/modules/tmp/tmp.types";
 
-import { TmpResult } from "./TmpResult";
 const EXPIRY_OPTIONS = [
   { label: "1 Minute", value: "60" },
   { label: "5 Minutes", value: "300" },

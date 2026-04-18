@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 
-import { QRCode } from "@/components/shortlink/QRCode";
+import { QRCode } from "@/components/qr-code";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { TmpFile } from "@/lib/modules/tmp/tmp.types";

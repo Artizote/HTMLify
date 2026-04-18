@@ -1,4 +1,4 @@
-import { Shortlink } from "@/components/shortlink/Shortlink";
+import { Shortlink } from "@/components/shortlink/shortlink-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const ShortlinkPage = () => {

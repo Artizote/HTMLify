@@ -11,7 +11,7 @@ import {
 import { toast } from "sonner";
 import z from "zod";
 
-import { NoExtentionAlertDialog } from "@/components/file/alert-dialog";
+import { AlertDialog } from "@/components/alert-dialog";
 import { FileDropzone } from "@/components/file/file-dropzone";
 import { FilePreview } from "@/components/file/file-preview";
 import { ModeSelect, VisibilitySelect } from "@/components/file/select-fields";
@@ -198,7 +198,9 @@ export const FileForm = ({
           code={content}
           onChange={(code) => form.setValue("content", code)}
         />
-        <NoExtentionAlertDialog
+        <AlertDialog
+          title="No file extension"
+          description="You are saving a file without any extension. The file may not open correctly without one."
           open={alertDialogOpen}
           setOpen={setAlertDialogOpen}
           onConfirm={() => onSubmit(form.getValues(), true)}

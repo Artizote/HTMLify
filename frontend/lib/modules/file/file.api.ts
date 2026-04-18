@@ -98,12 +98,16 @@ export const deleteFile = async (id: number): Promise<void> => {
     },
   );
 
+  console.log({ response });
+
   if (!response.ok) {
     const message = await parseServerError(response, "Failed to delete file");
     throw new APIError(message, response.status);
   }
 
-  return response.json();
+  if (response.status !== 204) {
+    return response.json();
+  }
 };
 
 export const getFolderByPath = async (

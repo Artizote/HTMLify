@@ -28,9 +28,7 @@ run-backend:
 	@echo "Starting backend server..."
 	cd backend && ${VENV_ACTIVE_CMD} && python -m app
 
-build:
-	@echo "Building frontend..."
-	cd frontend && pnpm build
+build: build-frontend install-backend
 
 lint:
 	@echo "Linting frontend..."
@@ -55,3 +53,6 @@ clean:
 	rm -rf backend/instance
 	rm -rf backend/.venv
 	rm -rf backend/__pycache__
+
+build-frontend:
+	cd frontend && pnpm build

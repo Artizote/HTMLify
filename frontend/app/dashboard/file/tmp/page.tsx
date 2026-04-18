@@ -1,4 +1,4 @@
-import { TmpForm } from "@/components/tmp/TmpForm";
+import { TmpForm } from "@/components/tmp/tmp-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const TmpPage = () => {

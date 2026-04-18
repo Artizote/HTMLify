@@ -31,7 +31,7 @@ export const QRCode = ({ url, fgColor, bgColor }: QRCodeProps) => {
       <p className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground self-start md:self-center">
         QR Code
       </p>
-      <div className="relative rounded-2xl border border-border shadow-sm">
+      <div className="relative rounded-2xl overflow-hidden border border-border shadow-sm">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img className="w-36 h-36 block" src={qrSrc} alt="QR Code" />
         <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-foreground/5 pointer-events-none" />

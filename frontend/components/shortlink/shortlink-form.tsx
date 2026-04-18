@@ -2,7 +2,7 @@
 import { useState } from "react";
 import z from "zod";
 
-import { ShortResult } from "@/components/shortlink/ShortResult";
+import { ShortResult } from "@/components/shortlink/short-result";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

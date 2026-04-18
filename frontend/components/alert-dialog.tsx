@@ -12,12 +12,16 @@ import {
 } from "@/components/ui/dialog";
 
 interface AlertDialogProps {
+  title: string;
+  description: string;
   onConfirm: () => void;
   open: boolean;
   setOpen: (open: boolean) => void;
 }
 
-export function NoExtentionAlertDialog({
+export function AlertDialog({
+  title,
+  description,
   onConfirm,
   open,
   setOpen,
@@ -35,10 +39,9 @@ export function NoExtentionAlertDialog({
               <TriangleAlert className="h-5 w-5 text-amber-600" />
             </div>
             <div>
-              <DialogTitle>No file extension</DialogTitle>
+              <DialogTitle>{title}</DialogTitle>
               <DialogDescription className="text-muted-foreground">
-                You are saving a file without any extension. The file may not
-                open correctly without one.
+                {description}
               </DialogDescription>
             </div>
           </div>

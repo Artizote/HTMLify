@@ -1,4 +1,4 @@
-import { FileUpload } from "@/components/upload/file-upload";
+import { FileUpload } from "@/components/file/upload/files-upload";
 
 const UploadPage = () => {
   return <FileUpload />;

@@ -1,6 +1,6 @@
 "use client";
 
-import { TmpForm } from "@/components/tmp/TmpForm";
+import { TmpForm } from "@/components/tmp/tmp-form";
 import {
   Card,
   CardContent,
