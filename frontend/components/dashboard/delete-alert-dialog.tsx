@@ -1,3 +1,5 @@
+"use client";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -21,9 +23,12 @@ interface AlertDialogProps {
 
 export function DeleteAlertDialog({ id, path }: AlertDialogProps) {
   const [open, setOpen] = useState(false);
+  const router = useRouter();
   const handleDelete = async () => {
     try {
       await deleteFile(id);
+      setOpen(false);
+      router.refresh();
     } catch (e) {
       console.error(e);
       toast.error(e instanceof Error ? e.message : "Failed to delete file");

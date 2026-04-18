@@ -21,16 +21,14 @@ const DashboardPage = async ({ searchParams }: DashboardPageProps) => {
   let { page, page_size, path } = await searchParams;
 
   const user = await getMe();
-  if (!user) {
-    redirect("/signin");
-  }
-  if (!path) {
-    path = `/${user.username}`;
-  }
+  // User shouldn't be null beecause middlware checking but still we are checkig if by any chance middleware failes
+  // but not redirect to signin page because it will cause infinite loop
+  if (!user) redirect("/");
+  path = path || `/${user.username}`;
 
   const currentPage = page ? max(parseInt(page), 1) : 1;
   const pageSize = page_size
-    ? max(parseInt(page_size), 10)
+    ? max(parseInt(page_size), 1)
     : env.NEXT_PUBLIC_PAGE_SIZE;
 
   const data = await getFolderByPath(path, true, currentPage, pageSize);
