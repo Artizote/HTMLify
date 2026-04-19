@@ -12,7 +12,7 @@ export const serveTmpFile = async (fileID: string) => {
 
     return resp;
   } catch (error) {
-    console.error("Proxy error:", error);
+    console.error("Failed to serve tmp file", error);
     return NextResponse.next();
   }
 };

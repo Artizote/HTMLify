@@ -1,11 +1,6 @@
 "use client";
 
-import "@uppy/core/css/style.min.css";
-import "@uppy/dashboard/css/style.min.css";
-
-import type { Meta, UppyFile } from "@uppy/core";
-import Uppy from "@uppy/core";
-import Dashboard from "@uppy/react/dashboard";
+import Uppy, { Meta, UppyFile } from "@uppy/core";
 import XHR from "@uppy/xhr-upload";
 import { FolderIcon, UploadCloudIcon } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -20,9 +15,10 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { UppyDashboardCustom } from "@/components/uppy-dashboard-custom";
 import { env } from "@/lib/env";
-import { getMe } from "@/lib/modules/user/user.actions";
 import { UserFullInfo } from "@/lib/modules/user/user.types";
+import { assignMetaToFiles, checkUserSession } from "@/lib/uppy";
 
 export const FileUpload = ({ user }: { user: UserFullInfo }) => {
   const [folderPath, setFolderPath] = useState(`/${user.username}/`);
@@ -80,33 +76,17 @@ export const FileUpload = ({ user }: { user: UserFullInfo }) => {
   useEffect(() => {
     uppy.setOptions({
       onBeforeUpload: (files) => {
-        try {
-          (async () => {
-            await getMe();
-          })();
-        } catch (error) {
-          console.log(error);
-          return false;
-        }
-
-        const updatedFiles = { ...files };
-        Object.keys(updatedFiles).forEach((fileId) => {
-          const file = updatedFiles[fileId];
+        checkUserSession();
+        return assignMetaToFiles(files, (file) => {
           const fullPath = folderPath
             ? `${folderPath.replace(/\/$/, "")}/${file.name}`
             : file.name;
-
-          updatedFiles[fileId] = {
-            ...file,
-            meta: {
-              ...file.meta,
-              path: fullPath,
-              visibility: "public",
-              mode: "source",
-            },
+          return {
+            path: fullPath,
+            visibility: "public",
+            mode: "source",
           };
         });
-        return updatedFiles;
       },
     });
   }, [uppy, folderPath]);
@@ -152,70 +132,9 @@ export const FileUpload = ({ user }: { user: UserFullInfo }) => {
             </div>
           </div>
 
-          <div
-            className="rounded-2xl overflow-hidden border border-border/40 shadow-xl bg-card transition-all hover:border-primary/20"
-            style={
-              {
-                "--uppy-primary-button-bg": "var(--primary)",
-                "--uppy-primary-button-font-color": "var(--primary-foreground)",
-                "--uppy-font-family": "inherit",
-                "--uppy-container-bg": "transparent",
-              } as React.CSSProperties
-            }
-          >
-            <Dashboard
-              uppy={uppy}
-              theme="dark"
-              width="100%"
-              height={380}
-              proudlyDisplayPoweredByUppy={false}
-              note="Max 20 files, up to 100MB each."
-            />
-          </div>
+          <UppyDashboardCustom uppy={uppy} />
         </CardContent>
       </Card>
-
-      <style jsx global>{`
-        /* Scoped overrides for Uppy to make it look native */
-        .uppy-Dashboard-inner {
-          background-color: transparent !important;
-          border: none !important;
-          font-family: inherit !important;
-        }
-        .uppy-Dashboard-Content {
-          background-color: transparent !important;
-        }
-        .uppy-Dashboard-AddFiles {
-          background-color: transparent !important;
-        }
-        .uppy-Dashboard-AddFiles-title {
-          font-weight: 600 !important;
-          font-size: 1.25rem !important;
-        }
-        .uppy-DashboardContent-bar {
-          background-color: var(--card) !important;
-          border-bottom: 1px solid var(--border) !important;
-        }
-        .uppy-DashboardItem {
-          background-color: var(--background) !important;
-          border: 1px solid var(--border) !important;
-          border-radius: 12px !important;
-        }
-        .uppy-Button--primary {
-          border-radius: 8px !important;
-          transition: transform 0.2s ease !important;
-        }
-        .uppy-Button--primary:hover {
-          transform: translateY(-1px) !important;
-        }
-        .uppy-StatusBar {
-          background-color: var(--card) !important;
-          border-top: 1px solid var(--border) !important;
-        }
-        .uppy-Dashboard-note {
-          color: var(--muted-foreground) !important;
-        }
-      `}</style>
     </div>
   );
 };

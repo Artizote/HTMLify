@@ -40,9 +40,10 @@ export async function proxy(request: NextRequest) {
 
   if (isTmp(pathname)) {
     const id = pathname.split("/")[2];
-    if (id) {
+    if (id && id !== "f") {
       return await serveTmpFile(id);
     }
+    return;
   }
 
   return await serverFile(pathname);
