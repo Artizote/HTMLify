@@ -42,6 +42,9 @@ const StaticServe = async ({
   let error: string | null = null;
 
   try {
+    if (filename.startsWith("/.well-known")) {
+      return null;
+    }
     const response = await getFileContentByPath(filename);
     const contentType = response.headers.get("content-type");
     const fileType = getFileContentType(filename, contentType);

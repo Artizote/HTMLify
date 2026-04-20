@@ -37,7 +37,7 @@ export const serverFile = async (pathname: string) => {
   const firstPath = pathname.split("/")[1];
   let filePath = pathname;
   let mode: FileMode = "source";
-  if (firstPath === "src") {
+  if (!firstPath || firstPath === "src") {
     return NextResponse.next();
   }
   if (firstPath === "raw" || firstPath === "render") {

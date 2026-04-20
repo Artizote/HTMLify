@@ -1,8 +1,11 @@
 "use client";
 import { Eye, Monitor, Smartphone, Tablet, User } from "lucide-react";
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 
+import { CodeBlockContent } from "@/components/ai-elements/code-block";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getFileContentByPath } from "@/lib/modules/file/file.api";
 import { getFramesFeed } from "@/lib/modules/frames/frames.api";
 import { FramesFeedResponse } from "@/lib/modules/frames/frames.types";
 
@@ -61,14 +64,15 @@ export const FramesContent = ({ initialFrames }: FramesContentProps) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [isFetching, setIsFetching] = useState(false);
+  const [codePreview, setCodePreview] = useState(false);
+  const [code, setCode] = useState("");
 
-  useEffect(() => {
-    if (iframeRef.current) {
-      iframeRef.current.src = frames[currentIdx].url;
+  const handleSwitch = async (next: boolean) => {
+    setCodePreview(false);
+    if (!next && currentIdx > 0) {
+      setCurrentIdx((prev) => prev - 1);
+      return;
     }
-  }, [currentIdx]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const handleNext = async () => {
     if (currentIdx < frames.length - 1) {
       setCurrentIdx((prev) => prev + 1);
       return;
@@ -83,9 +87,20 @@ export const FramesContent = ({ initialFrames }: FramesContentProps) => {
     setIsFetching(false);
   };
 
-  const handleBack = () => {
-    if (currentIdx > 0) {
-      setCurrentIdx((prev) => prev - 1);
+  const handleCodePreview = async (path: string) => {
+    if (codePreview) {
+      setCode("");
+      setCodePreview(false);
+      return;
+    }
+    try {
+      const res = await getFileContentByPath(path);
+      if (res) {
+        setCode(await res.text());
+        setCodePreview(true);
+      }
+    } catch {
+      toast.error("Failed to get code");
     }
   };
 
@@ -105,9 +120,10 @@ export const FramesContent = ({ initialFrames }: FramesContentProps) => {
 
   return (
     <FramesSidebar
-      currentURL={frames[currentIdx].url}
-      handleNext={handleNext}
-      handleBack={handleBack}
+      codePreview={codePreview}
+      handleCodePreview={handleCodePreview}
+      frmae={frames[currentIdx]}
+      handleSwitch={handleSwitch}
       handleReload={handleReload}
       isFetching={isFetching}
     >
@@ -118,18 +134,24 @@ export const FramesContent = ({ initialFrames }: FramesContentProps) => {
 
         <div className="flex-1 min-h-0 bg-muted-foreground/5 rounded-md flex justify-center w-full relative">
           <div
-            className="h-full transition-[width] duration-500 ease-in-out relative group"
+            className={`h-full w-full overflow-y-auto ${codePreview ? "" : "hidden"}`}
+          >
+            <CodeBlockContent code={code} showLineNumbers language={"html"} />
+          </div>
+
+          <div
+            className={`h-full transition-[width] duration-500 ease-in-out relative group ${codePreview ? "hidden" : ""}`}
             style={{ width: DEVICE_WIDTHS[device] }}
           >
             <div
               className="absolute -inset-0.5 bg-linear-to-b from-border/50 
             to-border/10 rounded-[1.2rem] blur-[2px] opacity-20 group-hover:opacity-40 transition-opacity"
             />
-
             <div className="h-full w-full rounded-md border  shadow-2xl relative overflow-hidden">
               <iframe
                 ref={iframeRef}
-                className="h-full w-full transition-all duration-500 ease-in-out"
+                src={frames[currentIdx].url}
+                className={`h-full w-full ${codePreview ? "hidden" : ""}`}
                 title="Block preview"
                 loading="lazy"
               />

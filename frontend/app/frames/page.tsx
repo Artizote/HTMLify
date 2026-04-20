@@ -4,7 +4,11 @@ import { getFramesFeed } from "@/lib/modules/frames/frames.api";
 const FramesPage = async () => {
   const frames = await getFramesFeed(10);
   if (!frames || frames.length === 0) {
-    return <div>No frames found</div>;
+    return (
+      <div className="h-screen flex items-center justify-center">
+        No frames found
+      </div>
+    );
   }
   return <FramesContent initialFrames={frames} />;
 };
