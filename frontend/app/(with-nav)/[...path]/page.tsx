@@ -31,7 +31,10 @@ const StaticServe = async ({
 }: {
   params: Promise<{ path: string[] }>;
 }) => {
-  const { path } = await params;
+  let { path } = await params;
+  if (path[0] === "src") {
+    path = path.slice(1);
+  }
   const filename = `/${path.join("/")}`.replace(/^\/\//, "/");
   const language = getLanguageByPath(filename);
 

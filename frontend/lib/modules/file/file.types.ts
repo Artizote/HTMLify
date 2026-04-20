@@ -1,5 +1,5 @@
 type FileVisibility = "public" | "private" | "once";
-type FileMode = "source" | "render";
+export type FileMode = "source" | "render" | "raw";
 type FileType = "img" | "video" | "audio" | "binary" | "other";
 
 type FileIDResponse = {
