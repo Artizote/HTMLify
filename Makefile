@@ -14,7 +14,7 @@ install-frontend:
 
 install-backend:
 	@echo "Installing backend dependencies..."
-	cd backend && ${PYTHON_CMD} setup.py && ${PIP_CMD} install -r requirements.txt
+	cd backend && ${PIP_CMD} install -r requirements.txt && ${PYTHON_CMD} setup.py --nodelay
 
 dev:
 	@echo "Starting fullstack application..."
@@ -56,3 +56,18 @@ clean:
 
 build-frontend:
 	cd frontend && pnpm build
+
+
+## Editor configs
+
+.PHONY: editor-config-vscode clean-editor-configs
+
+editor-config-vscode:
+	@echo "Creating editor configs for vscode"
+	rm -rf .vscode
+	cp -r editor-configs/vscode .vscode
+
+clean-editor-configs:
+	@echo "Cleaning Editor configs"
+	rm -rf .vscode
+

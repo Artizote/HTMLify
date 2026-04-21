@@ -1,1 +1,6 @@
 *.sqlite
+
+
+# Editor Config dirs
+
+.vscode/
