@@ -80,7 +80,10 @@ export const FramesSidebar = ({
   ];
 
   return (
-    <div className="flex h-screen w-full flex-col md:flex-row overflow-hidden bg-background">
+    <div
+      className="flex h-screen w-full flex-col 
+    md:flex-row overflow-hidden bg-background"
+    >
       <div className="flex-1 min-w-0 min-h-0 relative overflow-hidden">
         {children}
       </div>
@@ -116,7 +119,8 @@ export const FramesSidebar = ({
                 size="icon"
                 onClick={item.onClick}
                 disabled={isFetching}
-                className="h-9 w-9 md:h-10 md:w-10 rounded-xl hover:bg-muted transition-all duration-200 shrink-0"
+                className="h-9 w-9 md:h-10 md:w-10 rounded-xl 
+                hover:bg-muted transition-all duration-200 shrink-0"
                 title={item.title}
               >
                 <item.icon className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground" />
