@@ -1,13 +1,14 @@
 import { cookies } from "next/headers";
 
-import { clientEnv } from "@/lib/env";
+import { setCookie } from "@/app/api/auth/utils";
+import { env } from "@/lib/env";
 
 export async function POST(request: Request) {
   const formData = await request.formData();
 
   try {
     const response = await fetch(
-      `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/v1/auth/token`,
+      `${env.NEXT_PUBLIC_BACKEND_API_URL}/v1/auth/token`,
       {
         method: "POST",
         body: formData,
@@ -23,21 +24,8 @@ export async function POST(request: Request) {
 
     const cookieStore = await cookies();
 
-    cookieStore.set("access_token", data.access_token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 60 * 30,
-      path: "/",
-    });
-
-    cookieStore.set("refresh_token", data.refresh_token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 7,
-      path: "/",
-    });
+    setCookie(cookieStore, data.access_token, "access_token");
+    setCookie(cookieStore, data.refresh_token, "refresh_token");
 
     return new Response(JSON.stringify({ success: true }), {
       status: 200,

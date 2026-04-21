@@ -1,11 +1,11 @@
-import { clientEnv } from "@/lib/env";
+import { env } from "@/lib/env";
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
 
     const response = await fetch(
-      `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/v1/users`,
+      `${env.NEXT_PUBLIC_BACKEND_API_URL}/v1/users`,
       {
         method: "POST",
         headers: {

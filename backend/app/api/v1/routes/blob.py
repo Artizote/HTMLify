@@ -21,5 +21,9 @@ def get_blob_content(hash: str = Path(description="SHA256 hash of blob")) -> Fil
     blob = BlobService.get_blob(hash)
     if not blob:
         raise HTTPException(404, "Blob not found")
-    return FileResponse(blob.filepath, filename=hash, media_type="application/octet-stream")
+    return FileResponse(blob.filepath, 
+    filename=hash, 
+    media_type="application/octet-stream", 
+    headers={"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0"})
+
 

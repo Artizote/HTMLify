@@ -1,3 +1,7 @@
+type FileVisibility = "public" | "private" | "once";
+export type FileMode = "source" | "render" | "raw";
+type FileType = "img" | "video" | "audio" | "binary" | "other";
+
 type FileIDResponse = {
   id: number;
   user: string;
@@ -5,8 +9,8 @@ type FileIDResponse = {
   path: string;
   views: number;
   blob_hash: string;
-  mode: "source" | "render";
-  visibility: "public" | "private" | string;
+  mode: FileMode;
+  visibility: FileVisibility;
   password: string | null;
   locked: boolean;
   as_guest: boolean;
@@ -21,8 +25,8 @@ type FileItem = {
   path: string;
   views: number;
   blob_hash: string | null;
-  mode: "render" | "source";
-  visibility: "public" | "private" | string;
+  mode: FileMode;
+  visibility: FileVisibility;
   password: string | null;
   locked: boolean;
   as_guest: boolean;
@@ -40,11 +44,12 @@ type FolderResponse = {
   name: string;
   path: string;
   items: (FileItem | FolderItem)[];
+  items_count: number;
 };
 
 function isFolderItem(item: FileItem | FolderItem): item is FolderItem {
   return "name" in item;
 }
 
-export type { FileIDResponse, FileItem, FolderItem, FolderResponse };
+export type { FileIDResponse, FileItem, FileType, FolderItem, FolderResponse };
 export { isFolderItem };

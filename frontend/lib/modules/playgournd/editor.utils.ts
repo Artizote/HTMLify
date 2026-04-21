@@ -8,6 +8,8 @@ import { Extension } from "@codemirror/state";
 
 import type { SupportedLanguage } from "@/lib/modules/playgournd/editor.types";
 
+const plainText: Extension = [];
+
 const languageExtensionMap: Record<SupportedLanguage, Extension> = {
   javascript: javascript({ jsx: true }),
   js: javascript({ jsx: true }),
@@ -23,6 +25,7 @@ const languageExtensionMap: Record<SupportedLanguage, Extension> = {
   json: json(),
   markdown: markdown(),
   md: markdown(),
+  plain: plainText,
 };
 
 export function getLanguageExtension(language: string): Extension {
@@ -59,6 +62,37 @@ export function getLanguageByPath(path: string): SupportedLanguage {
     case "markdown":
       return "markdown";
     default:
-      return "javascript";
+      return "plain";
   }
 }
+const LANGUAGE_GROUPS = [
+  {
+    label: "Web",
+    languages: [
+      { value: "html", label: "HTML" },
+      { value: "css", label: "CSS" },
+      { value: "javascript", label: "JavaScript" },
+      { value: "typescript", label: "TypeScript" },
+      { value: "jsx", label: "JSX" },
+      { value: "tsx", label: "TSX" },
+    ],
+  },
+  {
+    label: "Backend",
+    languages: [{ value: "python", label: "Python" }],
+  },
+  {
+    label: "Config & Markup",
+    languages: [
+      { value: "json", label: "JSON" },
+      { value: "xml", label: "XML" },
+      { value: "markdown", label: "Markdown" },
+    ],
+  },
+  {
+    label: "Other",
+    languages: [{ value: "text", label: "Plain Text" }],
+  },
+] as const;
+
+export { LANGUAGE_GROUPS };

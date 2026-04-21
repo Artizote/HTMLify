@@ -16,21 +16,19 @@ install-backend:
 	@echo "Installing backend dependencies..."
 	cd backend && ${PYTHON_CMD} setup.py && ${PIP_CMD} install -r requirements.txt
 
-run:
+dev:
 	@echo "Starting fullstack application..."
 	@make -j 2 run-backend run-frontend
 
 run-frontend:
 	@echo "Starting frontend dev server..."
-	cd frontend && pnpm dev
+	cd frontend && pnpm dev -p 4000
 
 run-backend:
 	@echo "Starting backend server..."
 	cd backend && ${VENV_ACTIVE_CMD} && python -m app
 
-build:
-	@echo "Building frontend..."
-	cd frontend && pnpm build
+build: build-frontend install-backend
 
 lint:
 	@echo "Linting frontend..."
@@ -55,3 +53,6 @@ clean:
 	rm -rf backend/instance
 	rm -rf backend/.venv
 	rm -rf backend/__pycache__
+
+build-frontend:
+	cd frontend && pnpm build

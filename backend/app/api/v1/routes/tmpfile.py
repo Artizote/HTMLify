@@ -39,7 +39,10 @@ def get_tmp_file_content(id: str) -> FileResponse:
     # some issue with tmpfile expiry dataatye, need to be fix before use
     # if tmpfile.expiry.timestamp() < datetime.now(UTC).timestamp():
     #     raise HTTPException(410, detail="Expired")
-    return FileResponse(tmpfile.filepath, filename=tmpfile.name, content_disposition_type="inline")
+    return FileResponse(tmpfile.filepath, 
+    filename=tmpfile.name, 
+    content_disposition_type="inline", 
+    headers={"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0"})
 
 @router.get("/tmp-folders/{id}")
 def get_tmp_folder(id: str) -> TmpFolderRead:

@@ -12,7 +12,8 @@ app.include_router(internal_router, prefix="/internal")
 app.include_router(v1_router, prefix="/v1")
 
 origins = [
-    "http://localhost:3000",
+    "http://localhost:4000",
+    "http://localhost",
 ]
 
 app.add_middleware(

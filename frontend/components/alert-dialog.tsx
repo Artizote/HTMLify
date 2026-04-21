@@ -1,0 +1,61 @@
+import { TriangleAlert } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+
+interface AlertDialogProps {
+  title: string;
+  description: string;
+  onConfirm: () => void;
+  open: boolean;
+  setOpen: (open: boolean) => void;
+}
+
+export function AlertDialog({
+  title,
+  description,
+  onConfirm,
+  open,
+  setOpen,
+}: AlertDialogProps) {
+  const handleContinue = () => {
+    onConfirm();
+    setOpen(false);
+  };
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogContent>
+        <DialogHeader>
+          <div className="flex items-start gap-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-foreground/90">
+              <TriangleAlert className="h-5 w-5 text-amber-600" />
+            </div>
+            <div>
+              <DialogTitle>{title}</DialogTitle>
+              <DialogDescription className="text-muted-foreground">
+                {description}
+              </DialogDescription>
+            </div>
+          </div>
+        </DialogHeader>
+
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button variant="outline">Cancel</Button>
+          </DialogClose>
+          <Button variant="destructive" onClick={handleContinue}>
+            Continue
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}

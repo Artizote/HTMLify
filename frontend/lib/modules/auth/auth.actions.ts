@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 
-import { clientEnv } from "@/lib/env";
+import { env } from "@/lib/env";
 
 interface RefreshTokenResponse {
   access_token: string | null;
@@ -20,7 +20,7 @@ export async function RefreshToken(): Promise<RefreshTokenResponse> {
 
   try {
     const response = await fetch(
-      `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/v1/auth/refresh`,
+      `${env.NEXT_PUBLIC_BACKEND_API_URL}/v1/auth/refresh`,
       {
         method: "GET",
         headers: { Cookie: `refresh_token=${refreshToken}` },

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import * as React from "react";
 
+import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import {
   CommandDialog,
@@ -20,12 +21,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { clientEnv } from "@/lib/env";
+import { env } from "@/lib/env";
 
 const NAV_LINKS = [
   { name: "Dashboard", href: "/dashboard" },
-  { name: "Temp Share", href: "/temp-share" },
-  { name: "Shortlinks", href: "/shortlinks" },
+  { name: "Temp Share", href: "/tmp" },
+  { name: "Shortlinks", href: "/r" },
   { name: "Frames", href: "/frames" },
   { name: "API", href: "/api" },
 ];
@@ -90,9 +91,9 @@ export function Navbar() {
   return (
     <nav className="flex backdrop-blur-3xl sticky top-4 z-50 w-full items-center justify-between py-4 px-8 bg-foreground/5 rounded-full text-foreground">
       <Link href="/" className="flex items-center gap-3">
-        <div className="flex h-6 w-6 items-center justify-center bg-foreground text-background"></div>
+        <Logo />
         <span className="text-lg font-bold tracking-tight text-foreground">
-          {clientEnv.NEXT_PUBLIC_SITE_NAME}
+          {env.NEXT_PUBLIC_SITE_NAME}
         </span>
       </Link>
 

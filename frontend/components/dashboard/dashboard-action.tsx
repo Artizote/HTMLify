@@ -1,6 +1,7 @@
 import { EllipsisVertical } from "lucide-react";
 import Link from "next/link";
 
+import { DeleteAlertDialog } from "@/components/dashboard/delete-alert-dialog";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -59,7 +60,11 @@ export function DashboardAction({
               </Link>
             </DropdownMenuItem>
           )}
-          <DropdownMenuItem>Delete</DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            {file && "id" in file && (
+              <DeleteAlertDialog id={file.id} path={file.path} />
+            )}
+          </DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>

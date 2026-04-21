@@ -3,13 +3,24 @@ import { MergeView } from "@codemirror/merge";
 import { EditorState } from "@codemirror/state";
 import { oneDark } from "@codemirror/theme-one-dark";
 import { basicSetup, EditorView } from "codemirror";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import type { CodeEditorProps } from "@/lib/modules/playgournd/editor.types";
 import {
   getLanguageByPath,
   getLanguageExtension,
+  LANGUAGE_GROUPS,
 } from "@/lib/modules/playgournd/editor.utils";
+
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 
 const editorTheme = EditorView.theme({
   "&": { height: "100%" },
@@ -31,6 +42,9 @@ export default function CodeEditor({
   const containerRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
   const mergeViewRef = useRef<MergeView | null>(null);
+  const [currentLanguage, setCurrentLanguage] = useState(
+    language || getLanguageByPath(path || "") || "plain",
+  );
 
   // Re-create editor when language or diff mode changes
   useEffect(() => {
@@ -38,7 +52,7 @@ export default function CodeEditor({
 
     const extensions = [
       basicSetup,
-      getLanguageExtension(language),
+      getLanguageExtension(currentLanguage),
       oneDark,
       editorTheme,
     ];
@@ -94,7 +108,7 @@ export default function CodeEditor({
       };
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [language, diff]);
+  }, [currentLanguage, diff]);
 
   // Sync code changes to the normal editor
   useEffect(() => {
@@ -123,7 +137,7 @@ export default function CodeEditor({
   }, [code, diff]);
 
   return (
-    <div className="h-[70vh] my-4 rounded-xl border border-border/60 overflow-hidden shadow-sm flex flex-col">
+    <div className="h-[70vh] my-4 rounded-xl border border-border/60 overflow-hidden shadow-sm flex flex-col min-w-0">
       {/* Header bar */}
       <div className="flex items-center justify-between px-4 py-2 bg-muted/60 border-b border-border/50 backdrop-blur-sm shrink-0">
         <div className="flex items-center gap-2 min-w-0">
@@ -154,9 +168,7 @@ export default function CodeEditor({
         </div>
 
         {/* Language badge */}
-        <span className="text-[11px] font-mono px-2 py-0.5 rounded-md bg-background/60 border border-border/50 text-muted-foreground shrink-0 ml-2">
-          {language || getLanguageByPath(path || "") || "plain"}
-        </span>
+        <LangugesMenu onChange={setCurrentLanguage} />
       </div>
 
       <div className="flex-1 overflow-hidden">
@@ -165,3 +177,29 @@ export default function CodeEditor({
     </div>
   );
 }
+
+const LangugesMenu = ({
+  onChange,
+}: {
+  onChange: (language: string) => void;
+}) => {
+  return (
+    <Select onValueChange={(value) => onChange(value)}>
+      <SelectTrigger className="w-full max-w-48">
+        <SelectValue placeholder="Select a language" />
+      </SelectTrigger>
+      <SelectContent>
+        {LANGUAGE_GROUPS.map((group) => (
+          <SelectGroup key={group.label}>
+            <SelectLabel>{group.label}</SelectLabel>
+            {group.languages.map((lang) => (
+              <SelectItem key={lang.value} value={lang.value}>
+                {lang.label}
+              </SelectItem>
+            ))}
+          </SelectGroup>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+};
