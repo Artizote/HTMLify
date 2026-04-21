@@ -1,7 +1,10 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -19,14 +22,13 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { useAuth } from "@/lib/hooks/use-login";
 import {
-  AuthPayload,
   LoginSchema,
   loginSchema,
   SignUpSchema,
   signUpSchema,
 } from "@/lib/modules/auth/auth.schema";
+import { signIn, signUp } from "@/lib/modules/auth/client.actons";
 import { cn } from "@/lib/utils";
 
 const modeConfig = {
@@ -57,7 +59,8 @@ interface SigninFormProps extends React.ComponentProps<"div"> {
 }
 
 export function SigninForm({ mode, className, ...props }: SigninFormProps) {
-  const { mutate: auth, isPending } = useAuth();
+  const [isPending, setIsPending] = useState(false);
+  const router = useRouter();
   const config = modeConfig[mode];
 
   const form = useForm<LoginSchema | SignUpSchema>({
@@ -65,8 +68,28 @@ export function SigninForm({ mode, className, ...props }: SigninFormProps) {
     defaultValues: { username: "", password: "", email: "" },
   });
 
-  const handleSubmit = (data: LoginSchema | SignUpSchema) => {
-    auth({ credentials: data, mode } as AuthPayload);
+  const handleSubmit = async (data: LoginSchema | SignUpSchema) => {
+    setIsPending(true);
+    try {
+      if (mode === "signin") {
+        await signIn(data as LoginSchema);
+      } else {
+        await signUp(data as SignUpSchema);
+      }
+
+      toast.success(
+        mode === "signup"
+          ? "Account created! Welcome"
+          : "Signed in successfully",
+      );
+      router.refresh();
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Authentication failed",
+      );
+    } finally {
+      setIsPending(false);
+    }
   };
 
   return (

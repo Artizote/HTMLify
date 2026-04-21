@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useTmpFile } from "@/lib/modules/tmp/tmp.quries";
+import { createTmpFile } from "@/lib/modules/tmp/tmp.api";
 import { TmpFile } from "@/lib/modules/tmp/tmp.types";
 
 const EXPIRY_OPTIONS = [
@@ -35,12 +35,11 @@ export const TmpForm = () => {
   const [customUnit, setCustomUnit] = useState("1"); // multiplier
   const [error, setError] = useState("");
   const [result, setResult] = useState<TmpFile | null>(null);
-
-  const { mutate, isPending } = useTmpFile();
+  const [isPending, setIsPending] = useState(false);
 
   const isCustom = expiry === "custom";
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!file) {
       setError("Please select a file to upload");
       return;
@@ -56,24 +55,22 @@ export const TmpForm = () => {
       finalExpiry = value * parseInt(customUnit, 10);
     }
 
-    mutate(
-      {
+    setIsPending(true);
+    try {
+      const data = await createTmpFile({
         file,
         name: name || undefined,
         expiry: finalExpiry,
-      },
-      {
-        onSuccess: (data) => {
-          setResult(data);
-          setFile(null);
-          setName("");
-          setError("");
-        },
-        onError: (err) => {
-          setError(err.message);
-        },
-      },
-    );
+      });
+      setResult(data);
+      setFile(null);
+      setName("");
+      setError("");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred");
+    } finally {
+      setIsPending(false);
+    }
   };
 
   return (

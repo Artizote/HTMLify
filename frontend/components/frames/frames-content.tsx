@@ -1,6 +1,6 @@
 "use client";
 import { Eye, Monitor, Smartphone, Tablet, User } from "lucide-react";
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
+import { Dispatch, SetStateAction, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { CodeBlockContent } from "@/components/ai-elements/code-block";

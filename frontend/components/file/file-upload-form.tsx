@@ -31,7 +31,7 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group";
 import { env } from "@/lib/env";
-import { useUploadFile } from "@/lib/hooks/use-files";
+import { updateFile, uploadFile } from "@/lib/modules/file/file.api";
 import { fileFormSchema, FileFormType } from "@/lib/modules/file/file.schema";
 import { FileType } from "@/lib/modules/file/file.types";
 import {
@@ -79,7 +79,7 @@ export const FileForm = ({
   initialData,
   mode = "upload",
 }: FileFormProps) => {
-  const { mutate: uploadFile, isPending } = useUploadFile();
+  const [isPending, setIsPending] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const modeText = mode.charAt(0).toUpperCase() + mode.slice(1);
   const [alertDialogOpen, setAlertDialogOpen] = useState(false);
@@ -144,22 +144,32 @@ export const FileForm = ({
       setAlertDialogOpen(true);
       return;
     }
-    const formData = zodToFormData(data);
-    uploadFile(
-      { mode, formData, id: initialData?.id },
-      {
-        onSuccess: () => {
-          toast.success(
-            `File ${mode === "update" ? "updated" : "uploaded"} successfully`,
-          );
-          if (mode === "upload") {
-            form.reset();
-            setCurrentFileType("other");
-            setMediaUrl(null);
-          }
-        },
-      },
-    );
+
+    setIsPending(true);
+    try {
+      const formData = zodToFormData(data);
+      if (mode === "upload" || initialData?.id === undefined) {
+        await uploadFile(formData);
+      } else {
+        await updateFile(initialData.id, formData);
+      }
+
+      toast.success(
+        `File ${mode === "update" ? "updated" : "uploaded"} successfully`,
+      );
+
+      if (mode === "upload") {
+        form.reset();
+        setCurrentFileType("other");
+        setMediaUrl(null);
+      }
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to submit file",
+      );
+    } finally {
+      setIsPending(false);
+    }
   };
 
   const handleFileChange = (

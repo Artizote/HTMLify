@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { useShortLink } from "@/lib/modules/shortlink/shortlink.quries";
+import { createShortLink } from "@/lib/modules/shortlink/shortlink.api";
 import { ShortLink as ShortLinkType } from "@/lib/modules/shortlink/shortlink.types";
 
 const urlSchema = z.string().url("Please enter a valid URL");
@@ -15,31 +15,25 @@ const urlSchema = z.string().url("Please enter a valid URL");
 export const Shortlink = () => {
   const [url, setUrl] = useState("");
   const [urlError, setUrlError] = useState("");
-  const { mutate: shortLinkMutate } = useShortLink();
   const [shortLinkResult, setShortLinkResult] =
     useState<ShortLinkType | null>();
   const [isNew, setIsNew] = useState(false);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const result = urlSchema.safeParse(url);
     if (!result.success) {
       setUrlError(result.error.errors[0].message);
       return;
     }
 
-    shortLinkMutate(
-      { herf: url, new: isNew },
-      {
-        onSuccess: (data) => {
-          setShortLinkResult(data);
-          setUrl("");
-          setUrlError("");
-        },
-        onError: (e) => {
-          setUrlError(e.message);
-        },
-      },
-    );
+    try {
+      const data = await createShortLink(url, isNew);
+      setShortLinkResult(data);
+      setUrl("");
+      setUrlError("");
+    } catch (error) {
+      setUrlError(error instanceof Error ? error.message : "An error occurred");
+    }
   };
   return (
     <div>

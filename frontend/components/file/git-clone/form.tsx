@@ -1,6 +1,7 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Folder, Globe } from "lucide-react";
+import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -20,7 +21,7 @@ import {
 } from "@/components/ui/input-group";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { useGitClone } from "@/lib/hooks/use-files";
+import { gitCloneFile } from "@/lib/modules/file/file.api";
 import {
   GitCloneFormType,
   gitCloneSchema,
@@ -28,7 +29,8 @@ import {
 import { UserFullInfo } from "@/lib/modules/user/user.types";
 
 export const GitCloneForm = ({ user }: { user: UserFullInfo }) => {
-  const { mutate: gitClone, isPending } = useGitClone();
+  const [isPending, setIsPending] = useState(false);
+
   const form = useForm<GitCloneFormType>({
     resolver: zodResolver(gitCloneSchema),
     defaultValues: {
@@ -40,12 +42,18 @@ export const GitCloneForm = ({ user }: { user: UserFullInfo }) => {
     },
   });
 
-  const onSubmit = (data: GitCloneFormType) => {
-    gitClone(data, {
-      onSuccess: () => {
-        toast.success("Repository cloned successfully");
-      },
-    });
+  const onSubmit = async (data: GitCloneFormType) => {
+    setIsPending(true);
+    try {
+      await gitCloneFile(data);
+      toast.success("Repository cloned successfully");
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to clone repository",
+      );
+    } finally {
+      setIsPending(false);
+    }
   };
 
   return (
