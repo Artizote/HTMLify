@@ -194,11 +194,33 @@ def get_folder(
     expand_depth: int = Query(1, ge=0),
     page: Optional[int] = Query(None, description="Page number", gt=0),
     page_size: Optional[int] = Query(None, description="Page size", gt=0),
+    sort: Optional[str] = Query(None, description="Sort"),
 ) -> FolderRead:
     folder = FileService.get_folder(path)
     folder = FolderRead.from_orm(folder, expand, expand_depth)
+
+    if sort:
+        reverse = False
+        attr = sort
+        if attr.startswith("+"):
+            attr = attr[1:]
+            reverse = False
+        if attr.startswith("-"):
+            attr = attr[1:]
+            reverse = True
+        cansort = []
+        cannotsort = []
+        for item in folder.items:
+            if hasattr(item, attr):
+                cansort.append(item)
+            else:
+                cannotsort.append(item)
+        cansort.sort(key=lambda i:getattr(i, attr), reverse=reverse)
+        folder.items = cansort + cannotsort
+
     if not page:
         return folder
+
     if not page_size:
         page_size = 64
     offset = page_size * (page - 1)

@@ -104,6 +104,7 @@ class FileGitCloneRequest(BaseModel):
 class FolderRead(BaseModel):
     name: str
     path: str
+    title: str
     items: List[Union["FolderRead", FileRead]]
     items_count: int
     url: str
@@ -113,6 +114,7 @@ class FolderRead(BaseModel):
         fr = cls(
             name=dir.name,
             path=dir.path,
+            title=dir.title,
             items=[],
             items_count=dir.items_count(),
             url=dir.url
