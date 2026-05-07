@@ -1,8 +1,9 @@
 from fastapi import HTTPException, Path
+from starlette import status
 
 from typing import Optional
 
-from app.models import Pen, Blob
+from app.models import Pen, Blob, User
 from .user_service import UserService
 
 
@@ -82,6 +83,38 @@ class PenService:
         if not pen: return
         pen.js_content = content
         pen.save()
+
+    @staticmethod
+    def update_pen(
+        user: User,
+        pen: Pen,
+        title: Optional[str] = None,
+        head_content: Optional[str | bytes] = None,
+        body_content: Optional[str | bytes] = None,
+        css_content: Optional[str | bytes] = None,
+        js_content: Optional[str | bytes] = None,
+    ) -> Pen:
+        if pen.user != user:
+            raise HTTPException(
+                status.HTTP_102_PROCESSING,
+                "You are not allowed for this operation"
+            )
+
+        if title:
+            pen.title = title
+        if head_content:
+            pen.head_content = head_content
+        if body_content:
+            pen.body_content = body_content
+        if css_content:
+            pen.css_content = css_content
+        if js_content:
+            pen.js_content = js_content
+
+        pen.save()
+        pen.update_modified_time()
+
+        return pen
 
     @staticmethod
     def delete_pen(id: str):

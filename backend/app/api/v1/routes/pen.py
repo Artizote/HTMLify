@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Form, UploadFile, File as FFile
 from starlette import status
 
 from app.services.pen_service import PenService
@@ -60,4 +60,41 @@ def delete_pen(user: User = Depends(AuthService.get_current_user), pen: Pen = De
             "You are not authrized to delete this pen"
         )
     pen.delete_instance()
+
+@router.patch("/pens/{id}/update")
+async def update_pen_by_form(
+    pen: Pen = Depends(PenService.pen_from_path_dependency),
+    user: User = Depends(AuthService.get_current_user),
+    title: Optional[str] = Form(None),
+    head_file: Optional[UploadFile] = FFile(None),
+    head_content: Optional[str | bytes] = Form(None),
+    body_file: Optional[UploadFile] = FFile(None),
+    body_content: Optional[str | bytes] = Form(None),
+    css_file: Optional[UploadFile] = FFile(None),
+    css_content: Optional[str | bytes] = Form(None),
+    js_file: Optional[UploadFile] = FFile(None),
+    js_content: Optional[str | bytes] = Form(None),
+    show_content: bool = Query(False),
+) -> PenRead:
+
+    if head_file:
+        head_content = await head_file.read()
+    if body_file:
+        body_content = await body_file.read()
+    if css_file:
+        css_content = await css_file.read()
+    if js_file:
+        js_content = await js_file.read()
+
+    updated_pen = PenService.update_pen(
+        user,
+        pen,
+        title,
+        head_content,
+        body_content,
+        css_content,
+        js_content
+    )
+
+    return PenRead.from_orm(updated_pen, show_content=show_content)
 
