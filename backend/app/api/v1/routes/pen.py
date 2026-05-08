@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, Form, UploadFile, File as FFile
+from fastapi import APIRouter, Depends, HTTPException, Query, Form, UploadFile, File as FFile, Path
+from fastapi.responses import PlainTextResponse
 from starlette import status
 
 from app.services.pen_service import PenService
@@ -60,6 +61,49 @@ def delete_pen(user: User = Depends(AuthService.get_current_user), pen: Pen = De
             "You are not authrized to delete this pen"
         )
     pen.delete_instance()
+
+@router.get("/pens/{id}/content/{part}")
+def get_pen_content(
+    pen: Pen = Depends(PenService.pen_from_path_dependency),
+    part: PenPart = Path(),
+) -> str | bytes:
+    match part:
+        case "head":
+            return pen.head_content
+        case "body":
+            return pen.body_content
+        case "css":
+            return pen.css_content
+        case "js":
+            return pen.js_content
+    raise HTTPException(status.HTTP_400_BAD_REQUEST)
+
+@router.put("/pens/{id}/content/{part}", status_code=status.HTTP_204_NO_CONTENT)
+async def update_pen_content(
+    pen: Pen = Depends(PenService.pen_from_path_dependency),
+    user: User = Depends(AuthService.get_current_user),
+    part: PenPart = Path(),
+    file: UploadFile = FFile(None),
+    content: Optional[str | bytes] = Form(None),
+):
+    if pen.user != user:
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "You are not authrized for this operation")
+    
+    if file:
+        content = await file.read()
+
+    match part:
+        case "head":
+            pen.head_content = content or ""
+        case "body":
+            pen.body_content = content or ""
+        case "css":
+            pen.css_content = content or ""
+        case "js":
+            pen.js_content = content or ""
+
+    pen.save()
+    pen.update_modified_time()
 
 @router.patch("/pens/{id}/update")
 async def update_pen_by_form(

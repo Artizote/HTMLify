@@ -1,8 +1,15 @@
 from pydantic import BaseModel, Base64Str
 
 from typing import Optional
+from enum import StrEnum
 from datetime import datetime
 
+
+class PenPart(StrEnum):
+    head = "head"
+    body = "body"
+    css  = "css"
+    js   = "js"
 
 class PenRead(BaseModel):
     id: str
