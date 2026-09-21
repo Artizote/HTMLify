@@ -1,6 +1,7 @@
 "use client";
 
 import { FolderIcon, FolderPlus } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 import { DropzoneArea } from "@/components/file/dropzone-area";
@@ -11,20 +12,42 @@ import { useFileUploadStore } from "@/lib/hooks/use-file-upload";
 import { UserFullInfo } from "@/lib/modules/user/user.types";
 
 export const FileUpload = ({ user }: { user: UserFullInfo }) => {
-  const [folderPath, setFolderPath] = useState(`/${user.username}/`);
-  const [folderSet, setFolderSet] = useState(false);
-  const [subfolder, setSubfolder] = useState("");
-  const { queue, addFiles } = useFileUploadStore();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const dirParam = searchParams.get("dir");
+
+  const [folderPath, setFolderPath] = useState(
+    dirParam
+      ? `/${user.username}/${dirParam.replace(/^\//, "")}`
+      : `/${user.username}/`,
+  );
+  const [folderSet, setFolderSet] = useState(!!dirParam);
+  const [subfolder, setSubfolder] = useState(dirParam || "");
+  const { queue, addFiles, deleteFile, clearQueue } = useFileUploadStore();
+
+  const updateUrlParams = (path: string) => {
+    const params = new URLSearchParams(window.location.search);
+    const subPath = path.replace(`/${user.username}/`, "");
+    if (subPath) {
+      params.set("dir", subPath);
+    } else {
+      params.delete("dir");
+    }
+
+    clearQueue();
+    router.replace(`?${params.toString()}`);
+  };
 
   const handleSetFolder = () => {
+    let newPath: string;
     if (subfolder.trim()) {
-      setFolderPath(
-        `/${user.username}/${subfolder.replace(/^\//, "")}`,
-      );
+      newPath = `/${user.username}/${subfolder.replace(/^\//, "")}`;
     } else {
-      setFolderPath(`/${user.username}/`);
+      newPath = `/${user.username}/`;
     }
+    setFolderPath(newPath);
     setFolderSet(true);
+    updateUrlParams(newPath);
   };
 
   if (!folderSet) {
@@ -80,14 +103,13 @@ export const FileUpload = ({ user }: { user: UserFullInfo }) => {
       {queue.length > 0 && (
         <div className="border-t border-border/40">
           <div className="px-4 py-2">
-            <p className="text-xs font-medium text-muted-foreground">
-              Uploads
-            </p>
+            <p className="text-xs font-medium text-muted-foreground">Uploads</p>
           </div>
           <div className="flex flex-col">
             {[...queue].reverse().map((item) => (
               <FileListItem
-                key={item.id}
+                onRemove={() => deleteFile(item.localId)}
+                key={item.localId}
                 name={item.file.name}
                 size={item.file.size}
                 progress={item.progress}

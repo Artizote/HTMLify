@@ -1,7 +1,7 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff, File as FileIcon, Folder, Lock, X } from "lucide-react";
-import { ReactNode, useState } from "react";
+import { Eye, EyeOff, File as FileIcon, Lock } from "lucide-react";
+import { useState } from "react";
 import {
   Controller,
   ControllerRenderProps,
@@ -13,13 +13,13 @@ import z from "zod";
 
 import { AlertDialog } from "@/components/alert-dialog";
 import { DropzoneArea } from "@/components/file/dropzone-area";
+import { FileListItem } from "@/components/file/file-list-item";
 import { FilePreview } from "@/components/file/file-preview";
 import { ModeSelect, VisibilitySelect } from "@/components/file/select-fields";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Field,
-  FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
@@ -39,16 +39,7 @@ import {
   hasFileExtention,
 } from "@/lib/modules/file/file.utils";
 import { UserFullInfo } from "@/lib/modules/user/user.types";
-import { formatBytes, zodToFormData } from "@/lib/utils";
-
-type InputFieldConfig = {
-  name: keyof FileFormType;
-  label: string;
-  description?: string;
-  placeholder: string;
-  icon: ReactNode;
-  type?: string;
-};
+import { zodToFormData } from "@/lib/utils";
 
 interface InitialDataProps {
   id: number;
@@ -91,6 +82,8 @@ export const FileForm = ({
     initialData?.mediaUrl || null,
   );
 
+  const pathPrefix = `/${user.username}/`;
+
   const form = useForm<FileFormType>({
     resolver: zodResolver(fileFormSchema),
     defaultValues: {
@@ -98,36 +91,19 @@ export const FileForm = ({
       title: initialData?.title || "",
       password: initialData?.password || "",
       file: undefined,
-      path: initialData?.path || `/${user.username}/`,
+      path: initialData?.path
+        ? initialData.path.replace(new RegExp(`^${pathPrefix}`), "")
+        : "",
       mode: initialData?.mode || "source",
       visibility: initialData?.visibility || "public",
     },
   });
 
-  const inputFields: InputFieldConfig[] = [
-    {
-      name: "title",
-      label: "Title",
-      placeholder: "enter the title of ur file",
-      icon: <FileIcon />,
-    },
-    {
-      name: "path",
-      label: "Path",
-      description: `make sure the path starts with /${user.username}/`,
-      placeholder: "enter the file path",
-      icon: <Folder />,
-    },
-    {
-      name: "password",
-      label: "Password",
-      placeholder: "password (optional)",
-      icon: <Lock />,
-      type: "password",
-    },
-  ];
-
   const content = useWatch({ control: form.control, name: "content" });
+  const path = useWatch({ control: form.control, name: "path" });
+  function getFullPath(): string {
+    return `${pathPrefix}${path}`;
+  }
 
   const onSubmit = async (
     data: z.infer<typeof fileFormSchema>,
@@ -140,7 +116,10 @@ export const FileForm = ({
       };
     }
 
-    if (!force && !hasFileExtention(data.path)) {
+    const fullPath = getFullPath();
+    data = { ...data, path: fullPath };
+
+    if (!force && !hasFileExtention(fullPath)) {
       setAlertDialogOpen(true);
       return;
     }
@@ -197,13 +176,15 @@ export const FileForm = ({
         <CardTitle>{modeText} File</CardTitle>
       </CardHeader>
       <CardContent>
-        <FilePreview
-          mediaUrl={mediaUrl}
-          fileType={currentFileType}
-          path={initialData?.path || ""}
-          code={content}
-          onChange={(code) => form.setValue("content", code)}
-        />
+        <div className="pb-4">
+          <FilePreview
+            mediaUrl={mediaUrl}
+            fileType={currentFileType}
+            path={initialData?.path || getFullPath()}
+            code={content}
+            onChange={(code) => form.setValue("content", code)}
+          />
+        </div>
         <AlertDialog
           title="No file extension"
           description="You are saving a file without any extension. The file may not open correctly without one."
@@ -214,46 +195,76 @@ export const FileForm = ({
         <form onSubmit={form.handleSubmit((value) => onSubmit(value, false))}>
           <FieldGroup>
             <div className="w-full grid gap-4 md:grid-cols-2 grid-cols-1">
-              {inputFields.map(
-                ({ name, label, description, placeholder, icon, type }) => (
-                  <Controller
-                    key={name}
-                    name={name}
-                    control={form.control}
-                    render={({ field, fieldState }) => (
-                      <Field>
-                        <FieldLabel>{label}</FieldLabel>
-                        {description && (
-                          <FieldDescription>{description}</FieldDescription>
-                        )}
-                        <InputGroup className="h-11">
-                          <InputGroupAddon>{icon}</InputGroupAddon>
-                          <InputGroupInput
-                            {...field}
-                            value={field.value as string}
-                            type={
-                              name === "password"
-                                ? showPassword
-                                  ? "text"
-                                  : "password"
-                                : (type ?? "text")
-                            }
-                            placeholder={placeholder}
-                          />
-                          {name === "password" && (
-                            <InputGroupButton
-                              onClick={() => setShowPassword((prev) => !prev)}
-                            >
-                              {showPassword ? <EyeOff /> : <Eye />}
-                            </InputGroupButton>
-                          )}
-                        </InputGroup>
-                        <FieldError errors={[fieldState.error]} />
-                      </Field>
-                    )}
-                  />
-                ),
-              )}
+              <Controller
+                name="title"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field>
+                    <FieldLabel>Title</FieldLabel>
+                    <InputGroup className="h-11">
+                      <InputGroupAddon>
+                        <FileIcon />
+                      </InputGroupAddon>
+                      <InputGroupInput
+                        {...field}
+                        value={field.value as string}
+                        placeholder="enter the title of ur file"
+                      />
+                    </InputGroup>
+                    <FieldError errors={[fieldState.error]} />
+                  </Field>
+                )}
+              />
+              <Controller
+                name="password"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field>
+                    <FieldLabel>Password</FieldLabel>
+                    <InputGroup className="h-11">
+                      <InputGroupAddon>
+                        <Lock />
+                      </InputGroupAddon>
+                      <InputGroupInput
+                        {...field}
+                        value={field.value}
+                        type={showPassword ? "text" : "password"}
+                        placeholder="password (optional)"
+                      />
+                      <InputGroupButton
+                        onClick={() => setShowPassword((prev) => !prev)}
+                      >
+                        {showPassword ? <EyeOff /> : <Eye />}
+                      </InputGroupButton>
+                    </InputGroup>
+                    <FieldError errors={[fieldState.error]} />
+                  </Field>
+                )}
+              />
+              <Controller
+                name="path"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field>
+                    <FieldLabel>Path</FieldLabel>
+                    <InputGroup className="h-11">
+                      <InputGroupAddon>
+                        <FileIcon />
+                      </InputGroupAddon>
+                      <InputGroupAddon className="text-muted-foreground/60 font-mono text-sm select-none">
+                        {pathPrefix}
+                      </InputGroupAddon>
+                      <InputGroupInput
+                        {...field}
+                        value={field.value}
+                        type="text"
+                        placeholder="myfile.html"
+                      />
+                    </InputGroup>
+                    <FieldError errors={[fieldState.error]} />
+                  </Field>
+                )}
+              />
               <VisibilitySelect control={form.control} name="visibility" />
               <ModeSelect control={form.control} name="mode" />
             </div>
@@ -265,34 +276,16 @@ export const FileForm = ({
                 <Field>
                   <FieldLabel>File</FieldLabel>
                   {field.value ? (
-                    <div className="flex items-center gap-3 rounded-lg border bg-background px-3 py-2 shadow-sm">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-primary/10">
-                        <FileIcon className="h-5 w-5 text-primary" />
-                      </div>
-                      <div className="min-w-0 flex-1 text-left">
-                        <p className="truncate text-sm font-medium">
-                          {field.value.name}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {formatBytes(field.value.size)}
-                        </p>
-                      </div>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-                        onClick={() => handleFileChange(null, field)}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
+                    <FileListItem
+                      name={field.value.name}
+                      size={field.value.size}
+                      progress={100}
+                      onRemove={() => handleFileChange(null, field)}
+                    />
                   ) : (
                     <DropzoneArea
                       maxFiles={1}
-                      maxSize={
-                        env.NEXT_PUBLIC_MAX_UPLOAD_SIZE_MB * 1024 * 1024
-                      }
+                      maxSize={env.NEXT_PUBLIC_MAX_UPLOAD_SIZE_MB * 1024 * 1024}
                       onDrop={(files) =>
                         handleFileChange(files[0] ?? null, field)
                       }

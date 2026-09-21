@@ -1,10 +1,9 @@
 "use client";
 import {
-  Bell,
-  Briefcase,
   GitBranch,
   Home,
-  LogOut,
+  KeyIcon,
+  LucideProps,
   PenTool,
   PlusSquare,
   Upload,
@@ -25,61 +24,76 @@ import {
 } from "@/components/ui/sidebar";
 import { env } from "@/lib/env";
 import { UserFullInfo } from "@/lib/modules/user/user.types";
-const navFile = [
+
+interface NavItems {
+  label: string;
+  items: {
+    title: string;
+    url: string;
+    icon: React.ForwardRefExoticComponent<
+      Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>
+    >;
+  }[];
+}
+
+const navIems: NavItems[] = [
   {
-    title: "Dashboard",
-    url: "/dashboard",
-    icon: Home,
+    label: "Files",
+    items: [
+      {
+        title: "Dashboard",
+        url: "/dashboard",
+        icon: Home,
+      },
+      {
+        title: "Upload Files",
+        url: "/dashboard/file/upload",
+        icon: Upload,
+      },
+      {
+        title: "Add New File",
+        url: "/dashboard/file/new",
+        icon: PlusSquare,
+      },
+      {
+        title: "Git Clone",
+        url: "/dashboard/file/git-clone",
+        icon: GitBranch,
+      },
+      {
+        title: "Temporary File",
+        url: "/tmp",
+        icon: GitBranch,
+      },
+    ],
   },
   {
-    title: "Upload Files",
-    url: "/dashboard/file/upload",
-    icon: Upload,
+    label: "Pens",
+    items: [
+      {
+        title: "Pens",
+        url: "/dashboard/pens",
+        icon: PenTool,
+      },
+      {
+        title: "New Pen",
+        url: "/dashboard/pens/edit",
+        icon: PlusSquare,
+      },
+    ],
   },
   {
-    title: "Add New File",
-    url: "/dashboard/file/new",
-    icon: PlusSquare,
-  },
-  {
-    title: "Git Clone",
-    url: "/dashboard/file/git-clone",
-    icon: GitBranch,
-  },
-  {
-    title: "Temporary File",
-    url: "/tmp",
-    icon: GitBranch,
+    label: "API",
+    items: [
+      {
+        title: "API Key",
+        url: "/dashboard/api-key",
+        icon: KeyIcon,
+      },
+    ],
   },
 ];
 
-const navPen = [
-  {
-    title: "Projects",
-    url: "#",
-    icon: Briefcase,
-  },
-  {
-    title: "Pens",
-    url: "/dashboard/pens",
-    icon: PenTool,
-  },
-  {
-    title: "New Pen",
-    url: "/dashboard/pens/edit",
-    icon: PlusSquare,
-  },
-  {
-    title: "Notifications",
-    url: "#",
-    icon: Bell,
-  },
-  {
-    title: "Logout",
-    url: "#",
-    icon: LogOut,
-  },
-];
 export const DashboardSidebar = ({
   user,
   ...props
@@ -103,8 +117,9 @@ export const DashboardSidebar = ({
       </SidebarHeader>
       <SidebarContent>
         <SidebarMenu />
-        <NavMain label="Files" items={navFile} />
-        <NavMain label="Pens" items={navPen} />
+        {navIems.map((nav, idx) => (
+          <NavMain key={idx} label={nav.label} items={nav.items} />
+        ))}
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={user} />

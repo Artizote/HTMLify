@@ -1,3 +1,4 @@
+import { DasshboardNavbar } from "@/components/dashboard/dashbaord-navbar";
 import { PenEditor } from "@/components/pens/editors";
 import { getPenById } from "@/lib/modules/pen/pen.api";
 import { PenResponse } from "@/lib/modules/pen/pen.schema";
@@ -18,6 +19,7 @@ const page = async ({
   }
   return (
     <>
+      <DasshboardNavbar title="Edit Pen" />
       <div className="w-full h-full">
         <PenEditor data={penRes} />
       </div>

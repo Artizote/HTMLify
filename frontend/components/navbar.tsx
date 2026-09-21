@@ -26,9 +26,10 @@ const NAV_LINKS = [
 
 export function Navbar() {
   const pathname = usePathname();
+
   return (
-    <nav className="backdrop-blur-3xl fixed top-0 w-full z-50 py-4 px-8 bg-foreground/5 text-foreground">
-      <div className="container mx-auto w-full flex items-center justify-between">
+    <nav className="fixed top-0 w-full z-50 h-14 px-8 bg-background border-b border-border text-foreground">
+      <div className="container h-full mx-auto w-full flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3">
           <Logo />
           <span className="text-lg font-bold tracking-tight text-foreground">
@@ -36,14 +37,14 @@ export function Navbar() {
           </span>
         </Link>
 
-        <div className="hidden lg:flex items-center gap-6 rounded-md bg-muted/40 px-6 py-2.5">
+        <div className="hidden lg:flex divide-x divide-border/60 border-x border-border/60 items-center h-full">
           {NAV_LINKS.map((link, index) => (
             <Link
               key={index}
               href={link.href}
-              className={`text-sm font-medium transition-colors hover:text-foreground ${
+              className={`text-sm font-medium h-full min-w-22 flex items-center justify-center px-6 transition-colors hover:bg-foreground/5 hover:text-foreground ${
                 link.href === pathname
-                  ? "text-foreground hover:opacity-80"
+                  ? "bg-foreground/5"
                   : "text-muted-foreground"
               }`}
             >
@@ -57,11 +58,7 @@ export function Navbar() {
           <div className="lg:hidden">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-9 w-9 border-none outline-none"
-                >
+                <Button variant="ghost" size="icon" className="h-9 w-9">
                   <Menu className="h-5 w-5" />
                   <span className="sr-only">Toggle menu</span>
                 </Button>
@@ -74,11 +71,11 @@ export function Navbar() {
                   <DropdownMenuItem key={index} asChild>
                     <Link
                       href={link.href}
-                      className={`cursor-pointer font-medium ${
+                      className={
                         index === 0
-                          ? ""
-                          : "text-muted-foreground hover:text-foreground"
-                      }`}
+                          ? "font-medium"
+                          : "font-medium text-muted-foreground hover:text-foreground"
+                      }
                     >
                       {link.name}
                     </Link>

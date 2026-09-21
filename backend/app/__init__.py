@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.formparsers import MultiPartParser
 
 import uvicorn
 
@@ -12,6 +13,8 @@ app = FastAPI(title="HTMLify")
 
 app.include_router(internal_router, prefix="/internal")
 app.include_router(v1_router, prefix="/v1")
+
+MultiPartParser.max_part_size = 1024 * 1024 * 1024 # 1 GB
 
 origins = [
     "http://localhost:3000",

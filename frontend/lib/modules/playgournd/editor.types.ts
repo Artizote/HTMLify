@@ -15,7 +15,8 @@ export type SupportedLanguage =
   | "json"
   | "markdown"
   | "md"
-  | "plain";
+  | "plain"
+  | "go";
 
 export interface CodeEditorProps {
   code: string;

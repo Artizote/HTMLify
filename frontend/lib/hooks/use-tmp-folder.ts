@@ -5,9 +5,9 @@ import { createTmpFile } from "@/lib/modules/tmp/tmp.api";
 import {
   AddFileToTmpFolder,
   createTmpFolder,
+  DeleteTmpFileFromFolder,
 } from "@/lib/tmp-folder/tmp-folder.api";
 
-import { deleteFile } from "../modules/file/file.api";
 import { TmpFolderResponse } from "../tmp-folder/tmp-folder.types";
 
 type UploadStatus = "queued" | "uploading" | "completed" | "failed";
@@ -26,7 +26,7 @@ interface TmpFolderStore {
   createFolder: (
     name: string,
   ) => Promise<{ success: boolean; error: string | null }>;
-  deleteFile: (id: number) => void;
+  deleteFile: (fileId: string) => Promise<void>;
 
   queue: UploadItem[];
   isUploading: boolean;
@@ -44,14 +44,25 @@ interface TmpFolderStore {
 export const useTmpFolderStore = create<TmpFolderStore>((set, get) => ({
   folder: null,
 
-  deleteFile: async (id: number) => {
-    const { error } = await deleteFile(id);
-    if (error) {
-      console.error(error);
-      return;
-    }
-    set(() => ({
-      // queue: state.queue.filter((item) => item.id !== id),
+  deleteFile: async (fileId: string) => {
+    const { folder } = get();
+    if (!folder?.id || !folder?.auth_code) return;
+
+    const { error } = await DeleteTmpFileFromFolder({
+      tmpFolderId: folder.id,
+      tmpFileId: fileId,
+      authCode: folder.auth_code,
+    });
+
+    if (error) return;
+
+    set((state) => ({
+      folder: state.folder
+        ? {
+            ...state.folder,
+            files: state.folder.files.filter((id) => id !== fileId),
+          }
+        : null,
     }));
   },
   setFolder: (folderName, folderId = "", authCode = "") =>
@@ -62,9 +73,7 @@ export const useTmpFolderStore = create<TmpFolderStore>((set, get) => ({
         name: folderName,
         auth_code: authCode,
       },
-      url: folderId
-        ? `${env.NEXT_PUBLIC_SITE_URL}/tmp/f/${folderId}`
-        : null,
+      url: folderId ? `${env.NEXT_PUBLIC_SITE_URL}/tmp/f/${folderId}` : null,
       copied: false,
     }),
 

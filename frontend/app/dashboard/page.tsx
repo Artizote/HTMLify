@@ -5,7 +5,6 @@ import { redirect } from "next/navigation";
 import { DasshboardNavbar } from "@/components/dashboard/dashbaord-navbar";
 import { DashboardBreadcrumb } from "@/components/dashboard/dashboard-breadcrumb";
 import { FileTable } from "@/components/dashboard/file-table";
-import { Button } from "@/components/ui/button";
 import { env } from "@/lib/env";
 import { getFolderByPath } from "@/lib/modules/file/file.api";
 import { getMe } from "@/lib/modules/user/user.actions";
@@ -53,14 +52,17 @@ const DashboardPage = async ({ searchParams }: DashboardPageProps) => {
   return (
     <>
       <DasshboardNavbar className="w-full">
-        <div className="flex items-center justify-between w-full">
+        <div className="flex items-center h-full justify-between w-full">
           <DashboardBreadcrumb path={path} />
-          <Button size="sm" asChild>
-            <Link href="/dashboard/file/new">
-              <Plus className="h-4 w-4" />
-              New
-            </Link>
-          </Button>
+          <Link
+            href="/dashboard/file/new"
+            className="border-x border-x-border h-full flex 
+						hover:bg-foreground/5
+            items-center px-4 text-sm gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            New
+          </Link>
         </div>
       </DasshboardNavbar>
       <div className="flex flex-col gap-4 p-6 w-full">

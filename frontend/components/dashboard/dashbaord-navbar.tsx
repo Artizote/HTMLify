@@ -1,4 +1,5 @@
-import { Button } from "@/components/ui/button";
+import Link from "next/link";
+
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
@@ -27,33 +28,29 @@ export function DasshboardNavbar({
       )}
       {...props}
     >
-      <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
+      <div className="flex w-full items-center gap-1 h-full pl-4 lg:gap-2 lg:pl-6">
         <SidebarTrigger className="-ml-1" />
         <Separator
           orientation="vertical"
-          className="mx-2 data-[orientation=vertical]:h-4"
+          className="mx-2 data-[orientation=vertical]:h-full opacity-60"
         />
         {children ? (
           children
         ) : (
           <>
             <h1 className="text-base font-medium">{title}</h1>
-            <div className="ml-auto flex items-center gap-2">
-              <Button
-                variant="ghost"
-                asChild
-                size="sm"
-                className="hidden sm:flex"
+            <div className="ml-auto flex items-center h-full gap-2">
+              <Link
+                href="https://github.com/Artizote/HTMLify"
+                rel="noopener noreferrer"
+                target="_blank"
+                className="dark:text-foreground h-full 
+                flex items-center px-4 w-full justify-center 
+                border-l border-l-foreground/10
+                hover:bg-foreground/5 text-sm"
               >
-                <a
-                  href="https://github.com/shadcn-ui/ui/tree/main/apps/v4/app/(examples)/dashboard"
-                  rel="noopener noreferrer"
-                  target="_blank"
-                  className="dark:text-foreground"
-                >
-                  GitHub
-                </a>
-              </Button>
+                GitHub
+              </Link>
             </div>
           </>
         )}

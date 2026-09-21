@@ -34,6 +34,17 @@ function formatDate(dateString: string) {
 }
 
 export function FileTable({ items, totalItems, currentPage, pageSize }: Props) {
+  const handleRowClick = (item: FileItem | FolderItem) => {
+    const isFolder = isFolderItem(item);
+    if (isFolder) {
+      // Navigate to folder
+      window.location.href = `/dashboard?path=${item.path}`;
+    } else {
+      // Open file in new tab
+      window.open(item.path, "_blank", "noopener,noreferrer");
+    }
+  };
+
   const columns: ColumnDef<FileItem | FolderItem>[] = [
     {
       id: "name",
@@ -154,7 +165,9 @@ export function FileTable({ items, totalItems, currentPage, pageSize }: Props) {
 
         return (
           <div className="text-right ">
-            <DashboardAction isFolder={isFolder} file={item} href={href} />
+            <div onClick={(e) => e.stopPropagation()}>
+              <DashboardAction isFolder={isFolder} file={item} href={href} />
+            </div>
           </div>
         );
       },
@@ -169,6 +182,7 @@ export function FileTable({ items, totalItems, currentPage, pageSize }: Props) {
       pageCount={Math.ceil(totalItems / pageSize)}
       pageIndex={currentPage - 1}
       pageSize={pageSize}
+      onRowClick={handleRowClick}
     />
   );
 }

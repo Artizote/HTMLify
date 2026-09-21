@@ -1,4 +1,4 @@
-import { FileIcon } from "lucide-react";
+import { headers } from "next/headers";
 import { BundledLanguage } from "shiki";
 
 import {
@@ -9,6 +9,8 @@ import {
   CodeBlockHeader,
   CodeBlockTitle,
 } from "@/components/ai-elements/code-block";
+import { FileIcon } from "@/components/dashboard/file-icon";
+import { MediaActions } from "@/components/media-actions";
 import { MediaViewer } from "@/components/media-viewer";
 import { CodePlayground } from "@/components/playgroud/code-playground";
 import { Button } from "@/components/ui/button";
@@ -37,6 +39,12 @@ const StaticServe = async ({
   const filename = `/${path.join("/")}`.replace(/^\/\//, "/");
   const language = getLanguageByPath(filename);
 
+  // Build the frontend page URL for copy/share
+  const headersList = await headers();
+  const host = headersList.get("host") || "localhost:3000";
+  const protocol = headersList.get("x-forwarded-proto") || "http";
+  const pageUrl = `${protocol}://${host}/src/${path.join("/")}`;
+
   if (filename.startsWith("/.well-known")) {
     return null;
   }
@@ -44,7 +52,7 @@ const StaticServe = async ({
   const response = await getFileContentByPath(filename);
   if (!response) {
     return (
-      <div className="flex flex-col h-[70vh] items-center justify-center text-destructive">
+      <div className="flex-1 flex items-center justify-center text-destructive">
         Failed to load file content or file not found.
       </div>
     );
@@ -62,12 +70,13 @@ const StaticServe = async ({
   if (fileData.isMedia) {
     const { url, fileType, contentType } = fileData;
     return (
-      <div className="flex flex-col items-center max-h-[70vh]">
+      <div className="flex-1 flex items-center justify-center">
         <MediaViewer
           src={url}
           type={fileType}
           filename={filename}
           contentType={contentType}
+          copyUrl={pageUrl}
         />
       </div>
     );
@@ -75,28 +84,36 @@ const StaticServe = async ({
 
   const { code } = fileData;
   return (
-    <div className="flex flex-col max-h-[70vh]">
-      <CodeBlockContainer language={language}>
-        <CodeBlockHeader>
-          <CodeBlockTitle className="w-full">
-            <FileIcon size={14} />
-            <CodeBlockFilename>{filename}</CodeBlockFilename>
-          </CodeBlockTitle>
-          <CodePlayground code={code} language={language}>
-            <Button size="sm" className="h-8 text-xs">
-              Run
-            </Button>
-          </CodePlayground>
-          <CodeBlockActions />
-        </CodeBlockHeader>
-        <div className="overflow-auto max-h-[70vh] min-h-0">
-          <CodeBlockContent
-            code={code}
-            showLineNumbers
-            language={language as BundledLanguage}
+    <div className="flex-1 flex items-center justify-center px-4">
+      <div className="w-full max-w-7xl">
+        <CodeBlockContainer language={language}>
+          <CodeBlockHeader>
+            <CodeBlockTitle className="w-full">
+              <FileIcon path={filename} />
+              <CodeBlockFilename>{filename}</CodeBlockFilename>
+            </CodeBlockTitle>
+            <CodePlayground code={code} language={language}>
+              <Button size="sm" className="h-8 text-xs">
+                Run
+              </Button>
+            </CodePlayground>
+            <CodeBlockActions />
+          </CodeBlockHeader>
+          <div className="overflow-auto max-h-[60vh] min-h-0">
+            <CodeBlockContent
+              code={code}
+              showLineNumbers
+              language={language as BundledLanguage}
+            />
+          </div>
+          <MediaActions
+            src=""
+            copyUrl={pageUrl}
+            filename={filename}
+            className="px-4"
           />
-        </div>
-      </CodeBlockContainer>
+        </CodeBlockContainer>
+      </div>
     </div>
   );
 };

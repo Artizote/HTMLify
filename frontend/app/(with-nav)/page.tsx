@@ -5,7 +5,7 @@ import { Quote } from "@/components/quote";
 
 export default function Home() {
   return (
-    <main className="flex-1 h-full h-full mb-20">
+    <main className="flex-1  h-full mb-20">
       <Hero />
       <Quote />
       <Features />

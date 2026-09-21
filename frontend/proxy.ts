@@ -12,6 +12,8 @@ import { excludePaths } from "@/lib/modules/proxy/proxy.config";
 import { serveShortlink } from "@/lib/modules/shortlink/shortlink.proxy";
 import { serveTmpFile } from "@/lib/modules/tmp/tmp.proxy";
 
+import { env } from "./lib/env";
+
 const shortnerPaths = ["/r"];
 const tmpPaths = ["/tmp"];
 const penPaths = ["/pen"];
@@ -24,6 +26,10 @@ const isPen = (pathname: string) => matchRoute(pathname, penPaths);
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  if (pathname === "/api") {
+    return NextResponse.redirect(`${env.NEXT_PUBLIC_BACKEND_API_URL}/docs`);
+  }
 
   if (isShortLink(pathname)) {
     const redirect = await serveShortlink(pathname);

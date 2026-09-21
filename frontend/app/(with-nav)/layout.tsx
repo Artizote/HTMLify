@@ -8,7 +8,7 @@ export default function RootLayout({
   return (
     <div className="flex flex-col h-screen">
       <Navbar />
-      <main className="flex-1 min-h-0 pt-20">{children}</main>
+      <main className="flex-1 min-h-0 pt-20 flex flex-col">{children}</main>
     </div>
   );
 }

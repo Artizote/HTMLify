@@ -39,7 +39,11 @@ function FileUpload() {
               </button>
             </div>
           )}
-          <DropzoneArea onDrop={(files) => addFiles(files)} />
+          <DropzoneArea
+            maxFiles={20}
+            maxSize={1024 * 1024 * 100}
+            onDrop={(files) => addFiles(files)}
+          />
         </div>
       )}
     </section>

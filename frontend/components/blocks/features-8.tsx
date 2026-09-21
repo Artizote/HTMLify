@@ -2,24 +2,28 @@ import Link from "next/link";
 
 const features = [
   {
-    title: "One-click deploy",
-    desc: "Deploy static sites and modern web apps to a global edge network in seconds - no config, no waiting.",
+    title: "Pens & Code Editor",
+    desc: "Write, preview, and share code snippets with a built-in editor. Supports multiple languages with syntax highlighting.",
   },
   {
-    title: "Any language",
-    desc: "Python, HTML, JavaScript, Go, TypeScript, Rust and more. One platform for every stack.",
+    title: "File Hosting",
+    desc: "Upload any file - images, documents, archives - and get a permanent shareable link with one click.",
   },
   {
-    title: "Share instantly",
-    desc: "Share anything with a single link. Snippets, projects, and files ready to go.",
+    title: "URL Shortlinks",
+    desc: "Turn long, messy URLs into clean, memorable shortlinks. Track clicks and manage your links.",
   },
   {
-    title: "Shortlinks",
-    desc: "Turn any link into a clean, shareable shortlink in one click.",
+    title: "Temp File Links",
+    desc: "Need to share something quickly? Generate expiring links that auto-delete after use.",
   },
   {
-    title: "Temp file links",
-    desc: "Quick, throwaway sharing for when you need a link, not a project.",
+    title: "QR Code Generator",
+    desc: "Instantly generate QR codes for any link. Perfect for sharing on the go.",
+  },
+  {
+    title: "Search Everything",
+    desc: "Find your files, pens, and links instantly with built-in search across all your content.",
   },
 ];
 
@@ -30,14 +34,15 @@ export function Features() {
         <div className="flex flex-col md:flex-row gap-12 md:gap-24 items-start">
           <div className="md:w-1/2">
             <span className="font-mono text-xs text-muted-foreground/60 tracking-widest uppercase">
-              # capabilities
+              # features
             </span>
             <h2 className="font-mono text-4xl lg:text-5xl text-foreground mt-3 mb-5 leading-[1.1] tracking-tight">
-              Share anything, instantly.
+              Everything you need.
             </h2>
             <p className="font-mono text-sm text-muted-foreground leading-relaxed mb-8 max-w-md">
-              Deploy and host your web projects in seconds. No config headaches,
-              no lock-in - one platform for every stack.
+              A complete toolkit for developers who want to ship fast. Code
+              pens, file hosting, shortlinks, temp sharing, and more - all in
+              one place.
             </p>
             <div className="flex items-center gap-4">
               <Link

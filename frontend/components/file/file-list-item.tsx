@@ -1,14 +1,22 @@
+import { X } from "lucide-react";
+
 import { FileIcon } from "@/components/dashboard/file-icon";
+import { Button } from "@/components/ui/button";
 import { formatBytes } from "@/lib/utils";
 
 interface FileListItemProps {
   name: string;
   size: number;
   progress: number;
+  onRemove?: (e: React.MouseEvent) => void;
 }
 
-
-export function FileListItem({ name, size, progress }: FileListItemProps) {
+export function FileListItem({
+  name,
+  size,
+  progress,
+  onRemove,
+}: FileListItemProps) {
   const done = progress >= 100;
 
   return (
@@ -30,6 +38,17 @@ export function FileListItem({ name, size, progress }: FileListItemProps) {
         <span className="shrink-0 text-xs text-muted-foreground">
           {progress}%
         </span>
+      )}
+      {onRemove && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 shrink-0 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+          onClick={onRemove}
+        >
+          <X className="h-4 w-4" />
+        </Button>
       )}
     </div>
   );

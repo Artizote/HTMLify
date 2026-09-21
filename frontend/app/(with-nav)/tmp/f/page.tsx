@@ -19,8 +19,8 @@ const TempFolderPage = () => {
         <CardHeader>
           <CardTitle>Upload Files</CardTitle>
           <CardDescription>
-            Files you drop are uploaded automatically and share the same
-            folder link.
+            Files you drop are uploaded automatically and share the same folder
+            link.
           </CardDescription>
         </CardHeader>
         <CardContent>

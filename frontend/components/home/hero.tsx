@@ -1,19 +1,19 @@
 const cards = [
   {
-    title: "One-click deploy",
-    desc: "Deploy static sites and modern web apps to a global edge network in seconds - no config, no waiting.",
+    title: "No config needed",
+    desc: "Upload, deploy, and share in seconds. No build steps, no CI/CD pipelines, no YAML files.",
   },
   {
-    title: "Any language",
-    desc: "Python, HTML, JavaScript, Go, TypeScript, Rust and more. One platform for every stack.",
+    title: "Multi-language support",
+    desc: "Python, JavaScript, Go, Rust, TypeScript, HTML - one platform for every stack.",
   },
   {
-    title: "Share instantly",
-    desc: "Share anything with a single link. Snippets, projects, and files ready to go.",
+    title: "Global edge network",
+    desc: "Your content is served from the nearest edge location worldwide for blazing fast load times.",
   },
   {
-    title: "Shortlinks & temp links",
-    desc: "Turn any link into a clean, shareable shortlink or a quick throwaway temp file link.",
+    title: "Share with anyone",
+    desc: "Every upload gets a shareable link instantly. Public or private, you decide.",
   },
 ];
 

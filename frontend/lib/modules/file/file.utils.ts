@@ -1,5 +1,33 @@
 import { FileType } from "@/lib/modules/file/file.types";
 
+const imageExts = ["jpg", "jpeg", "png", "gif", "webp", "bmp", "svg"];
+const videoExts = ["mp4", "webm", "ogg", "mov", "avi", "mkv"];
+const audioExts = ["mp3", "wav", "aac", "flac"];
+const binaryExts = [
+  "pdf",
+  "doc",
+  "docx",
+  "xls",
+  "xlsx",
+  "ppt",
+  "pptx",
+  "zip",
+  "tar",
+  "gz",
+  "rar",
+  "7z",
+  "bz2",
+  "exe",
+  "dll",
+  "so",
+  "bin",
+  "dmg",
+  "iso",
+  "apk",
+  "sqlite",
+  "db",
+];
+
 export const getFileContentType = (
   filename: string,
   contentTypeHeader?: string | null,
@@ -14,34 +42,6 @@ export const getFileContentType = (
   }
 
   const ext = filename.split(".").pop()?.toLowerCase();
-
-  const imageExts = ["jpg", "jpeg", "png", "gif", "webp", "bmp", "svg"];
-  const videoExts = ["mp4", "webm", "ogg", "mov", "avi", "mkv"];
-  const audioExts = ["mp3", "wav", "aac", "flac"];
-  const binaryExts = [
-    "pdf",
-    "doc",
-    "docx",
-    "xls",
-    "xlsx",
-    "ppt",
-    "pptx",
-    "zip",
-    "tar",
-    "gz",
-    "rar",
-    "7z",
-    "bz2",
-    "exe",
-    "dll",
-    "so",
-    "bin",
-    "dmg",
-    "iso",
-    "apk",
-    "sqlite",
-    "db",
-  ];
 
   if (ext && imageExts.includes(ext)) return "img";
   if (ext && videoExts.includes(ext)) return "video";

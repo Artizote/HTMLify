@@ -37,7 +37,7 @@
   --font-sans: Plus Jakarta Sans, sans-serif;
   --font-serif: Source Serif 4, serif;
   --font-mono: JetBrains Mono, monospace;
-  --radius: 0.5rem;
+  --radius: 0.1rem;
   --shadow-x: 0;
   --shadow-y: 1px;
   --shadow-blur: 3px;
@@ -99,7 +99,7 @@
   --font-sans: Plus Jakarta Sans, sans-serif;
   --font-serif: Source Serif 4, serif;
   --font-mono: JetBrains Mono, monospace;
-  --radius: 0.5rem;
+  --radius: 0.3rem;
   --shadow-x: 0;
   --shadow-y: 1px;
   --shadow-blur: 3px;

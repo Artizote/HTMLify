@@ -1,46 +1,12 @@
 import { Check, Copy, ExternalLink, Share2 } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
 import { QRCode } from "@/components/qr-code";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ShortLink } from "@/lib/modules/shortlink/shortlink.types";
 import { cn } from "@/lib/utils";
-
-interface UseClipboardReturn {
-  copied: boolean;
-  copy: () => void;
-}
-
-const useClipboard = (
-  text: string,
-  timeout: number = 1800,
-): UseClipboardReturn => {
-  const [copied, setCopied] = useState<boolean>(false);
-  const copy = () => {
-    navigator.clipboard.writeText(text).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), timeout);
-    });
-  };
-  return { copied, copy };
-};
-
-const useDebounce = <T,>(value: T, delay: number): T => {
-  const [debouncedValue, setDebouncedValue] = useState<T>(value);
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedValue(value);
-    }, delay);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [value, delay]);
-
-  return debouncedValue;
-};
+import { shareContent, useClipboard, useDebounce } from "@/lib/utils/actions";
 
 interface ActionButtonProps {
   icon: React.ElementType;
@@ -90,11 +56,7 @@ const LinkResult = ({ url, sourceUrl }: LinkResultProps) => {
   const { copied, copy } = useClipboard(url);
 
   const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({ url });
-    } else {
-      copy();
-    }
+    shareContent({ url, fallbackCopy: true });
   };
 
   return (

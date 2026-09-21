@@ -1,3 +1,4 @@
+import { DasshboardNavbar } from "@/components/dashboard/dashbaord-navbar";
 import { FileForm } from "@/components/file/file-upload-form";
 import {
   getFileContentById,
@@ -39,21 +40,24 @@ export default async function NewFileCreatePage({
   const contentType = getFileContentType(fileData.fileInfo.path);
 
   return (
-    <div className="w-full max-w-7xl mx-auto pt-10 px-4">
-      <FileForm
-        mode="update"
-        user={user}
-        initialData={{
-          ...fileData.fileInfo,
-          mode:
-            fileData.fileInfo.mode === "raw"
-              ? "render"
-              : fileData.fileInfo.mode,
-          content: fileData.content,
-          mediaUrl: fileData.mediaUrl,
-          fileType: contentType,
-        }}
-      />
-    </div>
+    <>
+      <DasshboardNavbar title="Edit File" />
+      <div className="w-full max-w-7xl mx-auto pt-10 px-4">
+        <FileForm
+          mode="update"
+          user={user}
+          initialData={{
+            ...fileData.fileInfo,
+            mode:
+              fileData.fileInfo.mode === "raw"
+                ? "render"
+                : fileData.fileInfo.mode,
+            content: fileData.content,
+            mediaUrl: fileData.mediaUrl,
+            fileType: contentType,
+          }}
+        />
+      </div>
+    </>
   );
 }

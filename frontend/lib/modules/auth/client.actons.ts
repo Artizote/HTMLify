@@ -23,7 +23,7 @@ export const signUp = async (data: SignUpSchema) => {
 };
 
 export const signOut = async () => {
-  return await APICall(`/api/auth/signout`, {
+  return await APICall(`/api/auth/logout`, {
     method: "POST",
   });
 };

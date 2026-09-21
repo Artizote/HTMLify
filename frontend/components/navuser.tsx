@@ -1,7 +1,9 @@
 "use client";
 
 import { LogOut, Settings } from "lucide-react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
 
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -12,12 +14,31 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { signOut } from "@/lib/modules/auth/client.actons";
 import { UserFullInfo } from "@/lib/modules/user/user.types";
 
 export const NavUser = ({ user }: { user: UserFullInfo | null }) => {
+  const router = useRouter();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    const { error } = await signOut();
+    setIsLoggingOut(false);
+
+    if (error) {
+      toast.error(error || "Failed to log out");
+      return;
+    }
+
+    toast.success("Logged out successfully");
+    router.push("/");
+    router.refresh();
+  };
+
   return (
     <div className="flex items-center gap-3 rounded-xl border bg-background/80 p-2 backdrop-blur">
-      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
+      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/5 text-sm font-semibold text-primary">
         {user?.name?.charAt(0).toUpperCase() || "U"}
       </div>
 
@@ -37,14 +58,16 @@ export const NavUser = ({ user }: { user: UserFullInfo | null }) => {
             <ThemeToggle showText className="cursor-pointer" />
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem asChild>
-            <Link
-              href="#"
-              className="cursor-pointer text-red-600 focus:text-red-600"
-            >
-              <LogOut className="mr-2 h-4 w-4" />
-              <span>Logout</span>
-            </Link>
+          <DropdownMenuItem
+            disabled={isLoggingOut}
+            onSelect={(event) => {
+              event.preventDefault();
+              handleLogout();
+            }}
+            className="cursor-pointer text-destructive focus:text-red-600"
+          >
+            <LogOut className="mr-2 h-4 w-4" />
+            <span>{isLoggingOut ? "Logging out..." : "Logout"}</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

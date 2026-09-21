@@ -4,8 +4,7 @@ import { GitCloneFormType } from "@/lib/modules/file/file.schema";
 import { FileIDResponse, FolderResponse } from "@/lib/modules/file/file.types";
 
 type FileInfoParams =
-  | { path: string; id?: never }
-  | { path?: never; id: number };
+  { path: string; id?: never } | { path?: never; id: number };
 
 export const getFileInfoByPathOrID = async ({
   path,
@@ -79,10 +78,7 @@ export const uploadFileWithProgress = async (
 ): Promise<{ data: FileIDResponse | null; error: string | null }> => {
   return new Promise((resolve) => {
     const xhr = new XMLHttpRequest();
-    xhr.open(
-      "POST",
-      `${env.NEXT_PUBLIC_BACKEND_API_URL}/v1/files/upload`,
-    );
+    xhr.open("POST", `${env.NEXT_PUBLIC_BACKEND_API_URL}/v1/files/upload`);
     xhr.withCredentials = true;
 
     xhr.upload.onprogress = (event) => {

@@ -32,6 +32,8 @@ interface DataTableProps<TData, TValue> {
   pageCount?: number;
   pageIndex?: number;
   pageSize?: number;
+  onRowClick?: (row: TData) => void;
+  getRowClassName?: (row: TData) => string;
 }
 
 export function DataTable<TData, TValue>({
@@ -41,6 +43,8 @@ export function DataTable<TData, TValue>({
   pageCount,
   pageIndex = 0,
   pageSize = env.NEXT_PUBLIC_PAGE_SIZE,
+  onRowClick,
+  getRowClassName,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -127,7 +131,8 @@ export function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  className="group border-b border-border/40"
+                  className={`group border-b border-border/40 ${onRowClick ? "cursor-pointer" : ""} ${getRowClassName?.(row.original) ?? ""}`}
+                  onClick={() => onRowClick?.(row.original)}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id} className="py-3">

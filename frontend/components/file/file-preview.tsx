@@ -5,6 +5,13 @@ import { getLanguageByPath } from "@/lib/modules/playgournd/editor.utils";
 
 import CodeEditor from "../playgroud/code-editor";
 
+const getCacheBustedUrl = (url: string | null | undefined) => {
+  if (!url) return "";
+  if (url.startsWith("blob:")) return url;
+  const separator = url.includes("?") ? "&" : "?";
+  return `${url}${separator}v=${Date.now()}`;
+};
+
 interface FilePreviewProps {
   fileType: FileType;
   path: string;
@@ -13,12 +20,6 @@ interface FilePreviewProps {
   mediaUrl?: string | null;
   plain?: boolean;
 }
-const getCacheBustedUrl = (url: string | null | undefined) => {
-  if (!url) return "";
-  if (url.startsWith("blob:")) return url;
-  const separator = url.includes("?") ? "&" : "?";
-  return `${url}${separator}v=${Date.now()}`;
-};
 
 export function FilePreview({
   fileType,
@@ -30,84 +31,79 @@ export function FilePreview({
 }: FilePreviewProps) {
   const finalUrl = getCacheBustedUrl(mediaUrl || path);
 
-  if (fileType === "binary") {
-    return (
-      <div
-        className={
-          plain
-            ? "w-full px-8 py-12 flex flex-col items-center justify-center gap-6"
-            : "w-full p-8 flex flex-col items-center justify-center gap-6 bg-linear-to-b from-muted/50 to-muted/10 rounded-xl border border-border/50 my-4 shadow-sm"
-        }
-      >
-        <p className="text-muted-foreground">can&apos;t preview this file</p>
-      </div>
-    );
-  }
-  if (fileType === "img") {
-    return (
-      <div
-        className={
-          plain
-            ? "w-full h-full min-h-75 flex items-center justify-center"
-            : "relative w-full h-[60vh] min-h-75 flex items-center justify-center bg-muted/20 rounded-xl border border-border/50 overflow-hidden my-4"
-        }
-      >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          className="w-full h-full object-contain text-transparent"
-          src={finalUrl}
-          alt={path}
-        />
-      </div>
-    );
-  }
-  if (fileType === "video") {
-    return (
-      <div
-        className={
-          plain
-            ? "relative w-full h-full min-h-75 flex items-center justify-center"
-            : "relative w-full h-[60vh] min-h-75 flex items-center justify-center bg-black/95 rounded-xl border border-border/50 overflow-hidden my-4 shadow-sm"
-        }
-      >
-        <video
-          src={finalUrl}
-          controls
-          className="w-full h-full object-contain focus:outline-none"
-        />
-      </div>
-    );
-  }
-  if (fileType === "audio") {
-    return (
-      <div
-        className={
-          plain
-            ? "w-full px-8 py-12 flex flex-col items-center justify-center gap-6"
-            : "w-full p-8 flex flex-col items-center justify-center gap-6 bg-linear-to-b from-muted/50 to-muted/10 rounded-xl border border-border/50 my-4 shadow-sm"
-        }
-      >
+  switch (fileType) {
+    case "binary":
+      return (
         <div
-          className="p-4 bg-background 
-        rounded-full shadow-sm border 
-        border-border/50"
+          className={
+            plain
+              ? "flex flex-col items-center justify-center gap-6 px-8 py-12"
+              : "flex flex-col items-center justify-center gap-6 rounded-xl border border-border/50 bg-muted/10 p-8 shadow-sm"
+          }
         >
-          <Music className="w-8 h-8 text-primary/70" />
+          <p className="text-muted-foreground">can&apos;t preview this file</p>
         </div>
-        <audio
-          src={finalUrl}
-          controls
-          className="w-full max-w-md focus:outline-none"
+      );
+    case "img":
+      return (
+        <div
+          className={
+            plain
+              ? "flex min-h-75 w-full items-center justify-center"
+              : "relative flex min-h-75 w-full items-center justify-center overflow-hidden rounded-xl border border-border/50 bg-muted/10 shadow-sm"
+          }
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            className="h-full w-full object-contain text-transparent"
+            src={finalUrl}
+            alt={path}
+          />
+        </div>
+      );
+    case "video":
+      return (
+        <div
+          className={
+            plain
+              ? "relative flex min-h-75 w-full items-center justify-center"
+              : "relative flex min-h-75 w-full items-center justify-center overflow-hidden rounded-xl border border-border/50 bg-black/95 shadow-sm"
+          }
+        >
+          <video
+            src={finalUrl}
+            controls
+            className="h-full w-full object-contain focus:outline-none"
+          />
+        </div>
+      );
+    case "audio":
+      return (
+        <div
+          className={
+            plain
+              ? "flex flex-col items-center justify-center gap-6 px-8 py-12"
+              : "flex flex-col items-center justify-center gap-6 rounded-xl border border-border/50 bg-muted/10 p-8 shadow-sm"
+          }
+        >
+          <div className="rounded-full border border-border/50 bg-background p-4 shadow-sm">
+            <Music className="h-8 w-8 text-primary/70" />
+          </div>
+          <audio
+            src={finalUrl}
+            controls
+            className="w-full max-w-md focus:outline-none"
+          />
+        </div>
+      );
+    default:
+      return (
+        <CodeEditor
+          language={getLanguageByPath(path)}
+          code={code || ""}
+          onChange={onChange || (() => {})}
+          path={path}
         />
-      </div>
-    );
+      );
   }
-  return (
-    <CodeEditor
-      code={code || ""}
-      onChange={onChange || (() => {})}
-      path={path}
-      language={getLanguageByPath(path)}
-    />
-  );
 }

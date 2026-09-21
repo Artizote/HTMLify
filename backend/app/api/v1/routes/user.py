@@ -59,3 +59,9 @@ def get_user_info(username: str) -> UserPublicInfo:
 def get_my_api_key(user: User = Depends(AuthService.get_current_user)) -> APIKeyResponse:
     return APIKeyResponse(api_key=str(user.api_key))
 
+@router.post("/users/me/revoke-api-key")
+def revoke_my_key_key(user: User = Depends(AuthService.get_current_user)) -> APIKeyResponse:
+    user.api_key = user.new_api_key()
+    user.save()
+    return APIKeyResponse(api_key=str(user.api_key))
+

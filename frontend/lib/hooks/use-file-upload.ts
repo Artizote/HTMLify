@@ -1,12 +1,16 @@
 import { create } from "zustand";
 
-import { uploadFileWithProgress } from "@/lib/modules/file/file.api";
+import {
+  deleteFile,
+  uploadFileWithProgress,
+} from "@/lib/modules/file/file.api";
 import { FileIDResponse } from "@/lib/modules/file/file.types";
 
 type UploadStatus = "queued" | "uploading" | "completed" | "failed";
 
 interface UploadItem {
-  id: string;
+  localId: string;
+  id?: number;
   file: File;
   path: string;
   progress: number;
@@ -18,10 +22,12 @@ interface FileUploadStore {
   queue: UploadItem[];
   isUploading: boolean;
 
+  deleteFile: (localId: string) => void;
+
   addFiles: (files: File[], folderPath: string) => void;
   startQueue: () => Promise<void>;
-  updateProgress: (id: string, progress: number) => void;
-  updateItem: (id: string, updates: Partial<UploadItem>) => void;
+  updateProgress: (localId: string, progress: number) => void;
+  updateItem: (localId: string, updates: Partial<UploadItem>) => void;
   clearQueue: () => void;
 }
 
@@ -29,13 +35,27 @@ export const useFileUploadStore = create<FileUploadStore>((set, get) => ({
   queue: [],
   isUploading: false,
 
+  deleteFile: async (localId) => {
+    const item = get().queue.find((i) => i.localId === localId);
+    if (!item) return;
+
+    if (item.id) {
+      const { error } = await deleteFile(item.id);
+      if (error) return;
+    }
+
+    set((state) => ({
+      queue: state.queue.filter((i) => i.localId !== localId),
+    }));
+  },
+
   addFiles: (files, folderPath) => {
     const newItems: UploadItem[] = files.map((file) => {
       const fullPath = folderPath
         ? `${folderPath.replace(/\/$/, "")}/${file.name}`
         : file.name;
       return {
-        id: crypto.randomUUID(),
+        localId: crypto.randomUUID(),
         file,
         path: fullPath,
         progress: 0,
@@ -62,7 +82,9 @@ export const useFileUploadStore = create<FileUploadStore>((set, get) => ({
 
         set((state) => ({
           queue: state.queue.map((item) =>
-            item.id === next.id ? { ...item, status: "uploading" as const } : item,
+            item.localId === next.localId
+              ? { ...item, status: "uploading" as const }
+              : item,
           ),
         }));
 
@@ -75,7 +97,7 @@ export const useFileUploadStore = create<FileUploadStore>((set, get) => ({
 
           const { data, error } = await uploadFileWithProgress(formData, {
             onProgress: (progress) => {
-              get().updateProgress(next.id, progress);
+              get().updateProgress(next.localId, progress);
             },
           });
 
@@ -83,16 +105,24 @@ export const useFileUploadStore = create<FileUploadStore>((set, get) => ({
             throw new Error(error || "Upload failed");
           }
 
-          get().updateItem(next.id, {
-            status: "completed",
-            progress: 100,
-            response: data,
-          });
+          set((state) => ({
+            queue: state.queue.map((item) =>
+              item.localId === next.localId
+                ? {
+                    ...item,
+                    id: data.id,
+                    status: "completed",
+                    progress: 100,
+                    response: data,
+                  }
+                : item,
+            ),
+          }));
         } catch (err) {
           const message = err instanceof Error ? err.message : "Upload failed";
           set((state) => ({
             queue: state.queue.map((item) =>
-              item.id === next.id
+              item.localId === next.localId
                 ? { ...item, status: "failed" as const }
                 : item,
             ),
@@ -105,17 +135,17 @@ export const useFileUploadStore = create<FileUploadStore>((set, get) => ({
     }
   },
 
-  updateProgress: (id, progress) =>
+  updateProgress: (localId, progress) =>
     set((state) => ({
       queue: state.queue.map((item) =>
-        item.id === id ? { ...item, progress } : item,
+        item.localId === localId ? { ...item, progress } : item,
       ),
     })),
 
-  updateItem: (id, updates) =>
+  updateItem: (localId, updates) =>
     set((state) => ({
       queue: state.queue.map((item) =>
-        item.id === id ? { ...item, ...updates } : item,
+        item.localId === localId ? { ...item, ...updates } : item,
       ),
     })),
 

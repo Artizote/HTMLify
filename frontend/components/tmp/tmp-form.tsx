@@ -1,8 +1,7 @@
 "use client";
 
-import { File as FileIcon, X } from "lucide-react";
-
 import { DropzoneArea } from "@/components/file/dropzone-area";
+import { FileListItem } from "@/components/file/file-list-item";
 import { TmpResult } from "@/components/tmp/tmp-result";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,7 +14,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useTmpForm } from "@/lib/hooks/use-tmp-form";
-import { formatBytes } from "@/lib/utils";
 
 export const TmpForm = () => {
   const {
@@ -45,26 +43,12 @@ export const TmpForm = () => {
             Select File
           </Label>
           {file ? (
-            <div className="flex items-center gap-3 rounded-lg border bg-background px-3 py-2 shadow-sm">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-primary/10">
-                <FileIcon className="h-5 w-5 text-primary" />
-              </div>
-              <div className="min-w-0 flex-1 text-left">
-                <p className="truncate text-sm font-medium">{file.name}</p>
-                <p className="text-xs text-muted-foreground">
-                  {formatBytes(file.size)}
-                </p>
-              </div>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-                onClick={() => setFile(null)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
+            <FileListItem
+              name={file.name}
+              size={file.size}
+              progress={100}
+              onRemove={() => setFile(null)}
+            />
           ) : (
             <DropzoneArea
               maxFiles={1}
