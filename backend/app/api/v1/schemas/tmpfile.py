@@ -8,6 +8,7 @@ class TmpFileRead(BaseModel):
     id: str
     name: str
     url: HttpUrl
+    blob_hash: str
     expiry: datetime
 
     @classmethod
@@ -16,6 +17,7 @@ class TmpFileRead(BaseModel):
             id=tmpfile.code,
             name=tmpfile.name,
             url=tmpfile.url,
+            blob_hash=tmpfile.blob_hash,
             expiry=tmpfile.expiry
         )
 
