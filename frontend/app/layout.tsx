@@ -13,7 +13,10 @@ const geistSans = Geist({
 
 export const metadata: Metadata = {
   title: "HTMLify",
-  description: "Generate Code",
+  description: "Sharing code made simple",
+  icons: {
+    icon: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({
