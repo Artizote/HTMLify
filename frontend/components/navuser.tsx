@@ -1,7 +1,6 @@
 "use client";
 
 import { LogOut, Settings } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -14,11 +13,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { env } from "@/lib/env";
 import { signOut } from "@/lib/modules/auth/client.actons";
 import { UserFullInfo } from "@/lib/modules/user/user.types";
 
 export const NavUser = ({ user }: { user: UserFullInfo | null }) => {
-  const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleLogout = async () => {
@@ -32,8 +31,7 @@ export const NavUser = ({ user }: { user: UserFullInfo | null }) => {
     }
 
     toast.success("Logged out successfully");
-    router.push("/");
-    router.refresh();
+    window.location.href = env.NEXT_PUBLIC_SITE_URL;
   };
 
   return (

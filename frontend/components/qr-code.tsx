@@ -15,7 +15,7 @@ export const QRCode = ({ url, fgColor, bgColor }: QRCodeProps) => {
     bg: bgColor,
   });
 
-  const qrSrc = `${env.NEXT_PUBLIC_BACKEND_API_URL}/v1/qr-code?${params.toString()}`;
+  const qrSrc = `/api/v1/qr-code?${params.toString()}`;
 
   const handleDownload = (): void => {
     const link = document.createElement("a");

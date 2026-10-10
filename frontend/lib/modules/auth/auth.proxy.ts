@@ -4,8 +4,16 @@ import { env } from "@/lib/env";
 import { APICall } from "@/lib/fetch/api";
 import { UserFullInfo } from "@/lib/modules/user/user.types";
 
-export const AUTH_ONLY_ROUTES = ["/signin", "/signup"];
-export const PROTECTED_ROUTES = ["/dashboard"];
+export {
+  AUTH_ONLY_ROUTES,
+  PROTECTED_ROUTES,
+  DASHBOARD_ROUTES,
+} from "@/lib/modules/proxy/proxy.config";
+
+import {
+  AUTH_ONLY_ROUTES,
+  PROTECTED_ROUTES,
+} from "@/lib/modules/proxy/proxy.config";
 
 async function fetchMe(): Promise<{
   user: UserFullInfo | null;

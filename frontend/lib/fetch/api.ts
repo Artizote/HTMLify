@@ -1,3 +1,4 @@
+import { env } from "@/lib/env";
 import { parseServerError } from "@/lib/errors";
 let clientRefreshPromise: Promise<boolean> | null = null;
 
@@ -71,6 +72,12 @@ export async function APICall(
       const headers: Record<string, string> = {
         ...(options.headers as Record<string, string>),
       };
+
+      // Injecting internal API code for internal APIs 
+      if (url.includes("/internal/")) {
+        headers["X-Internal-Code"] = env.INTERNAL_API_CODE;
+      }
+
       if (token) {
         headers["Cookie"] = `access_token=${token}`;
       }
@@ -99,7 +106,13 @@ export async function APICall(
         refreshedToken: lastRefreshedToken,
       };
     } else {
-      let response = await fetch(url, {
+      // Rewrite backend URL to go through the same-origin proxy
+      const backendUrl = env.NEXT_PUBLIC_BACKEND_API_URL;
+      const proxiedUrl = url.startsWith(backendUrl)
+        ? `/api${url.slice(backendUrl.length)}`
+        : url;
+
+      let response = await fetch(proxiedUrl, {
         credentials: "include",
         ...options,
       });
@@ -107,7 +120,7 @@ export async function APICall(
       if (response.status === 401) {
         const refreshed = await executeClientRefresh();
         if (refreshed) {
-          response = await fetch(url, {
+          response = await fetch(proxiedUrl, {
             credentials: "include",
             ...options,
           });

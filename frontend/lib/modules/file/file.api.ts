@@ -78,7 +78,7 @@ export const uploadFileWithProgress = async (
 ): Promise<{ data: FileIDResponse | null; error: string | null }> => {
   return new Promise((resolve) => {
     const xhr = new XMLHttpRequest();
-    xhr.open("POST", `${env.NEXT_PUBLIC_BACKEND_API_URL}/v1/files/upload`);
+    xhr.open("POST", `/api/v1/files/upload`);
     xhr.withCredentials = true;
 
     xhr.upload.onprogress = (event) => {
