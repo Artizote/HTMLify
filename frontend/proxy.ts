@@ -64,7 +64,7 @@ export async function proxy(request: NextRequest) {
 
   // main domain to dashboard domain 
   if (hostname === publicHostname && isDashboardRoute(pathname)) {
-    const url = request.nextUrl.clone();
+    const url = new URL(`${pathname}${request.nextUrl.search}`, siteUrl);
     url.hostname = dashboardHostname;
 
     return NextResponse.redirect(url);
