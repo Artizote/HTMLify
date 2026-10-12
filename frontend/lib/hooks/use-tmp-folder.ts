@@ -7,6 +7,7 @@ import {
   createTmpFolder,
   DeleteTmpFileFromFolder,
 } from "@/lib/tmp-folder/tmp-folder.api";
+import { randomId } from "@/lib/utils";
 
 import { TmpFolderResponse } from "../tmp-folder/tmp-folder.types";
 
@@ -118,7 +119,7 @@ export const useTmpFolderStore = create<TmpFolderStore>((set, get) => ({
       queue: [
         ...state.queue,
         ...files.map((file) => ({
-          id: crypto.randomUUID(),
+          id: randomId(),
           file,
           progress: 0,
           status: "queued" as const,

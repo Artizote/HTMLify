@@ -5,6 +5,7 @@ import {
   uploadFileWithProgress,
 } from "@/lib/modules/file/file.api";
 import { FileIDResponse } from "@/lib/modules/file/file.types";
+import { randomId } from "@/lib/utils";
 
 type UploadStatus = "queued" | "uploading" | "completed" | "failed";
 
@@ -55,7 +56,7 @@ export const useFileUploadStore = create<FileUploadStore>((set, get) => ({
         ? `${folderPath.replace(/\/$/, "")}/${file.name}`
         : file.name;
       return {
-        localId: crypto.randomUUID(),
+        localId: randomId(),
         file,
         path: fullPath,
         progress: 0,
