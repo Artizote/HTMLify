@@ -25,7 +25,7 @@ def get_file_(
         file = FileService.get_file_by_path(path)
     if not file:
         raise HTTPException(404, "File not found")
-    return FileRead.from_orm(file)
+    return FileRead.from_orm(file, False, False, False)
 
 @router.post("/files")
 def create_file(
@@ -37,7 +37,7 @@ def create_file(
 
 @router.post("/files/upload")
 async def create_file_by_upload(
-    file: UploadFile = FFile(),
+    file: UploadFile = FFile(None),
     content: Optional[bytes | str] = Form(None),
     title: Optional[str] = Form(None),
     path: Optional[str] = Form(None),
