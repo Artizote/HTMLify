@@ -30,7 +30,7 @@ export function Navbar() {
   return (
     <nav className="fixed top-0 w-full z-50 h-14 px-8 bg-background border-b border-border text-foreground">
       <div className="container h-full mx-auto w-full flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-3">
+        <Link href={env.NEXT_PUBLIC_SITE_URL} className="flex items-center gap-3">
           <Logo />
           <span className="text-lg font-bold tracking-tight text-foreground">
             {env.NEXT_PUBLIC_SITE_NAME}

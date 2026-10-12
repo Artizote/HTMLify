@@ -104,7 +104,7 @@ export const DashboardSidebar = ({
         <SidebarMenu>
           <SidebarMenuItem>
             <Link
-              href="/"
+              href={env.NEXT_PUBLIC_SITE_URL}
               className="flex items-center bg-muted/15 hover:bg-muted/20 rounded gap-3 p-2"
             >
               <Logo />
