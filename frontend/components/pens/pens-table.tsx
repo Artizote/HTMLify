@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { deletePen } from "@/lib/modules/pen/pen.api";
 import { PenResponse } from "@/lib/modules/pen/pen.schema";
+import { copyToClipboard } from "@/lib/utils/actions";
 
 export const columns: ColumnDef<PenResponse>[] = [
   {
@@ -88,7 +89,11 @@ export const columns: ColumnDef<PenResponse>[] = [
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
               <DropdownMenuItem
-                onClick={() => navigator.clipboard.writeText(pen.id)}
+                onClick={async () => {
+                  if (await copyToClipboard(pen.id)) {
+                    toast.success("Pen ID copied");
+                  }
+                }}
               >
                 Copy Pen ID
               </DropdownMenuItem>

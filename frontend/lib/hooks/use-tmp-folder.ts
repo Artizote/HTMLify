@@ -8,6 +8,7 @@ import {
   DeleteTmpFileFromFolder,
 } from "@/lib/tmp-folder/tmp-folder.api";
 import { randomId } from "@/lib/utils";
+import { copyToClipboard } from "@/lib/utils/actions";
 
 import { TmpFolderResponse } from "../tmp-folder/tmp-folder.types";
 
@@ -106,7 +107,8 @@ export const useTmpFolderStore = create<TmpFolderStore>((set, get) => ({
     const { folder } = get();
     if (!folder?.id) return;
     const url = `${env.NEXT_PUBLIC_SITE_URL}/tmp/f/${folder.id}`;
-    navigator.clipboard.writeText(url).then(() => {
+    void copyToClipboard(url).then((ok) => {
+      if (!ok) return;
       set({ copied: true });
       setTimeout(() => set({ copied: false }), 1800);
     });

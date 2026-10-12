@@ -7,16 +7,17 @@ import { FilePreview } from "@/components/file/file-preview";
 import { Button } from "@/components/ui/button";
 import { getFileContentType } from "@/lib/modules/file/file.utils";
 import { TmpFolderFile } from "@/lib/tmp-folder/tmp-folder.types";
+import { copyToClipboard } from "@/lib/utils/actions";
 
 import { formatExpiry, formatExpiryDelta, isExpired } from "./utils";
 
 function CopyButton({ value }: { value: string }) {
   const [copied, setCopied] = useState(false);
-  const done = () => {
-    if (typeof navigator === "undefined") return;
-    navigator.clipboard?.writeText(value);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
+  const done = async () => {
+    if (await copyToClipboard(value)) {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    }
   };
   return (
     <button

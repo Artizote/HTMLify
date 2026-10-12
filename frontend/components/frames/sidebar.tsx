@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { FramesFeedResponse } from "@/lib/modules/frames/frames.types";
 import { createShortLink } from "@/lib/modules/shortlink/shortlink.api";
+import { copyToClipboard as copyText } from "@/lib/utils/actions";
 
 interface FramesSidebarProps {
   children: React.ReactNode;
@@ -28,10 +29,16 @@ interface FramesSidebarProps {
 }
 
 const copyToClipboard = async (text: string) => {
-  await navigator.clipboard.writeText(text);
-  toast.success("Link copied to clipboard", {
-    position: "top-right",
-  });
+  const ok = await copyText(text);
+  if (ok) {
+    toast.success("Link copied to clipboard", {
+      position: "top-right",
+    });
+  } else {
+    toast.error("Failed to copy link", {
+      position: "top-right",
+    });
+  }
 };
 
 export const FramesSidebar = ({

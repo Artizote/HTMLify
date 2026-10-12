@@ -20,6 +20,7 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group";
 import { revokeApiKey } from "@/lib/modules/user/user.api";
+import { copyToClipboard } from "@/lib/utils/actions";
 
 export function ApiKeyCard({ apiKey }: { apiKey: string }) {
   const [key, setKey] = useState(apiKey);
@@ -27,12 +28,12 @@ export function ApiKeyCard({ apiKey }: { apiKey: string }) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(key);
+    const ok = await copyToClipboard(key);
+    if (ok) {
       setCopied(true);
       toast.success("API key copied");
       window.setTimeout(() => setCopied(false), 1500);
-    } catch {
+    } else {
       toast.error("Failed to copy API key");
     }
   };
