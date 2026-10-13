@@ -26,16 +26,25 @@ import {
   GitCloneFormType,
   gitCloneSchema,
 } from "@/lib/modules/file/file.schema";
+import { toUserRelativePath } from "@/lib/modules/file/file.utils";
 import { UserFullInfo } from "@/lib/modules/user/user.types";
 
-export const GitCloneForm = ({ user }: { user: UserFullInfo }) => {
+export const GitCloneForm = ({
+  user,
+  initialFolder,
+}: {
+  user: UserFullInfo;
+  initialFolder?: string;
+}) => {
   const [isPending, setIsPending] = useState(false);
+
+  const pathPrefix = `/${user.username}/`;
 
   const form = useForm<GitCloneFormType>({
     resolver: zodResolver(gitCloneSchema),
     defaultValues: {
       repo_url: "",
-      folder: `/${user.username}/`,
+      folder: toUserRelativePath(initialFolder, user.username),
       mode: "render",
       visibility: "public",
       overwrite: true,
@@ -44,7 +53,10 @@ export const GitCloneForm = ({ user }: { user: UserFullInfo }) => {
 
   const onSubmit = async (data: GitCloneFormType) => {
     setIsPending(true);
-    const { error } = await gitCloneFile(data);
+    // Always clone under the user's own root, no matter what was typed.
+    const sub = data.folder.replace(/^\/+/, "").replace(/\/+$/, "");
+    const payload = { ...data, folder: `${pathPrefix}${sub}` };
+    const { error } = await gitCloneFile(payload);
     if (error) {
       toast.error(error);
     } else {
@@ -93,9 +105,12 @@ export const GitCloneForm = ({ user }: { user: UserFullInfo }) => {
                       <InputGroupAddon>
                         <Folder />
                       </InputGroupAddon>
+                      <InputGroupAddon className="text-muted-foreground/60 font-mono text-sm select-none">
+                        {pathPrefix}
+                      </InputGroupAddon>
                       <InputGroupInput
                         {...field}
-                        placeholder="/username/myfile"
+                        placeholder="subfolder (optional)"
                       />
                     </InputGroup>
                     <FieldError errors={[fieldState.error]}></FieldError>

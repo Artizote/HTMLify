@@ -9,20 +9,35 @@ import { FileListItem } from "@/components/file/file-list-item";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useFileUploadStore } from "@/lib/hooks/use-file-upload";
+import { toUserRelativePath } from "@/lib/modules/file/file.utils";
 import { UserFullInfo } from "@/lib/modules/user/user.types";
 
-export const FileUpload = ({ user }: { user: UserFullInfo }) => {
+export const FileUpload = ({
+  user,
+  initialPath,
+}: {
+  user: UserFullInfo;
+  initialPath?: string;
+}) => {
   const router = useRouter();
   const searchParams = useSearchParams();
+  // `path` is the absolute current folder (from the files page), `dir` is a
+  // legacy relative variant kept for backwards compatibility.
   const dirParam = searchParams.get("dir");
+  const initialDir = initialPath
+    ? toUserRelativePath(initialPath, user.username)
+    : dirParam || "";
 
   const [folderPath, setFolderPath] = useState(
-    dirParam
-      ? `/${user.username}/${dirParam.replace(/^\//, "")}`
+    initialDir
+      ? `/${user.username}/${initialDir.replace(/^\//, "")}`
       : `/${user.username}/`,
   );
-  const [folderSet, setFolderSet] = useState(!!dirParam);
-  const [subfolder, setSubfolder] = useState(dirParam || "");
+  // If a folder was passed in (even the user's root), it is already chosen.
+  const [folderSet, setFolderSet] = useState(
+    Boolean(initialPath) || Boolean(dirParam),
+  );
+  const [subfolder, setSubfolder] = useState(initialDir);
   const { queue, addFiles, deleteFile, clearQueue } = useFileUploadStore();
 
   const updateUrlParams = (path: string) => {

@@ -28,7 +28,7 @@ export { fileFormSchema, type FileFormType };
 
 const gitCloneSchema = z.object({
   repo_url: z.string().url("Please enter a valid repository URL"),
-  folder: z.string().min(1, "Folder path is required"),
+  folder: z.string(), // Empty means sub path relative to the user's root
   mode: z.enum(["source", "render"]),
   visibility: z.enum(["public", "hidden", "once"]),
   overwrite: z.boolean(),

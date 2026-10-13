@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { DasshboardNavbar } from "@/components/dashboard/dashbaord-navbar";
 import { DashboardBreadcrumb } from "@/components/dashboard/dashboard-breadcrumb";
 import { FileTable } from "@/components/dashboard/file-table";
+import { FolderActions } from "@/components/dashboard/folder-actions";
 import { env } from "@/lib/env";
 import { getFolderByPath } from "@/lib/modules/file/file.api";
 import { getMe } from "@/lib/modules/user/user.actions";
@@ -49,7 +50,7 @@ const FilesPage = async ({ searchParams }: FilesPageProps) => {
 
   return (
     <>
-      <DasshboardNavbar>
+      <DasshboardNavbar actions={<FolderActions path={path} />}>
         <DashboardBreadcrumb path={path} />
       </DasshboardNavbar>
       <div className="flex flex-col gap-4 p-6 w-full">

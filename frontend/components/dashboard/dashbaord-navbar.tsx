@@ -12,10 +12,12 @@ type DasshboardNavbarProps =
   | {
       title: string;
       children?: React.ReactNode;
+      actions?: React.ReactNode;
     }
   | {
       title?: string;
       children: React.ReactNode;
+      actions?: React.ReactNode;
     };
 
 // Routse which are the "create" destination don't need "New" button
@@ -37,6 +39,7 @@ function getCreateHref(pathname: string): string | null {
 export function DasshboardNavbar({
   title,
   children,
+  actions,
   className,
   ...props
 }: DasshboardNavbarProps & React.HTMLAttributes<HTMLDivElement>) {
@@ -64,15 +67,16 @@ export function DasshboardNavbar({
             <h1 className="truncate text-base font-medium">{title}</h1>
           )}
         </div>
-        {createHref && (
-          <Link
-            href={createHref}
-            className="border-x border-x-border h-full flex items-center px-4 text-sm gap-2 hover:bg-foreground/5"
-          >
-            <Plus className="h-4 w-4" />
-            New
-          </Link>
-        )}
+        {actions ??
+          (createHref ? (
+            <Link
+              href={createHref}
+              className="border-x border-x-border h-full flex items-center px-4 text-sm gap-2 hover:bg-foreground/5"
+            >
+              <Plus className="h-4 w-4" />
+              New
+            </Link>
+          ) : null)}
       </div>
     </header>
   );

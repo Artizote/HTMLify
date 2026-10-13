@@ -37,6 +37,7 @@ import { FileType } from "@/lib/modules/file/file.types";
 import {
   getFileContentType,
   hasFileExtention,
+  toUserRelativePath,
 } from "@/lib/modules/file/file.utils";
 import { UserFullInfo } from "@/lib/modules/user/user.types";
 import { zodToFormData } from "@/lib/utils";
@@ -58,16 +59,19 @@ type FileFormProps =
       mode: "update";
       initialData: InitialDataProps;
       user: UserFullInfo;
+      initialPath?: string;
     }
   | {
       mode: "upload";
       initialData?: never;
       user: UserFullInfo;
+      initialPath?: string;
     };
 
 export const FileForm = ({
   user,
   initialData,
+  initialPath,
   mode = "upload",
 }: FileFormProps) => {
   const [isPending, setIsPending] = useState(false);
@@ -83,6 +87,8 @@ export const FileForm = ({
   );
 
   const pathPrefix = `/${user.username}/`;
+  // Parent folder passed from the files page (absolute, e.g. /user/docs/api)
+  const initialRelativeDir = toUserRelativePath(initialPath, user.username);
 
   const form = useForm<FileFormType>({
     resolver: zodResolver(fileFormSchema),
@@ -93,7 +99,9 @@ export const FileForm = ({
       file: undefined,
       path: initialData?.path
         ? initialData.path.replace(new RegExp(`^${pathPrefix}`), "")
-        : "",
+        : initialRelativeDir
+          ? `${initialRelativeDir}/`
+          : "",
       mode: initialData?.mode || "source",
       visibility: initialData?.visibility || "public",
     },
