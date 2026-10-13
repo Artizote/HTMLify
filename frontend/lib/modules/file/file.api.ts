@@ -149,6 +149,7 @@ export const getFolderByPath = async (
   expand: boolean = true,
   page: number = 1,
   pageSize: number = env.NEXT_PUBLIC_PAGE_SIZE,
+  sort?: string,
 ): Promise<{ data: FolderResponse | null; error: string | null }> => {
   const params = new URLSearchParams({
     path,
@@ -156,6 +157,9 @@ export const getFolderByPath = async (
     page: page.toString(),
     page_size: pageSize.toString(),
   });
+  if (sort) {
+    params.set("sort", sort);
+  }
 
   const { response, error } = await APICall(
     `${env.NEXT_PUBLIC_BACKEND_API_URL}/v1/folders?${params.toString()}`,

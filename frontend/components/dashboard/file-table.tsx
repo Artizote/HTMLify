@@ -38,7 +38,7 @@ export function FileTable({ items, totalItems, currentPage, pageSize }: Props) {
     const isFolder = isFolderItem(item);
     if (isFolder) {
       // Navigate to folder
-      window.location.href = `/dashboard?path=${item.path}`;
+      window.location.href = `/dashboard/files?path=${item.path}`;
     } else {
       // Open file in new tab
       window.open(item.path, "_blank", "noopener,noreferrer");
@@ -65,7 +65,7 @@ export function FileTable({ items, totalItems, currentPage, pageSize }: Props) {
           : item.title ||
             item.path.split("/").filter(Boolean).pop() ||
             "Untitled";
-        const href = isFolder ? `/dashboard?path=${item.path}` : item.path;
+        const href = isFolder ? `/dashboard/files?path=${item.path}` : item.path;
 
         return (
           <div className="flex items-center gap-2.5 min-w-0">
@@ -161,7 +161,7 @@ export function FileTable({ items, totalItems, currentPage, pageSize }: Props) {
       cell: ({ row }) => {
         const item = row.original;
         const isFolder = isFolderItem(item);
-        const href = isFolder ? `/dashboard?path=${item.path}` : item.path;
+        const href = isFolder ? `/dashboard/files?path=${item.path}` : item.path;
 
         return (
           <div className="text-right ">
