@@ -1,17 +1,29 @@
 import { parseServerError } from "@/lib/errors";
+import { useTokenStore } from "@/lib/stores/token.store";
+
 let clientRefreshPromise: Promise<boolean> | null = null;
 
 async function executeClientRefresh() {
   if (clientRefreshPromise) return clientRefreshPromise;
+
   clientRefreshPromise = fetch(`/api/auth/refresh`, {
     method: "GET",
     credentials: "include",
   })
-    .then((r) => r.ok)
+    .then(async (r) => {
+      if (!r.ok) return false;
+
+      const data = (await r.json()) as { access_token?: string };
+      if (!data.access_token) return false;
+
+      useTokenStore.getState().setAccessToken(data.access_token);
+      return true;
+    })
     .catch(() => false)
     .finally(() => {
       clientRefreshPromise = null;
     });
+
   return clientRefreshPromise;
 }
 
@@ -99,17 +111,24 @@ export async function APICall(
         refreshedToken: lastRefreshedToken,
       };
     } else {
+      const buildHeaders = () => {
+        return {
+          ...options.headers,
+          Authorization: `Bearer ${useTokenStore.getState().accessToken}`,
+        };
+      };
+
       let response = await fetch(url, {
-        credentials: "include",
         ...options,
+        headers: buildHeaders(),
       });
 
       if (response.status === 401) {
         const refreshed = await executeClientRefresh();
         if (refreshed) {
           response = await fetch(url, {
-            credentials: "include",
             ...options,
+            headers: buildHeaders(),
           });
         }
       }
