@@ -1,5 +1,6 @@
 import { env } from "@/lib/env";
-import { APICall as APICall } from "@/lib/fetch/api";
+import { APICall } from "@/lib/fetch/api";
+import { xhrClient } from "@/lib/fetch/xhr";
 import { GitCloneFormType } from "@/lib/modules/file/file.schema";
 import { FileIDResponse, FolderResponse } from "@/lib/modules/file/file.types";
 
@@ -77,9 +78,10 @@ export const uploadFileWithProgress = async (
   options?: UploadFileOptions,
 ): Promise<{ data: FileIDResponse | null; error: string | null }> => {
   return new Promise((resolve) => {
-    const xhr = new XMLHttpRequest();
-    xhr.open("POST", `${env.NEXT_PUBLIC_BACKEND_API_URL}/v1/files/upload`);
-    xhr.withCredentials = true;
+    const xhr = xhrClient(
+      "POST",
+      `${env.NEXT_PUBLIC_BACKEND_API_URL}/v1/files/upload`,
+    );
 
     xhr.upload.onprogress = (event) => {
       if (event.lengthComputable && options?.onProgress) {

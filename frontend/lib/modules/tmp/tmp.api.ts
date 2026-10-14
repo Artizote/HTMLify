@@ -1,4 +1,5 @@
 import { env } from "@/lib/env";
+import { xhrClient } from "@/lib/fetch/xhr";
 
 import { TmpFile, TmpFormType } from "./tmp.types";
 
@@ -23,9 +24,10 @@ export const createTmpFile = async (
   }
 
   return new Promise((resolve) => {
-    const xhr = new XMLHttpRequest();
-    xhr.open("POST", `${env.NEXT_PUBLIC_BACKEND_API_URL}/v1/tmp-files`);
-    xhr.withCredentials = true;
+    const xhr = xhrClient(
+      "POST",
+      `${env.NEXT_PUBLIC_BACKEND_API_URL}/v1/tmp-files`,
+    );
 
     xhr.upload.onprogress = (event) => {
       if (event.lengthComputable && options?.onProgress) {
