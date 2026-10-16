@@ -22,6 +22,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { createPen, updatePen } from "@/lib/modules/pen/pen.api";
 import { PenResponse } from "@/lib/modules/pen/pen.schema";
 import { formatHtmlContent } from "@/lib/modules/pen/pen.utils";
+import { pathToPublicUrl } from "@/lib/utils";
 
 const languages: Record<Language, { label: string; Icon: ElementType }> = {
   html: { label: "HTML", Icon: HTML },
@@ -355,7 +356,7 @@ const PenForm = ({ onNew }: { onNew: () => void }) => {
             New
           </Button>
           <Button size="sm" variant="ghost" asChild>
-            <Link href={`/pen/${pen.id}`} target="_blank">
+            <Link href={pathToPublicUrl(`/pen/${pen.id}`)} target="_blank">
               <Eye className="w-3.5 h-3.5" />
               View
             </Link>

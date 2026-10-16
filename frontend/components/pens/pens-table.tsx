@@ -1,7 +1,7 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { Edit2, Eye, MoreHorizontal } from "lucide-react";
+import { EllipsisVertical, Eye } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 
@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { deletePen } from "@/lib/modules/pen/pen.api";
 import { PenResponse } from "@/lib/modules/pen/pen.schema";
+import { formatDateTime, pathToPublicUrl } from "@/lib/utils";
 import { copyToClipboard } from "@/lib/utils/actions";
 
 export const columns: ColumnDef<PenResponse>[] = [
@@ -34,8 +35,8 @@ export const columns: ColumnDef<PenResponse>[] = [
           >
             {pen.title || "Untitled Pen"}
           </Link>
-          <span className="text-[10px] text-muted-foreground font-mono uppercase tracking-tight">
-            {pen.id}
+          <span className="text-[10px] text-muted-foreground font-mono tracking-tight">
+            {`/pen/${pen.id}`}
           </span>
         </div>
       );
@@ -55,21 +56,12 @@ export const columns: ColumnDef<PenResponse>[] = [
   },
   {
     accessorKey: "modified",
-    header: "Last Modified",
-    cell: ({ row }) => {
-      const date = new Date(row.getValue("modified"));
-      return (
-        <span className="text-sm text-muted-foreground tabular-nums">
-          {new Intl.DateTimeFormat("en-US", {
-            month: "short",
-            day: "numeric",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          }).format(date)}
-        </span>
-      );
-    },
+    header: "Modified",
+    cell: ({ row }) => (
+      <span className="text-sm text-muted-foreground tabular-nums">
+        {formatDateTime(row.getValue("modified"))}
+      </span>
+    ),
   },
   {
     id: "actions",
@@ -81,21 +73,32 @@ export const columns: ColumnDef<PenResponse>[] = [
         <div className="text-right">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
+              <Button variant="ghost" className="h-8 w-8 p-0 text-foreground/50">
                 <span className="sr-only">Open menu</span>
-                <MoreHorizontal className="h-4 w-4" />
+                <EllipsisVertical />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuLabel className="text-muted-foreground">
+                Actions
+              </DropdownMenuLabel>
+              <DropdownMenuItem asChild>
+                <Link
+                  href={pathToPublicUrl(`/pen/${pen.id}`)}
+                  target="_blank"
+                  className="cursor-pointer"
+                >
+                  View Public
+                </Link>
+              </DropdownMenuItem>
               <DropdownMenuItem
-                onClick={async () => {
-                  if (await copyToClipboard(pen.id)) {
-                    toast.success("Pen ID copied");
-                  }
-                }}
+                onClick={() =>
+                  copyToClipboard(pathToPublicUrl(`/pen/${pen.id}`), {
+                    successMessage: "Pen URL copied",
+                  })
+                }
               >
-                Copy Pen ID
+                Copy URL
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
@@ -103,18 +106,7 @@ export const columns: ColumnDef<PenResponse>[] = [
                   href={`/dashboard/pens/edit?id=${pen.id}`}
                   className="cursor-pointer"
                 >
-                  <Edit2 className="mr-2 h-4 w-4" />
-                  Edit Pen
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link
-                  href={`/pen/${pen.id}`}
-                  target="_blank"
-                  className="cursor-pointer"
-                >
-                  <Eye className="mr-2 h-4 w-4" />
-                  View Public
+                  Edit
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />

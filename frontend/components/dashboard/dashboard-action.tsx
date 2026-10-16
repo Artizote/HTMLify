@@ -10,24 +10,24 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { deleteFile } from "@/lib/modules/file/file.api";
 import { FileItem, FolderItem } from "@/lib/modules/file/file.types";
+import { pathToPublicUrl } from "@/lib/utils";
+import { copyToClipboard } from "@/lib/utils/actions";
 
 export function DashboardAction({
-  isFolder,
-  href,
   file,
 }: {
-  isFolder: boolean;
-  href: string;
   file: FileItem | FolderItem;
 }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="text-foreground/50">
+        <Button variant="ghost" className="h-8 w-8 p-0 text-foreground/50">
+          <span className="sr-only">Open menu</span>
           <EllipsisVertical />
         </Button>
       </DropdownMenuTrigger>
@@ -37,48 +37,53 @@ export function DashboardAction({
             Actions
           </DropdownMenuLabel>
           <DropdownMenuItem>
-            {isFolder ? (
-              <Link href={href} className="w-full">
-                Open
-              </Link>
-            ) : (
-              <a
-                href={href}
-                className="w-full"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Open
-              </a>
-            )}
+            <a
+              href={pathToPublicUrl(file.path)}
+              className="w-full"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              View Public
+            </a>
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() =>
+              copyToClipboard(pathToPublicUrl(file.path), {
+                successMessage: "URL copied",
+              })
+            }
+          >
+            Copy URL
           </DropdownMenuItem>
           {file && "id" in file && (
-            <DropdownMenuItem asChild>
-              <Link
-                href={`/dashboard/file/edit/${file.id}`}
-                className="w-full cursor-pointer"
-              >
-                Edit
-              </Link>
-            </DropdownMenuItem>
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link
+                  href={`/dashboard/file/edit/${file.id}`}
+                  className="w-full cursor-pointer"
+                >
+                  Edit
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <DeleteAlertDialog
+                  title="Delete file"
+                  description={`Are you sure you want to delete ${file.path}?`}
+                  successMessage="File deleted successfully"
+                  onConfirm={async () => {
+                    const { error } = await deleteFile(file.id);
+                    if (error) {
+                      toast.error(error);
+                      return false;
+                    }
+                    return true;
+                  }}
+                />
+              </DropdownMenuItem>
+            </>
           )}
-          <DropdownMenuItem asChild>
-            {file && "id" in file && (
-              <DeleteAlertDialog
-                title="Delete file"
-                description={`Are you sure you want to delete ${file.path}?`}
-                successMessage="File deleted successfully"
-                onConfirm={async () => {
-                  const { error } = await deleteFile(file.id);
-                  if (error) {
-                    toast.error(error);
-                    return false;
-                  }
-                  return true;
-                }}
-              />
-            )}
-          </DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>

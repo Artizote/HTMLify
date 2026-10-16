@@ -1,6 +1,5 @@
 import {
   Clock,
-  Folder,
   GitBranch,
   PenTool,
   PlusSquare,
@@ -14,9 +13,10 @@ import { FileIcon } from "@/components/dashboard/file-icon";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { env } from "@/lib/env";
 import { getFolderByPath } from "@/lib/modules/file/file.api";
-import { isFolderItem } from "@/lib/modules/file/file.types";
+import { FileItem, isFolderItem } from "@/lib/modules/file/file.types";
 import { getPens } from "@/lib/modules/pen/pen.api";
 import { getMe } from "@/lib/modules/user/user.actions";
+import { formatDateTime, pathToPublicUrl } from "@/lib/utils";
 
 const quickActions = [
   { title: "New File", href: "/dashboard/file/new", icon: PlusSquare },
@@ -25,18 +25,6 @@ const quickActions = [
   { title: "New Pen", href: "/dashboard/pens/edit", icon: PenTool },
   { title: "Temp File", href: `${env.NEXT_PUBLIC_SITE_URL}/tmp`, icon: Clock },
 ];
-
-function formatDate(dateString: string) {
-  try {
-    return new Intl.DateTimeFormat("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    }).format(new Date(dateString));
-  } catch {
-    return dateString;
-  }
-}
 
 const DashboardOverviewPage = async () => {
   const user = await getMe();
@@ -47,9 +35,30 @@ const DashboardOverviewPage = async () => {
     getPens(),
   ]);
 
-  const recent = folder?.items ?? [];
   const fileCount = folder?.items_count ?? 0;
   const penCount = pens?.length ?? 0;
+
+  const files = (folder?.items ?? []).filter(
+    (item): item is FileItem => !isFolderItem(item),
+  );
+
+  const recent = [
+    ...files.map((file) => ({
+      kind: "file" as const,
+      title:
+        file.title || file.path.split("/").filter(Boolean).pop() || "Untitled",
+      path: file.path,
+      modified: Date.parse(file.modified) || 0,
+    })),
+    ...(pens ?? []).map((pen) => ({
+      kind: "pen" as const,
+      title: pen.title || "Untitled Pen",
+      path: `/pen/${pen.id}`,
+      modified: Date.parse(pen.modified) || 0,
+    })),
+  ]
+    .sort((a, b) => b.modified - a.modified)
+    .slice(0, 6);
 
   return (
     <>
@@ -83,7 +92,9 @@ const DashboardOverviewPage = async () => {
             className="rounded-lg border bg-card p-4 transition-colors hover:bg-accent/50"
           >
             <div className="text-2xl font-semibold">{fileCount}</div>
-            <div className="text-sm text-muted-foreground">Files &amp; folders</div>
+            <div className="text-sm text-muted-foreground">
+              Files &amp; folders
+            </div>
           </Link>
           <Link
             href="/dashboard/pens"
@@ -95,80 +106,43 @@ const DashboardOverviewPage = async () => {
         </div>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-base">Recent files</CardTitle>
-            <Link
-              href="/dashboard/files"
-              className="text-sm text-muted-foreground hover:underline"
-            >
-              View all
-            </Link>
+          <CardHeader>
+            <CardTitle className="text-base">Recent changes</CardTitle>
           </CardHeader>
           <CardContent>
             {recent.length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                You have not created any files yet.
+                Nothing here yet. Create a file or a pen to get started.
               </p>
             ) : (
               <ul className="divide-y">
-                {recent.map((item) => {
-                  const isFolder = isFolderItem(item);
-                  const name = isFolder
-                    ? item.name ||
-                      item.path.split("/").filter(Boolean).pop() ||
-                      "Folder"
-                    : item.title ||
-                      item.path.split("/").filter(Boolean).pop() ||
-                      "Untitled";
-
-                  const row = (
-                    <div className="flex items-center gap-3 py-2.5">
-                      {isFolder ? (
-                        <Folder
-                          fill="currentColor"
-                          className="h-4 w-4 shrink-0 text-blue-400"
-                        />
+                {recent.map((item) => (
+                  <li key={`${item.kind}:${item.path}`}>
+                    <a
+                      href={pathToPublicUrl(item.path)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-3 rounded-sm px-3 py-2.5 transition-colors hover:bg-accent/40"
+                    >
+                      {item.kind === "pen" ? (
+                        <PenTool className="h-4 w-4 shrink-0 text-muted-foreground" />
                       ) : (
                         <FileIcon path={item.path} />
                       )}
                       <div className="flex min-w-0 flex-col">
                         <span className="truncate text-sm font-medium">
-                          {name}
+                          {item.title}
                         </span>
                         <span className="truncate font-mono text-[11px] text-muted-foreground">
                           {item.path}
                         </span>
                       </div>
-                      {!isFolder && (
-                        <span className="ml-auto whitespace-nowrap text-xs text-muted-foreground">
-                          {formatDate(item.modified)}
-                        </span>
-                      )}
-                    </div>
-                  );
-
-                  return (
-                    <li key={item.path}>
-                      {isFolder ? (
-                        <Link
-                          href={`/dashboard/files?path=${item.path}`}
-                          className="block rounded-sm transition-colors hover:bg-accent/40"
-                        >
-                          {row}
-                        </Link>
-                      ) : (
-                        <a
-                          href={item.path}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="block rounded-sm transition-colors hover:bg-accent/40"
-                        >
-                          {row}
-                        </a>
-                      )}
-                    </li>
-                  );
-                })}
+                      <span className="ml-auto whitespace-nowrap text-xs text-muted-foreground">
+                        {formatDateTime(item.modified)}
+                      </span>
+                    </a>
+                  </li>
+                ))}
               </ul>
             )}
           </CardContent>

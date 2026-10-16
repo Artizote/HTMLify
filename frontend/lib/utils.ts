@@ -1,8 +1,26 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
+import { env } from "@/lib/env";
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
+}
+
+export function pathToPublicUrl(path: string): string {
+  const base = env.NEXT_PUBLIC_SITE_URL.replace(/\/+$/, "");
+  if (!path) return base;
+  return `${base}${path.startsWith("/") ? "" : "/"}${path}`;
+}
+
+export function formatDateTime(value: string | number | Date): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return (
+    `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}` +
+    ` ${pad(date.getHours())}:${pad(date.getMinutes())}`
+  );
 }
 
 /**
