@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 
 interface DropzoneAreaProps {
   onDrop: (files: File[]) => void;
+  onReject?: (rejections: FileRejection[]) => void;
   accept?: Accept;
   maxSize?: number;
   maxFiles?: number;
@@ -15,14 +16,16 @@ interface DropzoneAreaProps {
 
 export function DropzoneArea({
   onDrop,
+  onReject,
   accept,
   maxSize,
   maxFiles,
   className,
 }: DropzoneAreaProps) {
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop: (accepted: File[], _rejected: FileRejection[]) => {
+    onDrop: (accepted: File[], rejected: FileRejection[]) => {
       onDrop(accepted);
+      if (rejected.length > 0) onReject?.(rejected);
     },
     accept,
     maxSize,

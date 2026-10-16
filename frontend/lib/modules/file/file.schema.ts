@@ -3,7 +3,7 @@ import z from "zod";
 const fileFormSchema = z
   .object({
     content: z.string().optional(),
-    file: z.instanceof(File).optional(),
+    file: z.instanceof(File).nullish(),
     title: z.string().min(1, "Title is required"),
     path: z.string().min(1, "Path is required"),
     password: z.string().optional(),

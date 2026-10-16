@@ -18,7 +18,7 @@ export default async function NewFileCreatePage({
     <>
       <DasshboardNavbar title="New File" />
       <div className="w-full max-w-7xl mx-auto pt-10 px-4">
-        <FileForm mode="upload" user={user} initialPath={path} />
+        <FileForm key="new-file" mode="upload" user={user} initialPath={path} />
       </div>
     </>
   );

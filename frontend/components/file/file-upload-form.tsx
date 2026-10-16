@@ -1,6 +1,7 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, File as FileIcon, Lock } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   Controller,
@@ -76,8 +77,11 @@ export const FileForm = ({
 }: FileFormProps) => {
   const [isPending, setIsPending] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const modeText = mode.charAt(0).toUpperCase() + mode.slice(1);
+  const modeText = mode === "upload" ? "Create" : "Update";
+  const submitLabel = mode === "update" ? "Update" : "Save";
+  const pendingLabel = mode === "update" ? "Updating..." : "Saving...";
   const [alertDialogOpen, setAlertDialogOpen] = useState(false);
+  const router = useRouter();
 
   const [currentFileType, setCurrentFileType] = useState<FileType>(
     initialData?.fileType || "other",
@@ -134,23 +138,33 @@ export const FileForm = ({
 
     setIsPending(true);
     const formData = zodToFormData(data);
-    const { error } =
-      mode === "upload" || initialData?.id === undefined
-        ? await uploadFile(formData)
-        : await updateFile(initialData.id, formData);
+    const isUpdate = mode === "update" && initialData?.id !== undefined;
+    const result = isUpdate
+      ? await updateFile(initialData.id, formData)
+      : await uploadFile(formData);
 
-    if (error) {
-      toast.error(error);
-    } else {
-      toast.success(
-        `File ${mode === "update" ? "updated" : "uploaded"} successfully`,
-      );
+    if (result.error) {
+      toast.error(result.error);
+      setIsPending(false);
+      return;
+    }
 
-      if (mode === "upload") {
-        form.reset();
-        setCurrentFileType("other");
-        setMediaUrl(null);
-      }
+    if (isUpdate) {
+      toast.success("File updated successfully");
+      setIsPending(false);
+      return;
+    }
+
+    toast.success("File created successfully");
+    // Clear the form before leaving so that returning to the "New File" page
+    // doesn't restore the content of the file we just created.
+    form.reset();
+    setCurrentFileType("other");
+    setMediaUrl(null);
+    const createdId = result.data?.id;
+    if (createdId !== undefined) {
+      router.push(`/dashboard/file/edit/${createdId}`);
+      return;
     }
     setIsPending(false);
   };
@@ -297,6 +311,21 @@ export const FileForm = ({
                       onDrop={(files) =>
                         handleFileChange(files[0] ?? null, field)
                       }
+                      onReject={(rejections) => {
+                        const code = rejections[0]?.errors[0]?.code;
+                        if (code === "file-too-large") {
+                          toast.error(
+                            `File is too large (max ${env.NEXT_PUBLIC_MAX_UPLOAD_SIZE_MB} MB)`,
+                          );
+                        } else if (code === "file-invalid-type") {
+                          toast.error("File type not allowed");
+                        } else {
+                          toast.error(
+                            rejections[0]?.errors[0]?.message ??
+                              "Could not add file",
+                          );
+                        }
+                      }}
                     />
                   )}
                   <FieldError errors={[fieldState.error]} />
@@ -307,7 +336,7 @@ export const FileForm = ({
 
           <div className="flex items-center justify-center mt-2 gap-4 w-fit">
             <Button type="submit" disabled={isPending}>
-              {isPending ? "Submiting..." : "Submit"}
+              {isPending ? pendingLabel : submitLabel}
             </Button>
           </div>
         </form>

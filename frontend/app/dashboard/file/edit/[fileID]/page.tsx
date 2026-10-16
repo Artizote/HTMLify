@@ -44,6 +44,7 @@ export default async function NewFileCreatePage({
       <DasshboardNavbar title="Edit File" />
       <div className="w-full max-w-7xl mx-auto pt-10 px-4">
         <FileForm
+          key={`edit-file-${fileID}`}
           mode="update"
           user={user}
           initialData={{
