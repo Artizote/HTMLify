@@ -1,5 +1,6 @@
 import { env } from "@/lib/env";
 import { parseServerError } from "@/lib/errors";
+
 let clientRefreshPromise: Promise<boolean> | null = null;
 
 async function executeClientRefresh() {
@@ -13,6 +14,7 @@ async function executeClientRefresh() {
     .finally(() => {
       clientRefreshPromise = null;
     });
+
   return clientRefreshPromise;
 }
 
@@ -139,3 +141,5 @@ export async function APICall(
     return { response: null, error: "Failed to fetch" };
   }
 }
+
+export { executeClientRefresh };

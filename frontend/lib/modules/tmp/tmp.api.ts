@@ -1,4 +1,4 @@
-import { env } from "@/lib/env";
+import { uploadWithProgress } from "@/lib/fetch/xhr";
 
 import { TmpFile, TmpFormType } from "./tmp.types";
 
@@ -22,36 +22,27 @@ export const createTmpFile = async (
     formData.append("expiry", data.expiry.toString());
   }
 
-  return new Promise((resolve) => {
-    const xhr = new XMLHttpRequest();
-    xhr.open("POST", `/api/v1/tmp-files`);
-    xhr.withCredentials = true;
+  const result = await uploadWithProgress(
+    "POST",
+    `/api/v1/tmp-files`,
+    formData,
+    options?.onProgress,
+  );
 
-    xhr.upload.onprogress = (event) => {
-      if (event.lengthComputable && options?.onProgress) {
-        options.onProgress(Math.round((event.loaded / event.total) * 100));
-      }
-    };
+  if (!result) {
+    return { data: null, error: "Failed to create temporary file link" };
+  }
 
-    xhr.onload = () => {
-      if (xhr.status >= 200 && xhr.status < 300) {
-        try {
-          resolve({
-            data: JSON.parse(xhr.responseText) as TmpFile,
-            error: null,
-          });
-        } catch {
-          resolve({ data: null, error: "Invalid response from server" });
-        }
-      } else {
-        resolve({ data: null, error: "Failed to create temporary file link" });
-      }
-    };
+  if (result.status >= 200 && result.status < 300) {
+    try {
+      return {
+        data: JSON.parse(result.responseText) as TmpFile,
+        error: null,
+      };
+    } catch {
+      return { data: null, error: "Invalid response from server" };
+    }
+  }
 
-    xhr.onerror = () => {
-      resolve({ data: null, error: "Failed to create temporary file link" });
-    };
-
-    xhr.send(formData);
-  });
+  return { data: null, error: "Failed to create temporary file link" };
 };

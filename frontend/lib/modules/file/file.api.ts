@@ -1,5 +1,6 @@
 import { env } from "@/lib/env";
-import { APICall as APICall } from "@/lib/fetch/api";
+import { APICall } from "@/lib/fetch/api";
+import { uploadWithProgress } from "@/lib/fetch/xhr";
 import { GitCloneFormType } from "@/lib/modules/file/file.schema";
 import { FileIDResponse, FolderResponse } from "@/lib/modules/file/file.types";
 
@@ -76,43 +77,34 @@ export const uploadFileWithProgress = async (
   formData: FormData,
   options?: UploadFileOptions,
 ): Promise<{ data: FileIDResponse | null; error: string | null }> => {
-  return new Promise((resolve) => {
-    const xhr = new XMLHttpRequest();
-    xhr.open("POST", `/api/v1/files/upload`);
-    xhr.withCredentials = true;
+  const result = await uploadWithProgress(
+    "POST",
+    `/api/v1/files/upload`,
+    formData,
+    options?.onProgress,
+  );
 
-    xhr.upload.onprogress = (event) => {
-      if (event.lengthComputable && options?.onProgress) {
-        options.onProgress(Math.round((event.loaded / event.total) * 100));
-      }
-    };
+  if (!result) {
+    return { data: null, error: "Failed to upload file" };
+  }
 
-    xhr.onload = () => {
-      if (xhr.status >= 200 && xhr.status < 300) {
-        try {
-          resolve({
-            data: JSON.parse(xhr.responseText) as FileIDResponse,
-            error: null,
-          });
-        } catch {
-          resolve({ data: null, error: "Invalid response from server" });
-        }
-      } else {
-        let msg = "Upload failed";
-        try {
-          const body = JSON.parse(xhr.responseText);
-          msg = body?.detail ?? msg;
-        } catch {}
-        resolve({ data: null, error: msg });
-      }
-    };
+  if (result.status >= 200 && result.status < 300) {
+    try {
+      return {
+        data: JSON.parse(result.responseText) as FileIDResponse,
+        error: null,
+      };
+    } catch {
+      return { data: null, error: "Invalid response from server" };
+    }
+  }
 
-    xhr.onerror = () => {
-      resolve({ data: null, error: "Failed to upload file" });
-    };
-
-    xhr.send(formData);
-  });
+  let msg = "Upload failed";
+  try {
+    const body = JSON.parse(result.responseText);
+    msg = body?.detail ?? msg;
+  } catch {}
+  return { data: null, error: msg };
 };
 
 export const updateFile = async (
