@@ -53,7 +53,13 @@ const FilesPage = async ({ searchParams }: FilesPageProps) => {
       <DasshboardNavbar actions={<FolderActions path={path} />}>
         <DashboardBreadcrumb path={path} />
       </DasshboardNavbar>
-      <div className="flex flex-col gap-4 p-6 w-full">
+      <div className="container mx-auto px-6 py-6 space-y-6">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-2xl font-bold tracking-tight">Your Files</h2>
+          <p className="text-muted-foreground">
+            Manage your files and folders.
+          </p>
+        </div>
         <FileTable
           items={items}
           totalItems={totalItems}

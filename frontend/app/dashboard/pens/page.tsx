@@ -29,13 +29,23 @@ export default async function PensPage({
   return (
     <>
       <DasshboardNavbar title="Pens" />
-      <div className="w-full h-full p-6">
+      <div className="container mx-auto px-6 py-6 space-y-6">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-2xl font-bold tracking-tight">Your Pens</h2>
+          <p className="text-muted-foreground">
+            Manage your HTML CSS JS pens.
+          </p>
+        </div>
         <PensTable
           pens={paginatedPens}
           pageCount={pageCount}
           pageIndex={pageIndex}
           pageSize={pageSize}
         />
+        <p className="text-xs text-muted-foreground">
+          Showing {paginatedPens.length} of {totalItems}{" "}
+          {totalItems === 1 ? "pen" : "pens"}
+        </p>
       </div>
     </>
   );

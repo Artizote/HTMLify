@@ -16,7 +16,7 @@ import { getFolderByPath } from "@/lib/modules/file/file.api";
 import { FileItem, isFolderItem } from "@/lib/modules/file/file.types";
 import { getPens } from "@/lib/modules/pen/pen.api";
 import { getMe } from "@/lib/modules/user/user.actions";
-import { formatDateTime, pathToPublicUrl } from "@/lib/utils";
+import { formatDateTime } from "@/lib/utils";
 
 const quickActions = [
   { title: "New File", href: "/dashboard/file/new", icon: PlusSquare },
@@ -45,6 +45,7 @@ const DashboardOverviewPage = async () => {
   const recent = [
     ...files.map((file) => ({
       kind: "file" as const,
+      id: file.id,
       title:
         file.title || file.path.split("/").filter(Boolean).pop() || "Untitled",
       path: file.path,
@@ -52,6 +53,7 @@ const DashboardOverviewPage = async () => {
     })),
     ...(pens ?? []).map((pen) => ({
       kind: "pen" as const,
+      id: pen.id,
       title: pen.title || "Untitled Pen",
       path: `/pen/${pen.id}`,
       modified: Date.parse(pen.modified) || 0,
@@ -118,11 +120,13 @@ const DashboardOverviewPage = async () => {
               <ul className="divide-y">
                 {recent.map((item) => (
                   <li key={`${item.kind}:${item.path}`}>
-                    <a
-                      href={pathToPublicUrl(item.path)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-3 rounded-sm px-3 py-2.5 transition-colors hover:bg-accent/40"
+                    <Link
+                      href={
+                        item.kind === "pen"
+                          ? `/dashboard/pens/edit?id=${item.id}`
+                          : `/dashboard/file/edit/${item.id}`
+                      }
+                      className="flex items-center gap-3 rounded-sm px-3 py-2.5 transition-colors hover:bg-muted/50"
                     >
                       {item.kind === "pen" ? (
                         <PenTool className="h-4 w-4 shrink-0 text-muted-foreground" />
@@ -140,7 +144,7 @@ const DashboardOverviewPage = async () => {
                       <span className="ml-auto whitespace-nowrap text-xs text-muted-foreground">
                         {formatDateTime(item.modified)}
                       </span>
-                    </a>
+                    </Link>
                   </li>
                 ))}
               </ul>
