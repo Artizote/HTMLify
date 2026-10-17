@@ -52,6 +52,14 @@ export const getFileContentByPath = async (
   return getFileContentById(data.id);
 };
 
+export const hitFile = async ({ id, path, }: { id?: number; path?: string } = {}):
+Promise<void> => {
+  const params = new URLSearchParams();
+  if (id) params.set("id", String(id));
+  if (path) params.set("path", path);
+  await APICall(`${env.NEXT_PUBLIC_BACKEND_API_URL}/internal/file/hit?${params.toString()}`);
+};
+
 export const uploadFile = async (
   formData: FormData,
 ): Promise<{ data: FileIDResponse | null; error: string | null }> => {

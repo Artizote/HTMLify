@@ -113,4 +113,8 @@ async function deletePen(
   };
 }
 
-export { createPen, deletePen, getPenById, getPens, updatePen };
+async function hitPen(id: string) {
+  await APICall(`${env.NEXT_PUBLIC_BACKEND_API_URL}/internal/pen/hit?id=${id}`);
+}
+
+export { createPen, deletePen, getPenById, getPens, hitPen, updatePen };

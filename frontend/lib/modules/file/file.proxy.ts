@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import {
   getFileContentById,
   getFileInfoByPathOrID,
+  hitFile,
 } from "@/lib/modules/file/file.api";
 import { FileMode } from "@/lib/modules/file/file.types";
 import { getFileContentType } from "@/lib/modules/file/file.utils";
@@ -54,5 +55,6 @@ export const serverFile = async (pathname: string) => {
   if (mode === "source") {
     mode = fileInfo.mode;
   }
+  void hitFile({ id: fileInfo.id });
   return await serveFileContent(fileInfo.id, mode, filePath);
 };

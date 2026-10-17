@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { getPenById } from "@/lib/modules/pen/pen.api";
+import { getPenById, hitPen } from "@/lib/modules/pen/pen.api";
 import { formatHtmlContent } from "@/lib/modules/pen/pen.utils";
 
 const serverPenContent = async (id: string) => {
@@ -14,11 +14,14 @@ const serverPenContent = async (id: string) => {
     data.css_content,
     data.js_content,
   );
+  void hitPen(id);
   return new NextResponse(html, {
     headers: {
       "Content-Type": "text/html",
     },
   });
 };
+
+// TODO: src, raw and render mode path-modefier
 
 export { serverPenContent };
