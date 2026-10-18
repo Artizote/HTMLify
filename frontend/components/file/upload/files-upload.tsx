@@ -8,6 +8,7 @@ import { DropzoneArea } from "@/components/file/dropzone-area";
 import { FileListItem } from "@/components/file/file-list-item";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import { useFileUploadStore } from "@/lib/hooks/use-file-upload";
 import { toUserRelativePath } from "@/lib/modules/file/file.utils";
 import { UserFullInfo } from "@/lib/modules/user/user.types";
@@ -40,6 +41,8 @@ export const FileUpload = ({
   );
   const [subfolder, setSubfolder] = useState(initialDir);
   const [overwrite, setOverwrite] = useState(false);
+  const [mode, setMode] = useState<"source" | "render">("render");
+  const [visibility, setVisibility] = useState<"public" | "hidden">("public");
   const { queue, addFiles, removeItem, retryItem, retryFailed, clearQueue } =
     useFileUploadStore();
 
@@ -114,17 +117,41 @@ export const FileUpload = ({
       <div className="p-4">
         <DropzoneArea
           maxFiles={20}
-          onDrop={(files) => addFiles(files, folderPath, overwrite)}
+          onDrop={(files) => addFiles(files, folderPath, overwrite, mode, visibility)}
         />
-        <label className="flex items-center gap-2 mt-3 cursor-pointer text-sm text-muted-foreground w-fit">
-          <input
-            type="checkbox"
-            checked={overwrite}
-            onChange={(e) => setOverwrite(e.target.checked)}
-            className="accent-primary"
-          />
-          Overwrite existing files
-        </label>
+        <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
+          <label className="flex cursor-pointer items-center gap-2">
+            <input
+              type="checkbox"
+              checked={overwrite}
+              onChange={(e) => setOverwrite(e.target.checked)}
+              className="accent-primary"
+            />
+            Overwrite existing files
+          </label>
+          <div className="ml-auto flex flex-wrap items-center gap-x-6 gap-y-2">
+            <label className="flex cursor-pointer items-center gap-2">
+              <span className="text-xs font-medium">Private</span>
+              <Switch
+                size="sm"
+                checked={visibility === "public"}
+                onCheckedChange={(v) =>
+                  setVisibility(v ? "public" : "hidden")
+                }
+              />
+              <span className="text-xs font-medium">Public</span>
+            </label>
+            <label className="flex cursor-pointer items-center gap-2">
+              <span className="text-xs font-medium">Source</span>
+              <Switch
+                size="sm"
+                checked={mode === "render"}
+                onCheckedChange={(v) => setMode(v ? "render" : "source")}
+              />
+              <span className="text-xs font-medium">Render</span>
+            </label>
+          </div>
+        </div>
       </div>
 
       {queue.length > 0 && (

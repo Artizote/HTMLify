@@ -21,6 +21,8 @@ interface UploadItem {
   controller?: AbortController;
   error?: string;
   overwrite?: boolean;
+  mode?: string;
+  visibility?: string;
 }
 
 interface FileUploadStore {
@@ -29,8 +31,7 @@ interface FileUploadStore {
   cancelled: string[];
 
   removeItem: (localId: string) => void;
-
-  addFiles: (files: File[], folderPath: string, overwrite?: boolean) => void;
+  addFiles: (files: File[], folderPath: string, overwrite?: boolean, mode?: string, visibility?: string) => void;
   startQueue: () => Promise<void>;
   updateProgress: (localId: string, progress: number) => void;
   updateItem: (localId: string, updates: Partial<UploadItem>) => void;
@@ -55,7 +56,7 @@ export const useFileUploadStore = create<FileUploadStore>((set, get) => ({
     }));
   },
 
-  addFiles: (files, folderPath, overwrite = false) => {
+  addFiles: (files, folderPath, overwrite = false, mode = "render", visibility = "public") => {
     const newItems: UploadItem[] = files.map((file) => {
       const fullPath = folderPath
         ? `${folderPath.replace(/\/$/, "")}/${file.name}`
@@ -67,6 +68,8 @@ export const useFileUploadStore = create<FileUploadStore>((set, get) => ({
         progress: 0,
         status: "queued" as const,
         overwrite,
+        mode,
+        visibility,
       };
     });
 
@@ -124,8 +127,8 @@ export const useFileUploadStore = create<FileUploadStore>((set, get) => ({
           const formData = new FormData();
           formData.append("file", next.file);
           formData.append("path", next.path);
-          formData.append("visibility", "public");
-          formData.append("mode", "source");
+          if (next.mode) formData.append("mode", next.mode);
+          if (next.visibility) formData.append("visibility", next.visibility);
           if (next.overwrite) {
             formData.append("update", "true");
           }
