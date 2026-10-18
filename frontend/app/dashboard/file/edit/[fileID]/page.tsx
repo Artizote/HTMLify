@@ -34,10 +34,10 @@ export default async function NewFileCreatePage({
   if (!fileContentResp) {
     return "Failed to load file content";
   }
-  const content = await fileContentResp.text();
+  const contentType = getFileContentType(data.path);
+  const content =
+    contentType === "other" ? await fileContentResp.text() : undefined;
   fileData = { fileInfo: data, content, mediaUrl: fileContentResp.url };
-
-  const contentType = getFileContentType(fileData.fileInfo.path);
 
   return (
     <>

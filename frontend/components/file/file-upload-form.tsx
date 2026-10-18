@@ -121,11 +121,17 @@ export const FileForm = ({
     data: z.infer<typeof fileFormSchema>,
     force = false,
   ) => {
-    if (currentFileType === "other") {
+    if (currentFileType !== "other" && !data.file) {
+      // Media without a new file: keep the existing blob untouched.
       data = {
         ...data,
-        file: undefined,
+        content: undefined,
       };
+    }
+
+    if (mode === "upload" && !data.content && !data.file) {
+      toast.error("Either file or content is required");
+      return;
     }
 
     const fullPath = getFullPath();
