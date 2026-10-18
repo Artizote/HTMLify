@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { useFileUploadStore } from "@/lib/hooks/use-file-upload";
 import { toUserRelativePath } from "@/lib/modules/file/file.utils";
 import { UserFullInfo } from "@/lib/modules/user/user.types";
+import { pathToPublicUrl } from "@/lib/utils";
 
 export const FileUpload = ({
   user,
@@ -38,7 +39,9 @@ export const FileUpload = ({
     Boolean(initialPath) || Boolean(dirParam),
   );
   const [subfolder, setSubfolder] = useState(initialDir);
-  const { queue, addFiles, deleteFile, clearQueue } = useFileUploadStore();
+  const [overwrite, setOverwrite] = useState(false);
+  const { queue, addFiles, removeItem, retryItem, retryFailed, clearQueue } =
+    useFileUploadStore();
 
   const updateUrlParams = (path: string) => {
     const params = new URLSearchParams(window.location.search);
@@ -111,25 +114,75 @@ export const FileUpload = ({
       <div className="p-4">
         <DropzoneArea
           maxFiles={20}
-          onDrop={(files) => addFiles(files, folderPath)}
+          onDrop={(files) => addFiles(files, folderPath, overwrite)}
         />
+        <label className="flex items-center gap-2 mt-3 cursor-pointer text-sm text-muted-foreground w-fit">
+          <input
+            type="checkbox"
+            checked={overwrite}
+            onChange={(e) => setOverwrite(e.target.checked)}
+            className="accent-primary"
+          />
+          Overwrite existing files
+        </label>
       </div>
 
       {queue.length > 0 && (
         <div className="border-t border-border/40">
-          <div className="px-4 py-2">
+          <div className="flex items-center justify-between border-b border-border/40 px-4 py-2">
             <p className="text-xs font-medium text-muted-foreground">Uploads</p>
+            {queue.some((item) => item.status === "failed") && (
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-7 text-xs text-muted-foreground hover:text-foreground"
+                onClick={() => retryFailed(overwrite)}
+              >
+                Retry All
+              </Button>
+            )}
           </div>
           <div className="flex flex-col">
-            {[...queue].reverse().map((item) => (
-              <FileListItem
-                onRemove={() => deleteFile(item.localId)}
-                key={item.localId}
-                name={item.file.name}
-                size={item.file.size}
-                progress={item.progress}
-              />
-            ))}
+            {queue
+              .filter((item) => item.status === "completed")
+              .map((item) => {
+                const folder = item.path.split("/").slice(0, -1).join("/");
+                return (
+                  <FileListItem
+                    key={item.localId}
+                    name={item.file.name}
+                    size={item.file.size}
+                    progress={item.progress}
+                    onFolder={() =>
+                      router.push(`/dashboard/files?path=${folder}`)
+                    }
+                    onOpen={() =>
+                      window.open(pathToPublicUrl(item.path), "_blank")
+                    }
+                  />
+                );
+              })}
+            {queue
+              .filter((item) => item.status !== "completed")
+              .map((item) => (
+                <div key={item.localId}>
+                  <FileListItem
+                    key={item.localId}
+                    name={item.file.name}
+                    size={item.file.size}
+                    progress={item.progress}
+                    error={
+                      item.status === "failed" ? item.error : undefined
+                    }
+                    onRetry={
+                      item.status === "failed"
+                        ? () => retryItem(item.localId, overwrite)
+                        : undefined
+                    }
+                    onRemove={() => removeItem(item.localId)}
+                  />
+                </div>
+              ))}
           </div>
         </div>
       )}

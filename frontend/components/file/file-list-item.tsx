@@ -1,4 +1,4 @@
-import { ExternalLink, Trash2 } from "lucide-react";
+import { ExternalLink, Folder, RotateCw, Trash2 } from "lucide-react";
 
 import { FileIcon } from "@/components/dashboard/file-icon";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,10 @@ interface FileListItemProps {
   size: number;
   progress: number;
   subtitle?: string;
+  error?: string;
+  onFolder?: (e: React.MouseEvent) => void;
   onOpen?: (e: React.MouseEvent) => void;
+  onRetry?: (e: React.MouseEvent) => void;
   onRemove?: (e: React.MouseEvent) => void;
 }
 
@@ -18,7 +21,10 @@ export function FileListItem({
   size,
   progress,
   subtitle,
+  error,
+  onFolder,
   onOpen,
+  onRetry,
   onRemove,
 }: FileListItemProps) {
   const done = progress >= 100;
@@ -41,12 +47,39 @@ export function FileListItem({
             {subtitle}
           </p>
         )}
+        {error && (
+          <p className="truncate text-xs text-destructive">{error}</p>
+        )}
         <p className="text-xs text-muted-foreground">{formatBytes(size)}</p>
       </div>
       {!done && (
         <span className="shrink-0 text-xs text-muted-foreground">
           {progress}%
         </span>
+      )}
+      {onRetry && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          title="Retry"
+          className="h-8 w-8 shrink-0 text-muted-foreground hover:bg-background hover:text-foreground"
+          onClick={onRetry}
+        >
+          <RotateCw className="h-4 w-4" />
+        </Button>
+      )}
+      {onFolder && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          title="Open in folder"
+          className="h-8 w-8 shrink-0 text-muted-foreground hover:bg-background hover:text-foreground"
+          onClick={onFolder}
+        >
+          <Folder className="h-4 w-4" />
+        </Button>
       )}
       {onOpen && (
         <Button

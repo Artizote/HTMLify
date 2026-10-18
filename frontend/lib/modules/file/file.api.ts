@@ -84,6 +84,7 @@ export const uploadFile = async (
 
 interface UploadFileOptions {
   onProgress?: (progress: number) => void;
+  signal?: AbortSignal;
 }
 
 export const uploadFileWithProgress = async (
@@ -95,6 +96,7 @@ export const uploadFileWithProgress = async (
     `/api/v1/files/upload`,
     formData,
     options?.onProgress,
+    options?.signal,
   );
 
   if (!result) {
