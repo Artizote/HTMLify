@@ -4,6 +4,7 @@ import { TmpFile, TmpFormType } from "./tmp.types";
 
 interface CreateTmpFileOptions {
   onProgress?: (progress: number) => void;
+  signal?: AbortSignal;
 }
 
 export const createTmpFile = async (
@@ -12,7 +13,6 @@ export const createTmpFile = async (
 ): Promise<{ data: TmpFile | null; error: string | null }> => {
   const formData = new FormData();
   if (data.file) {
-    console.log({ file: typeof data.file });
     formData.append("file", data.file);
   }
   if (data.name) {
@@ -27,10 +27,11 @@ export const createTmpFile = async (
     `/api/v1/tmp-files`,
     formData,
     options?.onProgress,
+    options?.signal,
   );
 
   if (!result) {
-    return { data: null, error: "Failed to create temporary file link" };
+    return { data: null, error: "Failed to upload temporary file" };
   }
 
   if (result.status >= 200 && result.status < 300) {
@@ -44,5 +45,5 @@ export const createTmpFile = async (
     }
   }
 
-  return { data: null, error: "Failed to create temporary file link" };
+  return { data: null, error: "Failed to upload temporary file" };
 };

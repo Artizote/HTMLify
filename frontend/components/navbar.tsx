@@ -19,6 +19,7 @@ import { env } from "@/lib/env";
 const NAV_LINKS = [
   { name: "Dashboard", href: "/dashboard" },
   { name: "Temp File", href: "/tmp" },
+  { name: "Temp Folder", href: "/tmp/f" },
   { name: "Shortlinks", href: "/r" },
   { name: "Frames", href: "/frames" },
   { name: "API", href: "/api" },

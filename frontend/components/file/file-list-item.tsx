@@ -1,4 +1,4 @@
-import { X } from "lucide-react";
+import { ExternalLink, Trash2 } from "lucide-react";
 
 import { FileIcon } from "@/components/dashboard/file-icon";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,8 @@ interface FileListItemProps {
   name: string;
   size: number;
   progress: number;
+  subtitle?: string;
+  onOpen?: (e: React.MouseEvent) => void;
   onRemove?: (e: React.MouseEvent) => void;
 }
 
@@ -15,6 +17,8 @@ export function FileListItem({
   name,
   size,
   progress,
+  subtitle,
+  onOpen,
   onRemove,
 }: FileListItemProps) {
   const done = progress >= 100;
@@ -32,6 +36,11 @@ export function FileListItem({
       </div>
       <div className="min-w-0 flex-1 text-left">
         <p className="truncate text-sm font-medium">{name}</p>
+        {subtitle && (
+          <p className="truncate text-[11px] text-muted-foreground font-mono">
+            {subtitle}
+          </p>
+        )}
         <p className="text-xs text-muted-foreground">{formatBytes(size)}</p>
       </div>
       {!done && (
@@ -39,15 +48,28 @@ export function FileListItem({
           {progress}%
         </span>
       )}
+      {onOpen && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          title="Open"
+          className="h-8 w-8 shrink-0 text-muted-foreground hover:bg-background hover:text-foreground"
+          onClick={onOpen}
+        >
+          <ExternalLink className="h-4 w-4" />
+        </Button>
+      )}
       {onRemove && (
         <Button
           type="button"
           variant="ghost"
           size="icon"
+          title="Remove"
           className="h-8 w-8 shrink-0 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
           onClick={onRemove}
         >
-          <X className="h-4 w-4" />
+          <Trash2 className="h-4 w-4" />
         </Button>
       )}
     </div>

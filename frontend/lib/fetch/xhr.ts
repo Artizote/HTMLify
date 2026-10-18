@@ -12,11 +12,16 @@ function sendOnce(
   url: string,
   body: XMLHttpRequestBodyInit | null,
   onProgress?: ProgressCallback,
+  signal?: AbortSignal,
 ): Promise<UploadResult> {
   return new Promise((resolve) => {
     const xhr = new XMLHttpRequest();
     xhr.open(method, url);
     xhr.withCredentials = true;
+
+    const abort = () => xhr.abort();
+    const done = () => signal?.removeEventListener("abort", abort);
+    signal?.addEventListener("abort", abort, { once: true });
 
     if (onProgress) {
       xhr.upload.onprogress = (event) => {
@@ -26,9 +31,18 @@ function sendOnce(
       };
     }
 
-    xhr.onload = () =>
+    xhr.onload = () => {
+      done();
       resolve({ status: xhr.status, responseText: xhr.responseText });
-    xhr.onerror = () => resolve(null);
+    };
+    xhr.onerror = () => {
+      done();
+      resolve(null);
+    };
+    xhr.onabort = () => {
+      done();
+      resolve(null);
+    };
 
     xhr.send(body);
   });
@@ -43,11 +57,12 @@ async function uploadWithProgress(
   url: string,
   body: XMLHttpRequestBodyInit | null,
   onProgress?: ProgressCallback,
+  signal?: AbortSignal,
 ): Promise<UploadResult> {
-  let result = await sendOnce(method, url, body, onProgress);
+  let result = await sendOnce(method, url, body, onProgress, signal);
 
   if (result && result.status === 401 && (await executeClientRefresh())) {
-    result = await sendOnce(method, url, body, onProgress);
+    result = await sendOnce(method, url, body, onProgress, signal);
   }
 
   return result;

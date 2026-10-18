@@ -2,13 +2,13 @@ import { create } from "zustand";
 
 import { env } from "@/lib/env";
 import { createTmpFile } from "@/lib/modules/tmp/tmp.api";
+import { TmpFile } from "@/lib/modules/tmp/tmp.types";
 import {
   AddFileToTmpFolder,
   createTmpFolder,
   DeleteTmpFileFromFolder,
 } from "@/lib/tmp-folder/tmp-folder.api";
 import { randomId } from "@/lib/utils";
-import { copyToClipboard } from "@/lib/utils/actions";
 
 import { TmpFolderResponse } from "../tmp-folder/tmp-folder.types";
 
@@ -19,6 +19,14 @@ interface UploadItem {
   file: File;
   progress: number;
   status: UploadStatus;
+  controller?: AbortController;
+}
+
+interface UploadedFile {
+  id: string;
+  name: string;
+  size: number;
+  url: string;
 }
 
 interface TmpFolderStore {
@@ -29,14 +37,17 @@ interface TmpFolderStore {
     name: string,
   ) => Promise<{ success: boolean; error: string | null }>;
   deleteFile: (fileId: string) => Promise<void>;
+  resetFolder: () => void;
 
   queue: UploadItem[];
   isUploading: boolean;
 
+  cancelled: string[];
+  uploaded: UploadedFile[];
+  removeFromQueue: (id: string) => void;
+
   url: string | null;
-  copied: boolean;
-  copyUrl: () => void;
-  resetCopy: () => void;
+  focusName: boolean;
 
   addFiles: (files: File[]) => void;
   startQueue: () => Promise<void>;
@@ -59,12 +70,7 @@ export const useTmpFolderStore = create<TmpFolderStore>((set, get) => ({
     if (error) return;
 
     set((state) => ({
-      folder: state.folder
-        ? {
-            ...state.folder,
-            files: state.folder.files.filter((id) => id !== fileId),
-          }
-        : null,
+      uploaded: state.uploaded.filter((file) => file.id !== fileId),
     }));
   },
   setFolder: (folderName, folderId = "", authCode = "") =>
@@ -76,7 +82,9 @@ export const useTmpFolderStore = create<TmpFolderStore>((set, get) => ({
         auth_code: authCode,
       },
       url: folderId ? `${env.NEXT_PUBLIC_SITE_URL}/tmp/f/${folderId}` : null,
-      copied: false,
+      uploaded: [],
+      cancelled: [],
+      focusName: false,
     }),
 
   createFolder: async (name: string) => {
@@ -88,7 +96,9 @@ export const useTmpFolderStore = create<TmpFolderStore>((set, get) => ({
       set({
         folder: data,
         url: `${env.NEXT_PUBLIC_SITE_URL}/tmp/f/${data.id}`,
-        copied: false,
+        uploaded: [],
+        cancelled: [],
+        focusName: false,
       });
       return { success: true, error: null };
     } catch (err) {
@@ -97,24 +107,34 @@ export const useTmpFolderStore = create<TmpFolderStore>((set, get) => ({
     }
   },
 
-  queue: [],
-  isUploading: false,
-
-  url: null,
-  copied: false,
-
-  copyUrl: () => {
-    const { folder } = get();
-    if (!folder?.id) return;
-    const url = `${env.NEXT_PUBLIC_SITE_URL}/tmp/f/${folder.id}`;
-    void copyToClipboard(url).then((ok) => {
-      if (!ok) return;
-      set({ copied: true });
-      setTimeout(() => set({ copied: false }), 1800);
+  resetFolder: () => {
+    const { queue } = get();
+    queue.forEach((item) => item.controller?.abort());
+    set({
+      folder: null,
+      queue: [],
+      uploaded: [],
+      cancelled: queue.map((item) => item.id),
+      url: null,
+      focusName: true,
     });
   },
 
-  resetCopy: () => set({ copied: false }),
+  queue: [],
+  isUploading: false,
+
+  cancelled: [],
+  uploaded: [],
+  removeFromQueue: (id) => {
+    get().queue.find((item) => item.id === id)?.controller?.abort();
+    set((state) => ({
+      queue: state.queue.filter((item) => item.id !== id),
+      cancelled: [...state.cancelled, id],
+    }));
+  },
+
+  url: null,
+  focusName: false,
 
   addFiles: (files) => {
     set((state) => ({
@@ -146,7 +166,13 @@ export const useTmpFolderStore = create<TmpFolderStore>((set, get) => ({
 
         set((state) => ({
           queue: state.queue.map((item) =>
-            item.id === next.id ? { ...item, status: "uploading" } : item,
+            item.id === next.id
+              ? {
+                  ...item,
+                  status: "uploading" as const,
+                  controller: new AbortController(),
+                }
+              : item,
           ),
         }));
 
@@ -169,7 +195,6 @@ export const useTmpFolderStore = create<TmpFolderStore>((set, get) => ({
             set({
               folder: data,
               url: `${env.NEXT_PUBLIC_SITE_URL}/tmp/f/${data.id}`,
-              copied: false,
             });
           }
 
@@ -177,11 +202,39 @@ export const useTmpFolderStore = create<TmpFolderStore>((set, get) => ({
             throw new Error("Auth code is required");
           }
 
-          await uploadFile(next, folderId, folder?.auth_code, (progress) => {
-            get().updateProgress(next.id, progress);
-          });
+          const tmpFile = await uploadFile(
+            next,
+            folderId,
+            folder?.auth_code,
+            (progress) => {
+              get().updateProgress(next.id, progress);
+            },
+            get().queue.find((item) => item.id === next.id)?.controller
+              ?.signal,
+          );
+
+          if (get().cancelled.includes(next.id)) {
+            const { folder: current } = get();
+            if (current?.auth_code) {
+              await DeleteTmpFileFromFolder({
+                tmpFolderId: folderId,
+                tmpFileId: tmpFile.id,
+                authCode: current.auth_code,
+              }).catch(() => {});
+            }
+            continue;
+          }
 
           set((state) => ({
+            uploaded: [
+              ...state.uploaded,
+              {
+                id: tmpFile.id,
+                name: tmpFile.name,
+                size: next.file.size,
+                url: tmpFile.url,
+              },
+            ],
             queue: state.queue.map((item) =>
               item.id === next.id
                 ? {
@@ -193,6 +246,9 @@ export const useTmpFolderStore = create<TmpFolderStore>((set, get) => ({
             ),
           }));
         } catch (err) {
+          if (get().cancelled.includes(next.id)) {
+            continue;
+          }
           console.error(err);
 
           set((state) => ({
@@ -225,12 +281,12 @@ const uploadFile = async (
   folderId: string,
   authCode: string,
   onProgress: (progress: number) => void,
-) => {
+  signal?: AbortSignal,
+): Promise<TmpFile> => {
   const { data: tmpFile, error: uploadError } = await createTmpFile(
     { file: item.file },
-    { onProgress },
+    { onProgress, signal },
   );
-  console.log({ tmpFile });
   if (uploadError || !tmpFile) {
     throw new Error(uploadError ?? "Failed to upload file");
   }
@@ -243,4 +299,6 @@ const uploadFile = async (
   if (addError) {
     throw new Error(addError);
   }
+
+  return tmpFile;
 };

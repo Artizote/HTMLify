@@ -61,7 +61,7 @@ export const useTmpForm = () => {
       expiry: finalExpiry,
     });
     if (apiError || !data) {
-      setError(apiError || "Failed to create temporary file link");
+      setError(apiError || "Failed to upload temporary file");
       setIsPending(false);
       return;
     }

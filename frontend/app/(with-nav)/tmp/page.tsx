@@ -9,17 +9,18 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import Link from "next/link";
 
 const TmpPage = () => {
   return (
     <PageShell
-      title="Temporary File Links"
-      description="Upload files and generate secure, self-destructing links with custom expiry."
+      title="Temp File"
+      description="Upload a temporary file and get a public link. It is automatically deleted after the chosen expiry."
       titleClassName="text-left"
     >
       <Card className="border-border/50 shadow-xl bg-background/50 backdrop-blur-sm">
         <CardHeader>
-          <CardTitle>Generate Link</CardTitle>
+          <CardTitle>Upload File</CardTitle>
           <CardDescription>
             Your files will be automatically deleted after the specified time.
           </CardDescription>
@@ -28,6 +29,16 @@ const TmpPage = () => {
           <TmpForm />
         </CardContent>
       </Card>
+      <p className="text-sm text-muted-foreground text-center">
+        Need to share multiple files? Use a{" "}
+        <Link
+          href="/tmp/f"
+          className="underline underline-offset-4 transition-colors hover:text-foreground"
+        >
+          Temp Folder
+        </Link>{" "}
+        instead.
+      </p>
     </PageShell>
   );
 };
