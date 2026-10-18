@@ -45,7 +45,7 @@ const isStaticAsset    = (pathname: string) => {
     return true;
   }
 
-  return /\.(svg|png|jpg|jpeg|gif|webp|ico|css|js|woff|woff2|ttf|map)$/i.test(pathname);
+  return false;
 };
 
 
@@ -119,7 +119,7 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|favicon.svg|sitemap.xml|robots.txt|\\.well-known|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|woff|woff2|ttf|map)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|favicon.svg|sitemap.xml|robots.txt|\\.well-known).*)",
   ],
 };
 
