@@ -26,7 +26,10 @@ export default async function NewFileCreatePage({
     mediaUrl: string | null;
   } | null = null;
 
-  const { data, error } = await getFileInfoByPathOrID({ id: Number(fileID) });
+  const { data, error } = await getFileInfoByPathOrID({
+    id: Number(fileID),
+    showPassword: true,
+  });
   if (error || !data) {
     return error || "Failed to load file";
   }

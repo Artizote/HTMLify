@@ -5,11 +5,13 @@ import { GitCloneFormType } from "@/lib/modules/file/file.schema";
 import { FileIDResponse, FolderResponse } from "@/lib/modules/file/file.types";
 
 type FileInfoParams =
-  { path: string; id?: never } | { path?: never; id: number };
+  | { path: string; id?: never; showPassword?: boolean }
+  | { path?: never; id: number; showPassword?: boolean };
 
 export const getFileInfoByPathOrID = async ({
   path,
   id,
+  showPassword = false,
 }: FileInfoParams): Promise<{
   data: FileIDResponse | null;
   error: string | null;
@@ -19,6 +21,9 @@ export const getFileInfoByPathOrID = async ({
     params = `path=${path}`;
   } else if (id) {
     params = `id=${id}`;
+  }
+  if (showPassword) {
+    params += `&show_password=true`;
   }
 
   const { response, error } = await APICall(

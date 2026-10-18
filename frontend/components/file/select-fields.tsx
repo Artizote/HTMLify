@@ -28,7 +28,7 @@ export function VisibilitySelect<T extends FieldValues>({
         <Field>
           <FieldLabel>Visibility</FieldLabel>
           <Select onValueChange={field.onChange} defaultValue={field.value}>
-            <SelectTrigger className="w-full max-w-48">
+            <SelectTrigger className="w-full h-11">
               <SelectValue placeholder="Select visibility" />
             </SelectTrigger>
             <SelectContent>
@@ -59,7 +59,7 @@ export function ModeSelect<T extends FieldValues>({
         <Field>
           <FieldLabel>Mode</FieldLabel>
           <Select onValueChange={field.onChange} defaultValue={field.value}>
-            <SelectTrigger className="w-full max-w-48">
+            <SelectTrigger className="w-full h-11">
               <SelectValue placeholder="Select mode" />
             </SelectTrigger>
             <SelectContent>

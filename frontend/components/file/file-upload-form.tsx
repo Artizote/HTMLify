@@ -183,6 +183,9 @@ export const FileForm = ({
     field.onChange(value);
     const file = Array.isArray(value) ? value[0] : value;
     if (file instanceof File) {
+      if (!form.getValues("title")) {
+        form.setValue("title", file.name);
+      }
       const type = getFileContentType(file.name, file.type);
       setCurrentFileType(type);
       if (type === "other") {
@@ -293,8 +296,10 @@ export const FileForm = ({
                   </Field>
                 )}
               />
-              <VisibilitySelect control={form.control} name="visibility" />
-              <ModeSelect control={form.control} name="mode" />
+              <div className="w-full grid gap-4 md:grid-cols-2 grid-cols-1">
+                <VisibilitySelect control={form.control} name="visibility" />
+                <ModeSelect control={form.control} name="mode" />
+              </div>
             </div>
 
             <Controller
