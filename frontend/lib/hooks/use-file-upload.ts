@@ -2,9 +2,11 @@ import { create } from "zustand";
 
 import {
   deleteFile,
+  getFileInfoByPathOrID,
   uploadFileWithProgress,
 } from "@/lib/modules/file/file.api";
 import { FileIDResponse } from "@/lib/modules/file/file.types";
+import { randomId } from "@/lib/utils";
 
 type UploadStatus = "queued" | "uploading" | "completed" | "failed";
 
@@ -16,50 +18,58 @@ interface UploadItem {
   progress: number;
   status: UploadStatus;
   response?: FileIDResponse;
+  controller?: AbortController;
+  error?: string;
+  overwrite?: boolean;
+  mode?: string;
+  visibility?: string;
 }
 
 interface FileUploadStore {
   queue: UploadItem[];
   isUploading: boolean;
+  cancelled: string[];
 
-  deleteFile: (localId: string) => void;
-
-  addFiles: (files: File[], folderPath: string) => void;
+  removeItem: (localId: string) => void;
+  addFiles: (files: File[], folderPath: string, overwrite?: boolean, mode?: string, visibility?: string) => void;
   startQueue: () => Promise<void>;
   updateProgress: (localId: string, progress: number) => void;
   updateItem: (localId: string, updates: Partial<UploadItem>) => void;
+  retryItem: (localId: string, overwrite?: boolean) => void;
+  retryFailed: (overwrite?: boolean) => void;
   clearQueue: () => void;
 }
 
 export const useFileUploadStore = create<FileUploadStore>((set, get) => ({
   queue: [],
   isUploading: false,
+  cancelled: [],
 
-  deleteFile: async (localId) => {
+  removeItem: (localId) => {
     const item = get().queue.find((i) => i.localId === localId);
     if (!item) return;
 
-    if (item.id) {
-      const { error } = await deleteFile(item.id);
-      if (error) return;
-    }
-
+    item.controller?.abort();
     set((state) => ({
       queue: state.queue.filter((i) => i.localId !== localId),
+      cancelled: [...state.cancelled, localId],
     }));
   },
 
-  addFiles: (files, folderPath) => {
+  addFiles: (files, folderPath, overwrite = false, mode = "render", visibility = "public") => {
     const newItems: UploadItem[] = files.map((file) => {
       const fullPath = folderPath
         ? `${folderPath.replace(/\/$/, "")}/${file.name}`
         : file.name;
       return {
-        localId: crypto.randomUUID(),
+        localId: randomId(),
         file,
         path: fullPath,
         progress: 0,
         status: "queued" as const,
+        overwrite,
+        mode,
+        visibility,
       };
     });
 
@@ -83,26 +93,62 @@ export const useFileUploadStore = create<FileUploadStore>((set, get) => ({
         set((state) => ({
           queue: state.queue.map((item) =>
             item.localId === next.localId
-              ? { ...item, status: "uploading" as const }
+              ? {
+                  ...item,
+                  status: "uploading" as const,
+                  controller: new AbortController(),
+                }
               : item,
           ),
         }));
 
         try {
+          // No upload try if the path already taken
+          if (!next.overwrite) {
+            const { data: existing } = await getFileInfoByPathOrID({
+              path: next.path,
+            });
+            if (existing) {
+              set((state) => ({
+                queue: state.queue.map((item) =>
+                  item.localId === next.localId
+                    ? {
+                        ...item,
+                        status: "failed" as const,
+                        error: "File on this path already exists",
+                      }
+                    : item,
+                ),
+              }));
+              continue;
+            }
+          }
+
           const formData = new FormData();
           formData.append("file", next.file);
           formData.append("path", next.path);
-          formData.append("visibility", "public");
-          formData.append("mode", "source");
+          if (next.mode) formData.append("mode", next.mode);
+          if (next.visibility) formData.append("visibility", next.visibility);
+          if (next.overwrite) {
+            formData.append("update", "true");
+          }
 
           const { data, error } = await uploadFileWithProgress(formData, {
             onProgress: (progress) => {
               get().updateProgress(next.localId, progress);
             },
+            signal: get().queue.find((item) => item.localId === next.localId)
+              ?.controller?.signal,
           });
 
           if (error || !data) {
+            if (get().cancelled.includes(next.localId)) continue;
             throw new Error(error || "Upload failed");
+          }
+
+          if (get().cancelled.includes(next.localId)) {
+            void deleteFile(data.id);
+            continue;
           }
 
           set((state) => ({
@@ -119,11 +165,16 @@ export const useFileUploadStore = create<FileUploadStore>((set, get) => ({
             ),
           }));
         } catch (err) {
+          if (get().cancelled.includes(next.localId)) continue;
           const message = err instanceof Error ? err.message : "Upload failed";
           set((state) => ({
             queue: state.queue.map((item) =>
               item.localId === next.localId
-                ? { ...item, status: "failed" as const }
+                ? {
+                    ...item,
+                    status: "failed" as const,
+                    error: message,
+                  }
                 : item,
             ),
           }));
@@ -149,5 +200,51 @@ export const useFileUploadStore = create<FileUploadStore>((set, get) => ({
       ),
     })),
 
-  clearQueue: () => set({ queue: [] }),
+  retryItem: (localId, overwrite = false) => {
+    set((state) => ({
+      queue: state.queue.map((item) =>
+        item.localId === localId
+          ? {
+              ...item,
+              status: "queued" as const,
+              progress: 0,
+              error: undefined,
+              overwrite,
+            }
+          : item,
+      ),
+    }));
+    void get().startQueue();
+  },
+
+  retryFailed: (overwrite = false) => {
+    const hasFailed = get().queue.some((item) => item.status === "failed");
+    if (!hasFailed) return;
+    set((state) => ({
+      queue: state.queue.map((item) =>
+        item.status === "failed"
+          ? {
+              ...item,
+              status: "queued" as const,
+              progress: 0,
+              error: undefined,
+              overwrite,
+            }
+          : item,
+      ),
+    }));
+    void get().startQueue();
+  },
+
+  clearQueue: () => {
+    const { queue } = get();
+    queue.forEach((item) => item.controller?.abort());
+    set({
+      queue: [],
+      cancelled: [
+        ...get().cancelled,
+        ...queue.map((item) => item.localId),
+      ],
+    });
+  },
 }));

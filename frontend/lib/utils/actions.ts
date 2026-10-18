@@ -7,18 +7,71 @@ export async function copyToClipboard(
   text: string,
   options?: { successMessage?: string; errorMessage?: string },
 ): Promise<boolean> {
+  let copied = false;
+
   try {
-    await navigator.clipboard.writeText(text);
+    // `navigator.clipboard` is not avilable on plain HTTP
+    if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+      copied = true;
+    } else {
+      copied = fallbackCopy(text);
+    }
+  } catch {
+    copied = fallbackCopy(text);
+  }
+
+  if (copied) {
     if (options?.successMessage) {
       toast.success(options.successMessage);
     }
     return true;
-  } catch {
-    if (options?.errorMessage) {
-      toast.error(options.errorMessage);
-    }
-    return false;
   }
+
+  if (options?.errorMessage) {
+    toast.error(options.errorMessage);
+  }
+  return false;
+}
+
+/**
+ * Copy text using the `document.execCommand("copy")` API.
+ * Used as a fallback when the async Clipboard API is unavailable
+ */
+function fallbackCopy(text: string): boolean {
+  if (typeof document === "undefined") return false;
+
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.setAttribute("readonly", "");
+  textarea.style.position = "fixed";
+  textarea.style.top = "-9999px";
+  textarea.style.left = "-9999px";
+  textarea.style.opacity = "0";
+
+  const selection = document.getSelection();
+  const previousRange =
+    selection && selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
+
+  document.body.appendChild(textarea);
+  textarea.select();
+  textarea.setSelectionRange(0, textarea.value.length);
+
+  let copied = false;
+  try {
+    copied = document.execCommand("copy");
+  } catch {
+    copied = false;
+  }
+
+  document.body.removeChild(textarea);
+
+  if (selection && previousRange) {
+    selection.removeAllRanges();
+    selection.addRange(previousRange);
+  }
+
+  return copied;
 }
 
 export function downloadFile(url: string, filename?: string): void {

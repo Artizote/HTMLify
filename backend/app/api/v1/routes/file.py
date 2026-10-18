@@ -17,6 +17,8 @@ router = APIRouter(tags=["File"])
 def get_file_(
     id: Optional[int] = Query(None),
     path: Optional[str] = Query(None),
+    show_password: bool = Query(False),
+    user: Optional[User] = Depends(AuthService.get_or_none_current_user),
 ) -> FileRead:
     file = None
     if id:
@@ -25,7 +27,11 @@ def get_file_(
         file = FileService.get_file_by_path(path)
     if not file:
         raise HTTPException(404, "File not found")
-    return FileRead.from_orm(file)
+    if show_password:
+        if not user or file.user != user:
+            raise HTTPException(403, "Not allowed to view this file's password")
+        return FileRead.from_orm(file, False, False, True)
+    return FileRead.from_orm(file, False, False, False)
 
 @router.post("/files")
 def create_file(
@@ -37,7 +43,7 @@ def create_file(
 
 @router.post("/files/upload")
 async def create_file_by_upload(
-    file: UploadFile = FFile(),
+    file: UploadFile = FFile(None),
     content: Optional[bytes | str] = Form(None),
     title: Optional[str] = Form(None),
     path: Optional[str] = Form(None),

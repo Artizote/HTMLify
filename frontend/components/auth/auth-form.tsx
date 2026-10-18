@@ -70,21 +70,45 @@ export function SigninForm({ mode, className, ...props }: SigninFormProps) {
 
   const handleSubmit = async (data: LoginSchema | SignUpSchema) => {
     setIsPending(true);
-    const res =
-      mode === "signin"
-        ? await signIn(data as LoginSchema)
-        : await signUp(data as SignUpSchema);
 
-    setIsPending(false);
+    if (mode === "signup") {
+      const { username, password } = data as SignUpSchema;
 
-    if (res.error) {
-      toast.error(res.error);
+      const { error: signUpError } = await signUp(data as SignUpSchema);
+      if (signUpError) {
+        setIsPending(false);
+        toast.error(signUpError);
+        return;
+      }
+
+      // Auto login and redirect user to dashboard aufter new account cretaion
+      const { error: signInError } = await signIn({ username, password });
+      setIsPending(false);
+
+      if (signInError) {
+        // If faild to redirect, then login page
+        toast.success("Account created! Please sign in.");
+        form.reset();
+        router.push("/signin");
+        return;
+      }
+
+      toast.success("Account created! Welcome");
+      router.push("/dashboard");
+      router.refresh();
       return;
     }
 
-    toast.success(
-      mode === "signup" ? "Account created! Welcome" : "Signed in successfully",
-    );
+    const { error } = await signIn(data as LoginSchema);
+    setIsPending(false);
+
+    if (error) {
+      toast.error(error);
+      return;
+    }
+
+    toast.success("Signed in successfully");
+    router.push("/dashboard");
     router.refresh();
   };
 

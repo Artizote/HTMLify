@@ -1,29 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useTmpFolderStore } from "@/lib/hooks/use-tmp-folder";
 
 function AddFolderForm() {
-  const { createFolder } = useTmpFolderStore();
-  const [open, setOpen] = useState(false);
+  const { createFolder, focusName } = useTmpFolderStore();
+  const inputRef = useRef<HTMLInputElement>(null);
   const [name, setName] = useState("");
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
+  useEffect(() => {
+    if (focusName && inputRef.current) {
+      inputRef.current.focus();
+      useTmpFolderStore.setState({ focusName: false });
+    }
+  }, [focusName]);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const folderName = name.trim();
@@ -44,48 +41,28 @@ function AddFolderForm() {
     }
 
     setName("");
-    setOpen(false);
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="default">Add Folder</Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Create Folder</DialogTitle>
-          <DialogDescription>
-            Create a temporary folder to share multiple files.
-          </DialogDescription>
-        </DialogHeader>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="folder-name">Folder Name</Label>
-            <Input
-              id="folder-name"
-              placeholder="e.g. my-shared-folder"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              disabled={isPending}
-            />
-          </div>
-
-          {error && (
-            <p className="text-sm text-destructive bg-destructive/10 p-2 rounded-md">
-              {error}
-            </p>
-          )}
-
-          <DialogFooter>
-            <Button type="submit" disabled={isPending}>
-              {isPending ? "Creating..." : "Create Folder"}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+    <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-2">
+      <div className="flex gap-2">
+        <Input
+          ref={inputRef}
+          placeholder="Folder name..."
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          disabled={isPending}
+        />
+        <Button type="submit" disabled={isPending}>
+          {isPending ? "Creating..." : "Create"}
+        </Button>
+      </div>
+      {error && (
+        <p className="text-sm text-destructive bg-destructive/10 p-2 w-fit rounded-md">
+          {error}
+        </p>
+      )}
+    </form>
   );
 }
 

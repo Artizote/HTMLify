@@ -51,6 +51,33 @@ export const getFileContentType = (
   return "other";
 };
 
+/**
+ * Convert an absolute file/folder to user root relatve path
+ */
+export function toUserRelativePath(
+  absolutePath: string | null | undefined,
+  username: string,
+): string {
+  if (!absolutePath) return "";
+  let p = absolutePath.replace(/^\/+/, "").replace(/\/+$/, "");
+  if (username) {
+    if (p === username) return "";
+    if (p.startsWith(`${username}/`)) p = p.slice(username.length + 1);
+  }
+  return p.replace(/\/+$/, "");
+}
+
+/**
+ * Convert a path relative to the user root 
+ */
+export function toUserAbsolutePath(
+  userRelativePath: string | null | undefined,
+  username: string,
+): string {
+  const rel = (userRelativePath ?? "").replace(/^\/+/, "").replace(/\/+$/, "");
+  return rel ? `/${username}/${rel}` : `/${username}`;
+}
+
 function hasFileExtention(str: string) {
   const pathRegex =
     /^(\/|([a-zA-Z]:\\))?([^\\\/:*?"<>|\r\n]+[\\\/])*[^\\\/:*?"<>|\r\n]+\.[a-zA-Z0-9]+$/;

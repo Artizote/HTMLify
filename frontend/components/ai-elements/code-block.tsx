@@ -29,6 +29,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { copyToClipboard as copyText } from "@/lib/utils/actions";
 
 // Shiki uses bitflags for font styles: 1=italic, 2=bold, 4=underline
 // oxlint-disable-next-line eslint(no-bitwise)
@@ -463,23 +464,16 @@ export const CodeBlockCopyButton = ({
   const { code } = useContext(CodeBlockContext);
 
   const copyToClipboard = useCallback(async () => {
-    if (typeof window === "undefined" || !navigator?.clipboard?.writeText) {
-      onError?.(new Error("Clipboard API not available"));
+    if (typeof window === "undefined" || isCopied) {
       return;
     }
 
-    try {
-      if (!isCopied) {
-        await navigator.clipboard.writeText(code);
-        setIsCopied(true);
-        onCopy?.();
-        timeoutRef.current = window.setTimeout(
-          () => setIsCopied(false),
-          timeout,
-        );
-      }
-    } catch (error) {
-      onError?.(error as Error);
+    if (await copyText(code)) {
+      setIsCopied(true);
+      onCopy?.();
+      timeoutRef.current = window.setTimeout(() => setIsCopied(false), timeout);
+    } else {
+      onError?.(new Error("Clipboard API not available"));
     }
   }, [code, onCopy, onError, timeout, isCopied]);
 

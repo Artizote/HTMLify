@@ -1,7 +1,7 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { Folder, Lock } from "lucide-react";
+import { Eye, Folder, Lock } from "lucide-react";
 import Link from "next/link";
 
 import { DashboardAction } from "@/components/dashboard/dashboard-action";
@@ -11,6 +11,7 @@ import {
   FolderItem,
   isFolderItem,
 } from "@/lib/modules/file/file.types";
+import { formatDateTime } from "@/lib/utils";
 
 import { FileIcon } from "./file-icon";
 
@@ -21,27 +22,12 @@ interface Props {
   pageSize: number;
 }
 
-function formatDate(dateString: string) {
-  try {
-    return new Intl.DateTimeFormat("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    }).format(new Date(dateString));
-  } catch {
-    return dateString;
-  }
-}
-
 export function FileTable({ items, totalItems, currentPage, pageSize }: Props) {
   const handleRowClick = (item: FileItem | FolderItem) => {
-    const isFolder = isFolderItem(item);
-    if (isFolder) {
-      // Navigate to folder
-      window.location.href = `/dashboard?path=${item.path}`;
+    if (isFolderItem(item)) {
+      window.location.href = `/dashboard/files?path=${item.path}`;
     } else {
-      // Open file in new tab
-      window.open(item.path, "_blank", "noopener,noreferrer");
+      window.location.href = `/dashboard/file/edit/${item.id}`;
     }
   };
 
@@ -65,7 +51,9 @@ export function FileTable({ items, totalItems, currentPage, pageSize }: Props) {
           : item.title ||
             item.path.split("/").filter(Boolean).pop() ||
             "Untitled";
-        const href = isFolder ? `/dashboard?path=${item.path}` : item.path;
+        const href = isFolder
+          ? `/dashboard/files?path=${item.path}`
+          : `/dashboard/file/edit/${item.id}`;
 
         return (
           <div className="flex items-center gap-2.5 min-w-0">
@@ -78,21 +66,15 @@ export function FileTable({ items, totalItems, currentPage, pageSize }: Props) {
               <FileIcon path={item.path} />
             )}
             <div className="flex flex-col text-foreground/90 min-w-0">
-              {isFolder ? (
-                <Link
-                  href={href}
-                  className="text-sm font-medium truncate leading-tight hover:underline"
-                >
-                  {name}
-                </Link>
-              ) : (
-                <span className="text-sm font-medium truncate leading-tight flex items-center">
-                  {name}
-                  {!isFolder && item.locked && (
-                    <Lock className="inline ml-1.5 h-3 w-3 opacity-40" />
-                  )}
-                </span>
-              )}
+              <Link
+                href={href}
+                className="text-sm font-medium truncate leading-tight"
+              >
+                {name}
+                {!isFolder && item.locked && (
+                  <Lock className="inline ml-1.5 h-3 w-3 opacity-40" />
+                )}
+              </Link>
               <span className="text-[11px] text-muted-foreground font-mono truncate leading-tight">
                 {item.path}
               </span>
@@ -136,8 +118,13 @@ export function FileTable({ items, totalItems, currentPage, pageSize }: Props) {
         const item = row.original;
         if (isFolderItem(item)) return <div className="hidden md:table-cell" />;
         return (
-          <div className="hidden md:table-cell text-foreground/80 gap-1.5  text-sm">
-            {item.views.toLocaleString()}
+          <div className="hidden md:table-cell">
+            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+              <Eye className="w-3.5 h-3.5" />
+              <span className="tabular-nums">
+                {item.views.toLocaleString()}
+              </span>
+            </div>
           </div>
         );
       },
@@ -149,24 +136,22 @@ export function FileTable({ items, totalItems, currentPage, pageSize }: Props) {
         const item = row.original;
         if (isFolderItem(item)) return <div className="hidden sm:table-cell" />;
         return (
-          <span className="text-sm text-muted-foreground whitespace-nowrap hidden sm:table-cell">
-            {formatDate(item.modified)}
+          <span className="text-sm text-muted-foreground whitespace-nowrap tabular-nums hidden sm:table-cell">
+            {formatDateTime(item.modified)}
           </span>
         );
       },
     },
     {
       id: "actions",
-      header: () => <div className="text-right">Action</div>,
+      header: () => <div className="text-right">Actions</div>,
       cell: ({ row }) => {
         const item = row.original;
-        const isFolder = isFolderItem(item);
-        const href = isFolder ? `/dashboard?path=${item.path}` : item.path;
 
         return (
           <div className="text-right ">
             <div onClick={(e) => e.stopPropagation()}>
-              <DashboardAction isFolder={isFolder} file={item} href={href} />
+              <DashboardAction file={item} />
             </div>
           </div>
         );

@@ -64,7 +64,7 @@ export const TmpForm = () => {
             </Label>
             <Input
               id="tmp-name"
-              placeholder="e.g. my-awesome-file"
+              placeholder="e.g. my-awesome.html"
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
@@ -130,7 +130,7 @@ export const TmpForm = () => {
           className="w-full md:w-auto"
           disabled={isPending || !file}
         >
-          {isPending ? "Generating..." : "Generate Link"}
+          {isPending ? "Uploading..." : "Upload File"}
         </Button>
       </div>
 

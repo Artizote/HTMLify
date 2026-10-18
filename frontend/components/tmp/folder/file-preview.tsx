@@ -1,32 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
 
 import { FilePreview } from "@/components/file/file-preview";
 import { Button } from "@/components/ui/button";
+import { CopyButton } from "@/components/ui/copy-button";
 import { getFileContentType } from "@/lib/modules/file/file.utils";
 import { TmpFolderFile } from "@/lib/tmp-folder/tmp-folder.types";
 
 import { formatExpiry, formatExpiryDelta, isExpired } from "./utils";
-
-function CopyButton({ value }: { value: string }) {
-  const [copied, setCopied] = useState(false);
-  const done = () => {
-    if (typeof navigator === "undefined") return;
-    navigator.clipboard?.writeText(value);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
-  };
-  return (
-    <button
-      onClick={done}
-      className="text-xs px-2 py-0.5 font-mono border border-border rounded-md text-muted-foreground hover:text-foreground hover:border-primary transition-colors"
-    >
-      {copied ? "copied" : "copy"}
-    </button>
-  );
-}
 
 export function FileMetadata({
   file,

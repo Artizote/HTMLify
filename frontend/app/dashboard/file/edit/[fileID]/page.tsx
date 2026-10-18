@@ -26,7 +26,10 @@ export default async function NewFileCreatePage({
     mediaUrl: string | null;
   } | null = null;
 
-  const { data, error } = await getFileInfoByPathOrID({ id: Number(fileID) });
+  const { data, error } = await getFileInfoByPathOrID({
+    id: Number(fileID),
+    showPassword: true,
+  });
   if (error || !data) {
     return error || "Failed to load file";
   }
@@ -34,16 +37,17 @@ export default async function NewFileCreatePage({
   if (!fileContentResp) {
     return "Failed to load file content";
   }
-  const content = await fileContentResp.text();
+  const contentType = getFileContentType(data.path);
+  const content =
+    contentType === "other" ? await fileContentResp.text() : undefined;
   fileData = { fileInfo: data, content, mediaUrl: fileContentResp.url };
-
-  const contentType = getFileContentType(fileData.fileInfo.path);
 
   return (
     <>
       <DasshboardNavbar title="Edit File" />
       <div className="w-full max-w-7xl mx-auto pt-10 px-4">
         <FileForm
+          key={`edit-file-${fileID}`}
           mode="update"
           user={user}
           initialData={{

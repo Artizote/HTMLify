@@ -109,6 +109,12 @@ class FileService:
         overwrite: Optional[bool] = None
     ) -> File:
 
+        if user != file.user:
+            raise HTTPException(
+                    status.HTTP_403_FORBIDDEN,
+                    "You are not allowed to update this file"
+                )
+
         if content:
             blob = Blob.create(content)
             file.content = blob

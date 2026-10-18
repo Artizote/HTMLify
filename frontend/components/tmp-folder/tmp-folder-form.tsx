@@ -5,7 +5,7 @@ import { env } from "@/lib/env";
 import { useTmpFolderStore } from "@/lib/hooks/use-tmp-folder";
 
 import { FileUpload } from "./file-upload";
-import { ListFiles } from "./list-files";
+import { UploadList } from "./list-files";
 
 const TmpFolderForm = () => {
   const { folder } = useTmpFolderStore();
@@ -20,9 +20,16 @@ const TmpFolderForm = () => {
         <div className="w-full flex-1">
           <FileUpload />
         </div>
-        {url && <QRCode url={url} fgColor="#000000" bgColor="#ffffff" />}
+        {url && (
+          <>
+            <div className="hidden md:block w-px self-stretch bg-border" />
+            <div className="block md:hidden h-px w-full bg-border" />
+            <QRCode url={url} fgColor="#000000" bgColor="#ffffff" />
+          </>
+        )}
       </div>
-      <ListFiles />
+
+      <UploadList />
     </div>
   );
 };

@@ -21,14 +21,15 @@ export function DashboardBreadcrumb({ path }: Props) {
       <BreadcrumbList>
         <BreadcrumbItem>
           <BreadcrumbLink asChild>
-            <Link href="/dashboard" className="font-mono">
+            <Link href="/dashboard/files" className="font-mono">
               ~
             </Link>
           </BreadcrumbLink>
         </BreadcrumbItem>
 
         {segments.map((seg, i) => {
-          const href = "/dashboard?path=/" + segments.slice(0, i + 1).join("/");
+          const href =
+            "/dashboard/files?path=/" + segments.slice(0, i + 1).join("/");
           const isLast = i === segments.length - 1;
 
           return (

@@ -1,11 +1,18 @@
 "use client";
 import {
-  GitBranch,
-  Home,
-  KeyIcon,
+  BookOpen,
+  FileClock,
+  FilePlus2,
+  Files,
+  FolderClock,
+  FolderGit2,
+  KeyRound,
+  LayoutDashboard,
+  LayoutGrid,
+  Link2,
   LucideProps,
   PenTool,
-  PlusSquare,
+  SquarePen,
   Upload,
 } from "lucide-react";
 import Link from "next/link";
@@ -36,14 +43,24 @@ interface NavItems {
   }[];
 }
 
-const navIems: NavItems[] = [
+const navItems: NavItems[] = [
   {
-    label: "Files",
+    label: "Overview",
     items: [
       {
         title: "Dashboard",
         url: "/dashboard",
-        icon: Home,
+        icon: LayoutDashboard,
+      },
+    ],
+  },
+  {
+    label: "Files",
+    items: [
+      {
+        title: "Files",
+        url: "/dashboard/files",
+        icon: Files,
       },
       {
         title: "Upload Files",
@@ -51,19 +68,14 @@ const navIems: NavItems[] = [
         icon: Upload,
       },
       {
-        title: "Add New File",
+        title: "New File",
         url: "/dashboard/file/new",
-        icon: PlusSquare,
+        icon: FilePlus2,
       },
       {
         title: "Git Clone",
         url: "/dashboard/file/git-clone",
-        icon: GitBranch,
-      },
-      {
-        title: "Temporary File",
-        url: "/tmp",
-        icon: GitBranch,
+        icon: FolderGit2,
       },
     ],
   },
@@ -78,17 +90,47 @@ const navIems: NavItems[] = [
       {
         title: "New Pen",
         url: "/dashboard/pens/edit",
-        icon: PlusSquare,
+        icon: SquarePen,
       },
     ],
   },
   {
-    label: "API",
+    label: "Tools",
+    items: [
+      {
+        title: "Temp Files",
+        url: `${env.NEXT_PUBLIC_SITE_URL}/tmp`,
+        icon: FileClock,
+      },
+      {
+        title: "Temp Folders",
+        url: `${env.NEXT_PUBLIC_SITE_URL}/tmp/f`,
+        icon: FolderClock,
+      },
+      {
+        title: "Shortlinks",
+        url: `${env.NEXT_PUBLIC_SITE_URL}/r`,
+        icon: Link2,
+      },
+      {
+        title: "Frames",
+        url: `${env.NEXT_PUBLIC_SITE_URL}/frames`,
+        icon: LayoutGrid,
+      },
+    ],
+  },
+  {
+    label: "Account",
     items: [
       {
         title: "API Key",
         url: "/dashboard/api-key",
-        icon: KeyIcon,
+        icon: KeyRound,
+      },
+      {
+        title: "API Docs",
+        url: `${env.NEXT_PUBLIC_BACKEND_API_URL}/docs`,
+        icon: BookOpen,
       },
     ],
   },
@@ -104,7 +146,7 @@ export const DashboardSidebar = ({
         <SidebarMenu>
           <SidebarMenuItem>
             <Link
-              href="/"
+              href={env.NEXT_PUBLIC_SITE_URL}
               className="flex items-center bg-muted/15 hover:bg-muted/20 rounded gap-3 p-2"
             >
               <Logo />
@@ -117,7 +159,7 @@ export const DashboardSidebar = ({
       </SidebarHeader>
       <SidebarContent>
         <SidebarMenu />
-        {navIems.map((nav, idx) => (
+        {navItems.map((nav, idx) => (
           <NavMain key={idx} label={nav.label} items={nav.items} />
         ))}
       </SidebarContent>
