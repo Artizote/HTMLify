@@ -83,6 +83,15 @@ export function downloadFile(url: string, filename?: string): void {
   document.body.removeChild(a);
 }
 
+export function downloadFiles(
+  files: { url: string; filename?: string }[],
+  delay = 300,
+): void {
+  files.forEach((file, i) => {
+    window.setTimeout(() => downloadFile(file.url, file.filename), i * delay);
+  });
+}
+
 export async function shareContent(options: {
   title?: string;
   text?: string;

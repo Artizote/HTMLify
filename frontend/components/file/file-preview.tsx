@@ -1,5 +1,4 @@
-import { Music } from "lucide-react";
-
+import { FileMediaPreview } from "@/components/file/file-media-preview";
 import { FileType } from "@/lib/modules/file/file.types";
 import { getLanguageByPath } from "@/lib/modules/playgournd/editor.utils";
 
@@ -45,56 +44,15 @@ export function FilePreview({
         </div>
       );
     case "img":
-      return (
-        <div
-          className={
-            plain
-              ? "flex min-h-75 w-full items-center justify-center"
-              : "relative flex min-h-75 w-full items-center justify-center overflow-hidden rounded-xl border border-border/50 bg-muted/10 shadow-sm"
-          }
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            className="h-full w-full object-contain text-transparent"
-            src={finalUrl}
-            alt={path}
-          />
-        </div>
-      );
     case "video":
-      return (
-        <div
-          className={
-            plain
-              ? "relative flex min-h-75 w-full items-center justify-center"
-              : "relative flex min-h-75 w-full items-center justify-center overflow-hidden rounded-xl border border-border/50 bg-black/95 shadow-sm"
-          }
-        >
-          <video
-            src={finalUrl}
-            controls
-            className="h-full w-full object-contain focus:outline-none"
-          />
-        </div>
-      );
     case "audio":
       return (
-        <div
-          className={
-            plain
-              ? "flex flex-col items-center justify-center gap-6 px-8 py-12"
-              : "flex flex-col items-center justify-center gap-6 rounded-xl border border-border/50 bg-muted/10 p-8 shadow-sm"
-          }
-        >
-          <div className="rounded-full border border-border/50 bg-background p-4 shadow-sm">
-            <Music className="h-8 w-8 text-primary/70" />
-          </div>
-          <audio
-            src={finalUrl}
-            controls
-            className="w-full max-w-md focus:outline-none"
-          />
-        </div>
+        <FileMediaPreview
+          fileType={fileType}
+          url={finalUrl}
+          name={path}
+          plain={plain}
+        />
       );
     default:
       return (

@@ -1,7 +1,7 @@
 import { env } from "@/lib/env";
 import { APICall } from "@/lib/fetch/api";
 import {
-  TmpFolderFile,
+  TmpFolderMeta,
   TmpFolderResponse,
 } from "@/lib/tmp-folder/tmp-folder.types";
 
@@ -80,11 +80,11 @@ export const DeleteTmpFileFromFolder = async ({
   return { data: (await response.json()) as TmpFolderResponse, error: null };
 };
 
-export const getTmpFolderFiles = async (
+export const getTmpFolder = async (
   id: string,
-): Promise<{ data: TmpFolderFile[] | null; error: string | null }> => {
+): Promise<{ data: TmpFolderMeta | null; error: string | null }> => {
   const { response, error } = await APICall(
-    `${env.NEXT_PUBLIC_BACKEND_API_URL}/v1/tmp-folders/${id}/files`,
+    `${env.NEXT_PUBLIC_BACKEND_API_URL}/v1/tmp-folders/${id}`,
     {
       method: "GET",
       headers: {
@@ -95,8 +95,8 @@ export const getTmpFolderFiles = async (
   if (error || !response) {
     return {
       data: null,
-      error: error || "Failed to get temporary folder files",
+      error: error || "Failed to get temporary folder",
     };
   }
-  return { data: (await response.json()) as TmpFolderFile[], error: null };
+  return { data: (await response.json()) as TmpFolderMeta, error: null };
 };
