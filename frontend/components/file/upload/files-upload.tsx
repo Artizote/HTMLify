@@ -116,7 +116,6 @@ export const FileUpload = ({
       </div>
       <div className="p-4">
         <DropzoneArea
-          maxFiles={20}
           onDrop={(files) => addFiles(files, folderPath, overwrite, mode, visibility)}
         />
         <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-muted-foreground">

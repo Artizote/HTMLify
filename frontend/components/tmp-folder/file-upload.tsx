@@ -22,10 +22,7 @@ function FileUpload() {
       ) : (
         <div className="space-y-3">
           {url && <CopyableUrl url={url} showShare showOpen />}
-          <DropzoneArea
-            maxFiles={20}
-            onDrop={(files) => addFiles(files)}
-          />
+          <DropzoneArea onDrop={(files) => addFiles(files)} />
         </div>
       )}
     </section>
