@@ -21,7 +21,9 @@ async def _form(self, **kwargs):
 Request.form = _form
 
 origins = [
-    SERVER_NAME
+    SERVER_NAME,
+    "http://" + SERVER_NAME,
+    "https://" + SERVER_NAME,
 ]
 
 app.add_middleware(
