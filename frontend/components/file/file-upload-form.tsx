@@ -223,7 +223,11 @@ export const FileForm = ({
           setOpen={setAlertDialogOpen}
           onConfirm={() => onSubmit(form.getValues(), true)}
         />
-        <form onSubmit={form.handleSubmit((value) => onSubmit(value, false))}>
+        <form
+          autoComplete="off"
+          data-form-type="other"
+          onSubmit={form.handleSubmit((value) => onSubmit(value, false))}
+        >
           <FieldGroup>
             <div className="w-full grid gap-4 md:grid-cols-2 grid-cols-1">
               <Controller
@@ -238,6 +242,8 @@ export const FileForm = ({
                       </InputGroupAddon>
                       <InputGroupInput
                         {...field}
+                        name="file-title"
+                        autoComplete="off"
                         value={field.value as string}
                         placeholder="enter the title of ur file"
                       />
@@ -258,6 +264,10 @@ export const FileForm = ({
                       </InputGroupAddon>
                       <InputGroupInput
                         {...field}
+                        autoComplete={showPassword ? "off" : "new-password"}
+                        data-1p-ignore
+                        data-lpignore="true"
+                        data-bwignore
                         value={field.value}
                         type={showPassword ? "text" : "password"}
                         placeholder="password (optional)"
@@ -287,6 +297,8 @@ export const FileForm = ({
                       </InputGroupAddon>
                       <InputGroupInput
                         {...field}
+                        name="file-path"
+                        autoComplete="off"
                         value={field.value}
                         type="text"
                         placeholder="myfile.html"
