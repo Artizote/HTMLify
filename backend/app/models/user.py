@@ -95,6 +95,7 @@ class User(Model):
 
     @classmethod
     def by_username(cls, username) -> "User":
+        username = username.strip().casefold()
         return cls.get_or_none(cls.username==username)
 
     def set_password(self, password: str):
