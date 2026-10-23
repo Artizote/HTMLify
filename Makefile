@@ -1,61 +1,62 @@
-.PHONY: install install-frontend install-backend run run-frontend run-backend build lint format format-check clean
+# HTMLify
 
-PYTHON_CMD := $(shell command -v python3 >/dev/null 2>&1 && echo python3 || echo python)
-PIP_CMD := $(shell command -v uv >/dev/null 2>&1 && echo "uv pip" || echo "pip")
-VENV_ACTIVE_CMD := $(shell command -v uv >/dev/null 2>&1 && echo "source .venv/bin/activate" || echo "source .venv/bin/activate")
 
-all: install run
+.PHONY: all
+.PHONY: dev dev-frontend dev-backend
+.PHONY: install install-frontend install-backend
+.PHONY: build build-frontend build-backend
+.PHONY: clean clean-frontend clean-backend
+
+
+
+all: dev
+
+
+dev:
+	@make -j 2 dev-frontend dev-backend
+
+dev-frontend:
+	@make -C frontend dev
+
+dev-backend:
+	@make -C backend dev
+
 
 install: install-frontend install-backend
 
 install-frontend:
-	@echo "Installing frontend dependencies..."
-	cd frontend && pnpm install
+	@make -C frontend install
 
 install-backend:
-	@echo "Installing backend dependencies..."
-	cd backend && ${PIP_CMD} install -r requirements.txt && ${PYTHON_CMD} setup.py --nodelay
+	@make -C backend install
 
-dev:
-	@echo "Starting fullstack application..."
-	@make -j 2 run-backend run-frontend
 
-run-frontend:
-	@echo "Starting frontend dev server..."
-	cd frontend && pnpm dev -p 3000
-
-run-backend:
-	@echo "Starting backend server..."
-	cd backend && ${VENV_ACTIVE_CMD} && python -m app
-
-build: build-frontend install-backend
-
-lint:
-	@echo "Linting frontend..."
-	cd frontend && pnpm lint
-
-lint-fix:
-	@echo "Linting frontend..."
-	cd frontend && pnpm lint:fix
-
-format:
-	@echo "Formatting frontend..."
-	cd frontend && pnpm format:fix
-
-format-check:
-	@echo "Checking formatting..."
-	cd frontend && pnpm format:check
-
-clean:
-	@echo "Cleaning project..."
-	rm -rf frontend/node_modules
-	rm -rf frontend/.next
-	rm -rf backend/instance
-	rm -rf backend/.venv
-	rm -rf backend/__pycache__
+build: build-frontend build-backend
 
 build-frontend:
-	cd frontend && pnpm build
+	@make -C frontend build
+
+build-fbackend:
+	@make -C backend build
+
+
+start:
+	@make -j 2 start-frontend start-backend
+
+start-frontend:
+	@make -C frontend start
+
+start-backend:
+	@make -C backend start
+
+
+clean: clean-frontend clean-backend
+
+clean-frontend:
+	@make -C frontend clean
+
+clean-backend:
+	@make -C bcakend clean
 
 
 ## Editor configs
@@ -63,11 +64,9 @@ build-frontend:
 .PHONY: editor-config-vscode clean-editor-configs
 
 editor-config-vscode:
-	@echo "Creating editor configs for vscode"
 	rm -rf .vscode
 	cp -r editor-configs/vscode .vscode
 
 clean-editor-configs:
-	@echo "Cleaning Editor configs"
 	rm -rf .vscode
 
