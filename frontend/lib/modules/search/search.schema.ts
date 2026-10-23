@@ -10,14 +10,19 @@ type SearchQuery = z.infer<typeof searchQuerySchema>;
 interface SearchResult {
   token: string;
   score: number;
-  item_type: string;
+  item_type: "file" | "pen";
   item_id: string;
+  path: string;
+  title: string;
 }
 
 interface SearchResponse {
+  query: string;
   results: SearchResult[];
+  total_results: number;
   page: number;
   page_size: number;
+  total_pages: number;
   time_took: number;
 }
 

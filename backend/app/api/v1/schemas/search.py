@@ -14,17 +14,24 @@ class SearchResultBase(BaseModel):
     score: float
     item_type: SearchResulItemType
     item_id: str
+    path: str
+    url: str
+    title: str
 
     class Config:
         from_attributes = True
 
     @classmethod
     def from_sr(cls, sr: SearchResult):
+        item = sr.item
         return cls(
             token=str(sr.token),
             score=float(sr.score),
             item_id=str(sr.item_id),
-            item_type=SearchResulItemType.FILE if sr.item_type_s == "file" else SearchResulItemType.PEN
+            item_type=SearchResulItemType.FILE if sr.item_type_s == "file" else SearchResulItemType.PEN,
+            path=str(item.path),
+            url=str(item.url),
+            title=str(item.title or item.path),
         )
 
 class SearchResultRead(SearchResultBase):

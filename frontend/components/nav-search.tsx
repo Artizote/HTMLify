@@ -1,11 +1,11 @@
 "use client";
 
-import { File, Search } from "lucide-react";
+import { File, Search, SquarePen } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import {
   CommandDialog,
-  CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
@@ -15,10 +15,24 @@ import useDebounce from "@/hooks/use-debounce";
 import { searchFiles } from "@/lib/modules/search/search.api";
 import { SearchResult } from "@/lib/modules/search/search.schema";
 
+const SEARCH_ALL_VALUE = "__search_all__";
+
+function itemHref(item: SearchResult) {
+  return item.path;
+}
+
+function displayPath(item: SearchResult) {
+  return item.path?.replace(/^\/+/, "") || `${item.item_type} #${item.item_id}`;
+}
+
 function NavbarSearch() {
   const [open, setOpen] = useState(false);
-  const [result, setResult] = useState<SearchResult[]>([]);
+  const [hits, setHits] = useState<{ query: string; results: SearchResult[] }>(
+    { query: "", results: [] },
+  );
   const [searchQuery, setSearchQuery] = useState("");
+  const [selected, setSelected] = useState(SEARCH_ALL_VALUE);
+  const router = useRouter();
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -33,22 +47,54 @@ function NavbarSearch() {
   }, []);
 
   const debouncedQuery = useDebounce(searchQuery, 500);
+  const query = debouncedQuery.trim();
+  const typedQuery = searchQuery.trim();
 
   useEffect(() => {
+    if (!query) return;
+
+    let active = true;
+
     (async () => {
-      if (debouncedQuery) {
-        const { data, error } = await searchFiles({
-          query: debouncedQuery,
-          page: 1,
-          page_size: 5,
-        });
-        if (error || !data) {
-          return;
-        }
-        setResult(data.results);
-      }
+      const { data, error } = await searchFiles({
+        query,
+        page: 1,
+        page_size: 5,
+      });
+      // Ignore responses for a query the user already moved past.
+      if (!active) return;
+      setHits({ query, results: error || !data ? [] : data.results });
     })();
-  }, [debouncedQuery]);
+
+    return () => {
+      active = false;
+    };
+  }, [query]);
+
+  const result = query && hits.query === query ? hits.results : [];
+  const loading = typedQuery.length > 0 && hits.query !== typedQuery;
+
+  const reset = () => {
+    setSearchQuery("");
+    setHits({ query: "", results: [] });
+    setSelected(SEARCH_ALL_VALUE);
+  };
+
+  const goTo = (href: string) => {
+    setOpen(false);
+    reset();
+    router.push(href);
+  };
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    setOpen(nextOpen);
+    if (!nextOpen) reset();
+  };
+
+  const handleQueryChange = (value: string) => {
+    setSearchQuery(value);
+    setSelected(SEARCH_ALL_VALUE);
+  };
 
   return (
     <>
@@ -66,29 +112,79 @@ function NavbarSearch() {
           <span className="text-[10px]">⌘</span>K
         </kbd>
       </button>
-      <CommandDialog open={open} onOpenChange={setOpen}>
+      <CommandDialog
+        open={open}
+        onOpenChange={handleOpenChange}
+        shouldFilter={false}
+        value={selected}
+        onValueChange={setSelected}
+      >
         <CommandInput
           value={searchQuery}
-          onValueChange={(v) => setSearchQuery(v)}
-          placeholder="Type a command or search..."
+          onValueChange={handleQueryChange}
+          placeholder="Search files and pens..."
         />
         <CommandList>
-          <CommandEmpty>No results found.</CommandEmpty>
-          <CommandGroup heading="Files">
-            {result.map((item) => (
+          {typedQuery && (
+            <CommandGroup>
               <CommandItem
-                key={item.item_id}
-                value={item.token}
-                onSelect={() => setOpen(false)}
+                value={SEARCH_ALL_VALUE}
+                onSelect={() =>
+                  goTo(`/search?q=${encodeURIComponent(typedQuery)}`)
+                }
               >
-                <File className="mr-2 h-4 w-4 text-muted-foreground shrink-0" />
-                <span className="truncate">{item.token}</span>
-                <span className="ml-auto text-xs text-muted-foreground truncate">
-                  {item.item_id}
+                <Search className="mr-2 h-4 w-4 text-muted-foreground shrink-0" />
+                <span className="truncate">
+                  Search all results for “{typedQuery}”
+                </span>
+                <span className="ml-auto shrink-0 rounded border px-1 font-mono text-[10px] text-muted-foreground">
+                  Enter
                 </span>
               </CommandItem>
-            ))}
-          </CommandGroup>
+            </CommandGroup>
+          )}
+
+          {loading && (
+            <div className="py-6 text-center text-sm text-muted-foreground">
+              Searching...
+            </div>
+          )}
+
+          {!loading && result.length > 0 && (
+            <CommandGroup heading="Results">
+              {result.map((item) => (
+                <CommandItem
+                  key={`${item.item_type}:${item.item_id}`}
+                  value={`${item.item_type}:${item.item_id}`}
+                  onSelect={() => goTo(itemHref(item))}
+                >
+                  {item.item_type === "pen" ? (
+                    <SquarePen className="mr-2 h-4 w-4 text-muted-foreground shrink-0" />
+                  ) : (
+                    <File className="mr-2 h-4 w-4 text-muted-foreground shrink-0" />
+                  )}
+                  <span className="truncate font-mono text-xs">
+                    {displayPath(item)}
+                  </span>
+                  <span className="ml-auto text-xs text-muted-foreground shrink-0">
+                    {item.item_type}
+                  </span>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          )}
+
+          {!loading && typedQuery && result.length === 0 && (
+            <div className="py-6 text-center text-sm text-muted-foreground">
+              No results found.
+            </div>
+          )}
+
+          {!typedQuery && (
+            <div className="py-6 text-center text-sm text-muted-foreground">
+              Type to search files and pens.
+            </div>
+          )}
         </CommandList>
       </CommandDialog>
     </>
