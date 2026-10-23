@@ -13,6 +13,13 @@ export function pathToPublicUrl(path: string): string {
   return `${base}${path.startsWith("/") ? "" : "/"}${path}`;
 }
 
+/**
+ * URL-encode every segment of a file path
+ */
+export function encodeUrlPath(path: string): string {
+  return path.split("/").map(encodeURIComponent).join("/");
+}
+
 export function formatDateTime(value: string | number | Date): string {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return String(value);

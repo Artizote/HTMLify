@@ -2,10 +2,13 @@
 
 import { Search } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import useDebounce from "@/hooks/use-debounce";
+
+const DEBOUNCE_MS = 350;
 
 interface SearchInputProps {
   defaultValue?: string;
@@ -13,12 +16,27 @@ interface SearchInputProps {
 
 export function SearchInput({ defaultValue = "" }: SearchInputProps) {
   const [value, setValue] = useState(defaultValue);
+  const debounced = useDebounce(value, DEBOUNCE_MS);
+  const currentQuery = useRef(defaultValue.trim());
   const router = useRouter();
+
+  useEffect(() => {
+    const q = debounced.trim();
+    if (q === currentQuery.current) return;
+    currentQuery.current = q;
+    router.replace(q ? `/search?q=${encodeURIComponent(q)}` : "/search", {
+      scroll: false,
+    });
+  }, [debounced, router]);
 
   const submit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const q = value.trim();
-    router.push(q ? `/search?q=${encodeURIComponent(q)}` : "/search");
+    if (q === currentQuery.current) return;
+    currentQuery.current = q;
+    router.replace(q ? `/search?q=${encodeURIComponent(q)}` : "/search", {
+      scroll: false,
+    });
   };
 
   return (

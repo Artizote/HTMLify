@@ -6,7 +6,7 @@ import { FileIcon } from "@/components/dashboard/file-icon";
 import { SearchInput } from "@/components/search/search-input";
 import { searchFiles } from "@/lib/modules/search/search.api";
 import { SearchResult } from "@/lib/modules/search/search.schema";
-import { pathToPublicUrl } from "@/lib/utils";
+import { encodeUrlPath, pathToPublicUrl } from "@/lib/utils";
 
 const PAGE_SIZE = 32;
 interface SearchPageProps {
@@ -14,7 +14,7 @@ interface SearchPageProps {
 }
 
 function sourceHref(item: SearchResult) {
-  return `/src${item.path}`;
+  return `/src${encodeUrlPath(item.path)}`;
 }
 
 function ActionLink({
@@ -47,7 +47,7 @@ function displayTitle(item: SearchResult) {
 }
 
 function ResultRow({ item }: { item: SearchResult }) {
-  const publicUrl = pathToPublicUrl(item.path);
+  const publicUrl = pathToPublicUrl(encodeUrlPath(item.path));
 
   return (
     <div className="flex items-center gap-3 border-b border-border/40 p-3 hover:bg-foreground/5">

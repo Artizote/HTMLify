@@ -14,11 +14,12 @@ import {
 import useDebounce from "@/hooks/use-debounce";
 import { searchFiles } from "@/lib/modules/search/search.api";
 import { SearchResult } from "@/lib/modules/search/search.schema";
+import { encodeUrlPath } from "@/lib/utils";
 
 const SEARCH_ALL_VALUE = "__search_all__";
 
 function itemHref(item: SearchResult) {
-  return item.path;
+  return encodeUrlPath(item.path);
 }
 
 function displayPath(item: SearchResult) {
