@@ -28,7 +28,7 @@ export const createTmpFile = async (
 
   const result = await uploadWithProgress(
     "POST",
-    `/api/v1/tmp-files`,
+    `/api/v1/tmpfiles`,
     formData,
     options?.onProgress,
     options?.signal,

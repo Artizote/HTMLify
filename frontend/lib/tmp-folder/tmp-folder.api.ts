@@ -9,7 +9,7 @@ export const createTmpFolder = async (
   folderName: string,
 ): Promise<{ data: TmpFolderResponse | null; error: string | null }> => {
   const { response, error } = await APICall(
-    `${env.NEXT_PUBLIC_BACKEND_API_URL}/v1/tmp-folders`,
+    `${env.NEXT_PUBLIC_BACKEND_API_URL}/v1/tmpfolders`,
     {
       method: "POST",
       headers: {
@@ -34,7 +34,7 @@ export const AddFileToTmpFolder = async ({
   authCode: string;
 }): Promise<{ data: TmpFolderResponse | null; error: string | null }> => {
   const { response, error } = await APICall(
-    `${env.NEXT_PUBLIC_BACKEND_API_URL}/v1/tmp-folders/${tmpFolderId}/files`,
+    `${env.NEXT_PUBLIC_BACKEND_API_URL}/v1/tmpfolders/${tmpFolderId}/files`,
     {
       method: "POST",
       headers: {
@@ -62,7 +62,7 @@ export const DeleteTmpFileFromFolder = async ({
   authCode: string;
 }): Promise<{ data: TmpFolderResponse | null; error: string | null }> => {
   const { response, error } = await APICall(
-    `${env.NEXT_PUBLIC_BACKEND_API_URL}/v1/tmp-folders/${tmpFolderId}/files`,
+    `${env.NEXT_PUBLIC_BACKEND_API_URL}/v1/tmpfolders/${tmpFolderId}/files`,
     {
       method: "DELETE",
       headers: {
@@ -84,7 +84,7 @@ export const getTmpFolder = async (
   id: string,
 ): Promise<{ data: TmpFolderMeta | null; error: string | null }> => {
   const { response, error } = await APICall(
-    `${env.NEXT_PUBLIC_BACKEND_API_URL}/v1/tmp-folders/${id}`,
+    `${env.NEXT_PUBLIC_BACKEND_API_URL}/v1/tmpfolders/${id}`,
     {
       method: "GET",
       headers: {

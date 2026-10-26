@@ -5,7 +5,7 @@ import { APICall } from "@/lib/fetch/api";
 
 export const serveTmpFile = async (fileID: string) => {
   const { response, error } = await APICall(
-    `${env.NEXT_PUBLIC_BACKEND_API_URL}/v1/tmp-files/${fileID}/content`,
+    `${env.NEXT_PUBLIC_BACKEND_API_URL}/v1/tmpfiles/${fileID}/content`,
   );
 
   if (error || !response) {
