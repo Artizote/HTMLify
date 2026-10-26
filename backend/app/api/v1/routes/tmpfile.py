@@ -10,7 +10,7 @@ from ..schemas.tmpfile import *
 router = APIRouter(tags=["Temp File"])
 
 
-@router.get("/tmp-files/{id}", description="Get TmpFile Info")
+@router.get("/tmpfiles/{id}", description="Get TmpFile Info")
 def get_tmp_file(id) -> TmpFileRead:
     tmpfile = TmpFileService.get_tmpfile(id)
     if not tmpfile:
@@ -21,7 +21,7 @@ def get_tmp_file(id) -> TmpFileRead:
     tfr = TmpFileRead.from_orm(tmpfile)
     return tfr
 
-@router.post("/tmp-files", description="Create TmpFile")
+@router.post("/tmpfiles", description="Create TmpFile")
 def create_tmp_file(
     file: UploadFile = File(...),
     name: Optional[str] = Form(None),
@@ -31,7 +31,7 @@ def create_tmp_file(
     tfr = TmpFileRead.from_orm(tmpfile)
     return tfr
 
-@router.get("/tmp-files/{id}/content", description="Get TmpFile Content")
+@router.get("/tmpfiles/{id}/content", description="Get TmpFile Content")
 def get_tmp_file_content(id: str) -> FileResponse:
     tmpfile = TmpFileService.get_tmpfile(id)
     if not tmpfile:
@@ -44,7 +44,7 @@ def get_tmp_file_content(id: str) -> FileResponse:
     content_disposition_type="inline", 
     headers={"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0"})
 
-@router.get("/tmp-folders/{id}")
+@router.get("/tmpfolders/{id}")
 def get_tmp_folder(id: str) -> TmpFolderRead:
     tmpfolder = TmpFileService.get_tmpfolder(id)
     if not tmpfolder:
@@ -52,7 +52,7 @@ def get_tmp_folder(id: str) -> TmpFolderRead:
     tfr = TmpFolderRead.from_orm(tmpfolder)
     return tfr
 
-@router.post("/tmp-folders")
+@router.post("/tmpfolders")
 def create_tmp_folder(tmpfolder_create: TmpFolderCreate) -> TmpFolderReadWithAuthCode:
     tmpfolder = TmpFileService.create_tmpfolder(tmpfolder_create.name)
     if not tmpfolder:
@@ -60,7 +60,7 @@ def create_tmp_folder(tmpfolder_create: TmpFolderCreate) -> TmpFolderReadWithAut
     tfr = TmpFolderReadWithAuthCode.from_orm(tmpfolder)
     return tfr
 
-@router.get("/tmp-folders/{id}/files")
+@router.get("/tmpfolders/{id}/files")
 def get_tmp_folder_files(id: str) -> list[TmpFileRead]:
     tmpfolder = TmpFileService.get_tmpfolder(id)
     if not tmpfolder:
@@ -70,7 +70,7 @@ def get_tmp_folder_files(id: str) -> list[TmpFileRead]:
         tffs.append(TmpFileRead.from_orm(tmpfile))
     return tffs
 
-@router.post("/tmp-folders/{id}/files")
+@router.post("/tmpfolders/{id}/files")
 def add_file_in_tmp_folder(id: str, add_file: TmpFolderFileAdd) -> list[TmpFileRead]:
     try:
         TmpFileService.add_file_in_tmpfolder(id, add_file.id, add_file.auth_code)
@@ -86,7 +86,7 @@ def add_file_in_tmp_folder(id: str, add_file: TmpFolderFileAdd) -> list[TmpFileR
         tffs.append(TmpFileRead.from_orm(tmpfile))
     return tffs
 
-@router.delete("/tmp-folders/{id}/files")
+@router.delete("/tmpfolders/{id}/files")
 def remove_file_in_tmp_folder(id: str, remove_file: TmpFolderFileAdd) -> list[TmpFileRead]:
     try:
         TmpFileService.remove_file_from_tmpfolder(id, remove_file.id, remove_file.auth_code)
