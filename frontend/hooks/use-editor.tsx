@@ -55,6 +55,7 @@ export const EditorProvider = ({
   penData: PenResponse | null;
   children: React.ReactNode;
 }) => {
+  const [title, setTitle] = useState(penData?.title || "pen");
   const [html, setHtml] = useState(penData?.body_content || "");
   const [css, setCss] = useState(penData?.css_content || "");
   const [js, setJs] = useState(penData?.js_content || "");
@@ -154,8 +155,9 @@ export const EditorProvider = ({
     <EditorContext.Provider
       value={{
         pen,
-        setPen: setPen,
-
+        setPen,
+        title,
+        setTitle,
         html,
         setHtml,
         css,

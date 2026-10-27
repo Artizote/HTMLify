@@ -216,6 +216,7 @@ const MobileEditors = ({
 
 const PenEditorContent = () => {
   const {
+    title,
     html,
     css,
     js,
@@ -234,7 +235,7 @@ const PenEditorContent = () => {
 
   useEffect(() => {
     if (!iframeRef.current) return;
-    iframeRef.current.srcdoc = formatHtmlContent(html, headContent, css, js);
+    iframeRef.current.srcdoc = formatHtmlContent(title, html, headContent, css, js);
   }, [html, headContent, css, js]);
 
   return (
@@ -258,6 +259,7 @@ const PenEditorContent = () => {
             srcDoc={`
                 <html lang="${htmlLang}">
                   <head>
+                    <title>${title}</title>
                     ${debouncedHead}
                     <style>${debouncedCss}</style>
                   </head>
@@ -292,8 +294,8 @@ const TitleInput = ({
 );
 
 const PenForm = ({ onNew }: { onNew: () => void }) => {
-  const { setPen, pen, html, css, js, headContent } = useEditor();
-  const [title, setTitle] = useState(pen?.title || "");
+  const { setPen, pen, title, setTitle, html, css, js, headContent } = useEditor();
+  // const [title, setTitle] = useState(pen?.title || "");
   const router = useRouter();
 
   const handleUpdate = async (id: string) => {
@@ -303,7 +305,7 @@ const PenForm = ({ onNew }: { onNew: () => void }) => {
     }
     const { data, error } = await updatePen({
       id: id,
-      title,
+      title: title,
       head_content: headContent,
       body_content: html,
       css_content: css,

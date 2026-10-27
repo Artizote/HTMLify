@@ -1,21 +1,27 @@
 function formatHtmlContent(
+  title: string,
   html: string,
   head: string,
   css: string,
   js: string,
 ) {
   return `
-      <html>
-        <head>
-          ${head}
-          <style>${css}</style>
-        </head>
-        <body>
-          ${html}
-          <script>${js}</script>
-        </body>
-      </html>
-    `;
+<html>
+  <head>
+  <title>${title}</title>
+  <style>
+${css}
+  </style>
+${head}
+  </head>
+  <body>
+${html}
+    <script>
+${js}
+    </script>
+  </body>
+</html>
+`.trim();
 }
 
 function stringToBase64(str: string) {

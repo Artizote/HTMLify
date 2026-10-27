@@ -9,6 +9,7 @@ const serverPenContent = async (id: string) => {
     return null;
   }
   const html = formatHtmlContent(
+    data.title,
     data.body_content,
     data.head_content,
     data.css_content,

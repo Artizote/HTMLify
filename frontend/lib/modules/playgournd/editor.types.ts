@@ -54,6 +54,8 @@ export interface UserChoosenSettings {
 export interface EditorContextType {
   pen: PenResponse | null;
   setPen: (v: PenResponse) => void;
+  title: string;
+  setTitle: (v: string) => void;
   html: string;
   setHtml: (v: string) => void;
   css: string;
