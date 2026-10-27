@@ -10,7 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { createShortLink } from "@/lib/modules/shortlink/shortlink.api";
 import { ShortLink as ShortLinkType } from "@/lib/modules/shortlink/shortlink.types";
 
-const urlSchema = z.string().url("Please enter a valid URL");
+const urlSchema = z.string().min(1)
 
 export const Shortlink = () => {
   const [url, setUrl] = useState("");

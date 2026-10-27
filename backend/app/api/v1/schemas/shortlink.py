@@ -1,4 +1,4 @@
-from pydantic import BaseModel, HttpUrl
+from pydantic import BaseModel
 
 from typing import Optional
 
@@ -12,6 +12,6 @@ class ShortLinkRead(BaseModel):
 
 
 class ShortLinkCreate(BaseModel):
-    href: HttpUrl
+    href: str
     new: Optional[bool] = False
 
