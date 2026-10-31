@@ -47,14 +47,25 @@ export const TmpForm = () => {
               name={file.name}
               size={file.size}
               progress={100}
-              onRemove={() => setFile(null)}
+              onRemove={() => {
+                setFile(null);
+                if (file && name == file.name) {
+                  setName("");
+                }
+              }}
             />
           ) : (
-            <DropzoneArea
-              maxFiles={1}
-              onDrop={(files) => setFile(files[0] ?? null)}
-            />
-          )}
+              <DropzoneArea
+                maxFiles={1}
+                onDrop={(files) => {
+                  const file = files[0] ?? null;
+                  setFile(file);
+                  if (file && !name.trim()) {
+                    setName(file.name ?? "");
+                  }
+                }}
+              />
+            )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
