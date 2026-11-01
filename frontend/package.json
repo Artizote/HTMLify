@@ -8,9 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "lint:fix": "eslint --fix",
-    "format:check": "prettier --check .",
-    "format:fix": "prettier --write ."
+    "lint:fix": "eslint --fix"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
