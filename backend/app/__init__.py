@@ -1,4 +1,6 @@
 from fastapi import FastAPI
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 
@@ -13,6 +15,13 @@ app = FastAPI(title="HTMLify")
 
 app.include_router(internal_router, prefix="/internal")
 app.include_router(v1_router, prefix="/v1")
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
+
+@app.get('/favicon.ico', include_in_schema=False)
+@app.get('/favicon.svg', include_in_schema=False)
+async def favicon():
+    return FileResponse("app/static/favicon.svg")
+
 
 _original_form = Request.form
 async def _form(self, **kwargs):
