@@ -3,32 +3,38 @@ import Link from "next/link";
 import { Logo } from "@/components/logo";
 import { env } from "@/lib/env";
 
+
 const columns = [
   {
-    title: "Product",
+    title: "Services",
     links: [
-      { name: "Dashboard", href: "/dashboard" },
-      { name: "Temp File", href: "/tmp" },
-      { name: "Shortlinks", href: "/r" },
+      { name: "File Hosting", href: "/dashboard/files" },
+      { name: "Code Pen",     href: "/dashboard/pens" },
+      { name: "Temp Files",   href: "/tmp" },
+      { name: "Temp Folders", href: "/tmp/f" },
+      { name: "Short Links",  href: "/r" },
     ],
   },
   {
-    title: "Platform",
+    title: "Explore",
     links: [
-      { name: "Frames", href: "/frames" },
-      { name: "API", href: "/api" },
-      { name: "Upload", href: "/dashboard/file/upload" },
+      { name: "Frames",   href: "/frames" },
+      { name: "Search",   href: "/search" },
+      { name: "API Docs", href: "/api" },
     ],
   },
   {
-    title: "Resources",
+    title: "Get Started",
     links: [
-      { name: "New File", href: "/dashboard/file/new" },
-      { name: "Search", href: "/search" },
-      { name: "Sign In", href: "/signin" },
+      { name: "Host a TmpFile",     href: "/tmp" },
+      { name: "Create a ShortLink", href: "/r" },
+      { name: "Community showcase", href: "/frames" },
+      { name: "Create a File",      href: "/dashboard/file/new" },
+      { name: "Create a Pen",          href: "/dashboard/pens/edit" },
     ],
   },
 ];
+
 
 export function Footer() {
   return (
@@ -43,8 +49,7 @@ export function Footer() {
               </span>
             </Link>
             <p className="mt-4 max-w-xs font-mono text-sm leading-relaxed text-muted-foreground">
-              Deploy and host your web projects in seconds. One platform for
-              every stack - no config, no lock-in.
+              Make your webpages and code snippets live to the internet.
             </p>
           </div>
 
@@ -74,8 +79,7 @@ export function Footer() {
             © {new Date().getFullYear()} {env.NEXT_PUBLIC_SITE_NAME}
           </span>
           <span className="flex items-center gap-2">
-            <span className="size-1.5 rounded-full bg-primary" />
-            Deployed on the global edge
+            {/* There we will put some stats */}
           </span>
         </div>
       </div>

@@ -1,29 +1,34 @@
 import Link from "next/link";
 
+
 const features = [
   {
-    title: "Pens & Code Editor",
-    desc: "Write, preview, and share code snippets with a built-in editor. Supports multiple languages with syntax highlighting.",
-  },
-  {
     title: "File Hosting",
-    desc: "Upload any file - images, documents, archives - and get a permanent shareable link with one click.",
+    desc: "Upload/Write HTML, CSS, JavaScript, images, documents, and more. Get a permanent, shareable URL for every file.",
   },
   {
-    title: "URL Shortlinks",
-    desc: "Turn long, messy URLs into clean, memorable shortlinks. Track clicks and manage your links.",
+    title: "Code Pens & Live Preview",
+    desc: "Create, edit, and preview your code in real time with a built-in editor and syntax highlighting.",
   },
   {
-    title: "Temp File Links",
-    desc: "Need to share something quickly? Generate expiring links that auto-delete after use.",
+    title: "URL ShortLinks",
+    desc: "Turn long URLs into short, easy-to-share links. No account needed.",
   },
   {
-    title: "QR Code Generator",
-    desc: "Instantly generate QR codes for any link. Perfect for sharing on the go.",
+    title: "Temporary File Hosting",
+    desc: "Need to share a file temporarily? Upload it and get a shareable link without setting up permanent hosting or creating an account.",
   },
   {
-    title: "Search Everything",
-    desc: "Find your files, pens, and links instantly with built-in search across all your content.",
+    title: "Temporary Folder Hosting",
+    desc: "Share multiple files together through a single temporary folder link. No account required.",
+  },
+  {
+    title: "Community Showcase",
+    desc: "Explore Frames, a public gallery of HTML pages published by the community. Discover what others have uploaded and share inspiration.",
+  },
+  {
+    title: "Developer API",
+    desc: "Integrate with the platform programmatically. Access the features you need through our API and automate your file hosting, temporary uploads, shortlinks, and more.",
   },
 ];
 
@@ -40,22 +45,14 @@ export function Features() {
               Everything you need.
             </h2>
             <p className="font-mono text-sm text-muted-foreground leading-relaxed mb-8 max-w-md">
-              A complete toolkit for developers who want to ship fast. Code
-              pens, file hosting, shortlinks, temp sharing, and more - all in
-              one place.
+              Features focused on making hosting and sharing effortless for Developers
             </p>
             <div className="flex items-center gap-4">
               <Link
                 href="/dashboard"
                 className="font-mono text-sm font-medium text-foreground hover:text-muted-foreground transition-colors"
               >
-                Browse files →
-              </Link>
-              <Link
-                href="/dashboard/file/new"
-                className="font-mono text-sm font-medium text-foreground hover:text-muted-foreground transition-colors"
-              >
-                Start writing →
+                goto Dashboard;
               </Link>
             </div>
           </div>

@@ -1,19 +1,19 @@
 const cards = [
   {
-    title: "No config needed",
-    desc: "Upload, deploy, and share in seconds. No build steps, no CI/CD pipelines, no YAML files.",
+    title: "Share with Anyone",
+    desc: "Every file gets its own permanent, predictable URL, making sharing and accessing your content effortless.",
   },
   {
-    title: "Multi-language support",
-    desc: "Python, JavaScript, Go, Rust, TypeScript, HTML - one platform for every stack.",
+    title: "Multi-Language Syntax Highlighting",
+    desc: "Beautifully formatted code snippets with rich syntax highlighting across a wide range of programming languages.",
   },
   {
-    title: "Global edge network",
-    desc: "Your content is served from the nearest edge location worldwide for blazing fast load times.",
+    title: "One-Click Publishing",
+    desc: "Upload your content and make it instantly accessible on the web.",
   },
   {
-    title: "Share with anyone",
-    desc: "Every upload gets a shareable link instantly. Public or private, you decide.",
+    title: "Temp File Hosting",
+    desc: "Just need a quick and temporary host? He got you, upload files and share them instantly without permanent hosting.",
   },
 ];
 
@@ -23,17 +23,16 @@ export function Hero() {
       <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col justify-center px-6 py-24 md:py-28">
         <div className="max-w-3xl">
           <span className="font-mono text-xs text-muted-foreground/60 tracking-widest uppercase">
-            # deploy · host · share
+            # code - host - share
           </span>
 
           <h1 className="mt-3 font-mono text-3xl  leading-[1.05] tracking-[-0.08em] text-foreground lg:text-5xl">
-            Deploy anywhere. Share everywhere.
+            If it's HTML, HTMLify it!
           </h1>
 
           <p className="mt-8 max-w-xl font-mono text-sm leading-relaxed text-muted-foreground md:text-base">
-            The ultimate platform for deploying and hosting your web projects.
-            Launch static sites and modern web apps to a global edge network in
-            seconds - no config, no waiting.
+            The platform built for developers to host webpages and code snippets.
+            Publish your projects to the web and bring them to life just one click.
           </p>
         </div>
 

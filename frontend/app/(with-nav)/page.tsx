@@ -1,7 +1,7 @@
-import { Features } from "@/components/blocks/features-8";
-import { Footer } from "@/components/home/footer";
 import { Hero } from "@/components/home/hero";
-import { Quote } from "@/components/quote";
+import { Quote } from "@/components/home/quote";
+import { Features } from "@/components/home/features";
+import { Footer } from "@/components/home/footer";
 
 export default function Home() {
   return (
