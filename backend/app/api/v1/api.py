@@ -8,6 +8,7 @@ from .routes import (
     qrcode,
     search,
     shortlink,
+    stats,
     tmpfile,
     user,
 )
@@ -21,5 +22,6 @@ router.include_router(pen.router)
 router.include_router(qrcode.router)
 router.include_router(search.router)
 router.include_router(shortlink.router)
+router.include_router(stats.router)
 router.include_router(tmpfile.router)
 router.include_router(user.router)
