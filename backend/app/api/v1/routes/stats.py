@@ -9,11 +9,11 @@ router = APIRouter(tags=["Stats"])
 
 
 @router.get("/stats")
-def all_stats():
+def all_stats() -> dict[str, dict[str, int]]:
     return StatsService.all_stats()
 
 @router.get("/stats/{resource}")
-def resource_stats(resource: StatsResourceEnum):
+def resource_stats(resource: StatsResourceEnum) -> dict[str, int]:
     match resource:
         case StatsResourceEnum.USER:
             return StatsService.user_stats()
@@ -27,6 +27,6 @@ def resource_stats(resource: StatsResourceEnum):
             return StatsService.tmpfile_stats()
         case StatsResourceEnum.TMPFOLDER:
             return StatsService.tmpfolder_stats()
-
-    raise HTTPException(404, "Stats not found for this resource")
+        case _:
+            raise HTTPException(404, "Stats not found for this resource")
 

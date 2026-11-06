@@ -116,7 +116,7 @@ class StatsService:
     @staticmethod
     @cache.cache_fetcher
     def shortlink_hits():
-        return sum(map(lambda x:x.views, Pen.select(Pen.views)))
+        return sum(map(lambda x:x.visits, ShortLink.select(ShortLink.visits)))
 
 
     # TmpFile
