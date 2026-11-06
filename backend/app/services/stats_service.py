@@ -113,11 +113,19 @@ class StatsService:
     def tmpfile_stats(cls):
         return {
             "count": cls.tmpfile_count(),
+            "size": cls.tmpfile_size(),
         }
 
     @staticmethod
     def tmpfile_count():
         return TmpFile.select().count()
+
+    @staticmethod
+    def tmpfile_size():
+        s = 0
+        for tmpfile in TmpFile.select():
+            s += tmpfile.blob.size
+        return s
 
 
     # TmpFolder
