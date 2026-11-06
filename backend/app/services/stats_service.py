@@ -1,10 +1,11 @@
 from app.models import *
+from app.utils import TimedCache
 
 
 class StatsService:
     """Statistics Service for Resources"""
 
-    # TODO: time based caching
+    cache = TimedCache(900)
 
 
     @classmethod
@@ -28,6 +29,7 @@ class StatsService:
         }
 
     @staticmethod
+    @cache.cache_fetcher
     def user_count():
         return User.select().count()
 
@@ -41,10 +43,12 @@ class StatsService:
         }
 
     @staticmethod
+    @cache.cache_fetcher
     def blob_count():
         return Blob.select().count()
 
     @staticmethod
+    @cache.cache_fetcher
     def blob_size():
         return sum(map(lambda x:x.size, Blob.select(Blob.size)))
 
@@ -59,10 +63,12 @@ class StatsService:
         }
 
     @staticmethod
+    @cache.cache_fetcher
     def file_count():
         return File.select().count()
 
     @staticmethod
+    @cache.cache_fetcher
     def file_size():
         size = 0
         for file in File.select():
@@ -70,6 +76,7 @@ class StatsService:
         return size
 
     @staticmethod
+    @cache.cache_fetcher
     def file_hits():
         return sum(map(lambda x:x.views, File.select(File.views)))
 
@@ -83,10 +90,12 @@ class StatsService:
         }
 
     @staticmethod
+    @cache.cache_fetcher
     def pen_count():
         return Pen.select().count()
 
     @staticmethod
+    @cache.cache_fetcher
     def pen_hits():
         return sum(map(lambda x:x.views, Pen.select(Pen.views)))
 
@@ -100,10 +109,12 @@ class StatsService:
         }
 
     @staticmethod
+    @cache.cache_fetcher
     def shortlink_count():
         return ShortLink.select().count()
 
     @staticmethod
+    @cache.cache_fetcher
     def shortlink_hits():
         return sum(map(lambda x:x.views, Pen.select(Pen.views)))
 
@@ -117,10 +128,12 @@ class StatsService:
         }
 
     @staticmethod
+    @cache.cache_fetcher
     def tmpfile_count():
         return TmpFile.select().count()
 
     @staticmethod
+    @cache.cache_fetcher
     def tmpfile_size():
         s = 0
         for tmpfile in TmpFile.select():
@@ -136,6 +149,7 @@ class StatsService:
         }
 
     @staticmethod
+    @cache.cache_fetcher
     def tmpfolder_count():
         return TmpFolder.select().count()
 
