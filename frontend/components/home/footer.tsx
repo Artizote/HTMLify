@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { Logo } from "@/components/logo";
 import { env } from "@/lib/env";
+import { StatsInsightLine } from "components/home/stats-insight-line"
 
 
 const columns = [
@@ -79,7 +80,7 @@ export function Footer() {
             © {new Date().getFullYear()} {env.NEXT_PUBLIC_SITE_NAME}
           </span>
           <span className="flex items-center gap-2">
-            {/* There we will put some stats */}
+            <StatsInsightLine />
           </span>
         </div>
       </div>
