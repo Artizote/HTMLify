@@ -23,10 +23,10 @@ def resource_stats(resource: StatsResourceEnum) -> dict[str, int]:
             return StatsService.file_stats()
         case StatsResourceEnum.PEN:
             return StatsService.pen_stats()
+        case StatsResourceEnum.SHORTLINK:
+            return StatsService.shortlink_stats()
         case StatsResourceEnum.TMPFILE:
             return StatsService.tmpfile_stats()
         case StatsResourceEnum.TMPFOLDER:
             return StatsService.tmpfolder_stats()
-        case _:
-            raise HTTPException(404, "Stats not found for this resource")
 
