@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { getOriginalUrlFromShort } from "@/lib/modules/shortlink/shortlink.api";
+import { getShortLinkByShort, hitShortLink } from "lib/modules/shortlink/shortlink.api"
 import { env } from "@/lib/env";
 
 export const serveShortlink = async (pathname: string) => {
@@ -8,9 +8,10 @@ export const serveShortlink = async (pathname: string) => {
   if (!short) {
     return null;
   }
-  const data = await getOriginalUrlFromShort(short);
-  if (!data) {
+  const shortlink = await getShortLinkByShort(short);
+  if (!shortlink) {
     return null;
   }
-  return NextResponse.redirect(new URL(data.href, env.NEXT_PUBLIC_SITE_URL + "/r/"));
+  hitShortLink(shortlink.id);
+  return NextResponse.redirect(new URL(shortlink.href, env.NEXT_PUBLIC_SITE_URL + "/r/"));
 };
