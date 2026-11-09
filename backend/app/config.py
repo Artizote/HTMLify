@@ -38,6 +38,7 @@ config_vars = [
     ("SERVER_NAME", str),
     ("SCHEME", str),
     ("PROD", bool),
+    ("INTERNAL_API_CODE", str),
     ("ACCESS_TOKEN_EXPIRE_MINUTES", int),
     ("REFRESH_TOKEN_EXPIRE_DAYS", int),
     ("COOKIE_DOMAIN", str),
