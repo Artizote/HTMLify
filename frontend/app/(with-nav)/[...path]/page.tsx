@@ -36,6 +36,7 @@ const StaticServe = async ({
   if (path[0] === "src") {
     path = path.slice(1);
   }
+  const rawPath = "/raw/" + path.join("/");
   const filename = `/${path.join("/")}`.replace(/^\/\//, "/");
   const language = getLanguageByPath(filename);
 
@@ -109,7 +110,7 @@ const StaticServe = async ({
             />
           </div>
           <MediaActions
-            src=""
+            src={rawPath}
             copyUrl={pageUrl}
             filename={filename}
             className="px-4"
