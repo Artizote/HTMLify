@@ -15,6 +15,7 @@ SEARCH_INDEXING_TIME_DELAY = 3600
 SERVER_NAME = "localhost:3000"
 SCHEME = "http"
 PROD = False
+INTERNAL_API_CODE="dev-internal-code"
 
 # Auth Config
 ACCESS_TOKEN_EXPIRE_MINUTES = 15

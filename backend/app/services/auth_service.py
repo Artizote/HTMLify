@@ -7,7 +7,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Optional
 
 from app.services.user_service import UserService, User
-from app.config import SECRET_KEY, ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_DAYS
+from app.config import SECRET_KEY, ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_DAYS, INTERNAL_API_CODE
 
 
 oauth2_scheme = OAuth2PasswordBearer(
@@ -18,6 +18,10 @@ oauth2_scheme = OAuth2PasswordBearer(
 api_key_scheme = APIKeyHeader(
     name="X-API-Key",
     auto_error=False
+)
+
+internal_code_scheme = APIKeyHeader(
+    name="X-Internal-Code"
 )
 
 
@@ -121,4 +125,11 @@ class AuthService:
             user = AuthService.get_user_by_api_key(api_key)
         return user
 
+    @staticmethod
+    def verify_internal_code(internal_code: str = Security(internal_code_scheme)):
+        if not internal_code or internal_code != INTERNAL_API_CODE:
+            raise HTTPException(
+            status_code=401,
+            detail="Invalid or missing API key"
+        )
 
