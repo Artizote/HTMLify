@@ -34,6 +34,8 @@ import { cn } from "@/lib/utils";
 const modeConfig = {
   signin: {
     title: "Sign in to your account",
+    usernameFieldLabel: "Username or Email",
+    usernameFieldPlaceholder: "Enter your username or email",
     description: "Enter your credentials below to sign in",
     buttonLabel: "Sign in",
     footer: (
@@ -44,6 +46,8 @@ const modeConfig = {
   },
   signup: {
     title: "Create an account",
+    usernameFieldLabel: "Username",
+    usernameFieldPlaceholder: "Enter your username",
     description: "Enter your details below to create your account",
     buttonLabel: "Sign up",
     footer: (
@@ -127,8 +131,8 @@ export function SigninForm({ mode, className, ...props }: SigninFormProps) {
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <Field>
-                    <FieldLabel>Username</FieldLabel>
-                    <Input {...field} placeholder="Enter your username" />
+                    <FieldLabel>{config.usernameFieldLabel}</FieldLabel>
+                    <Input {...field} tabIndex={2} placeholder={config.usernameFieldPlaceholder} />
                     {fieldState.invalid && (
                       <FieldError errors={[fieldState.error]} />
                     )}
@@ -151,7 +155,7 @@ export function SigninForm({ mode, className, ...props }: SigninFormProps) {
                         </Link>
                       )}
                     </div>
-                    <Input {...field} type="password" placeholder="Password" />
+                    <Input {...field} tabIndex={2} type="password" placeholder="Password" />
                     {fieldState.invalid && (
                       <FieldError errors={[fieldState.error]} />
                     )}
@@ -174,7 +178,7 @@ export function SigninForm({ mode, className, ...props }: SigninFormProps) {
                 />
               )}
               <Field>
-                <Button type="submit" disabled={isPending}>
+                <Button tabIndex={3} type="submit" disabled={isPending}>
                   {config.buttonLabel}
                 </Button>
                 <FieldDescription className="text-center">

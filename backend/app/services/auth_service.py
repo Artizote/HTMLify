@@ -28,7 +28,11 @@ class AuthService:
 
     @staticmethod
     def authenticate_user(username: str, password: str) -> Optional[User]:
-        user = UserService.get_user(username)
+        """`useranme` can be email too"""
+        if "@" in username:
+            user = UserService.get_user_by_email(username)
+        else:
+            user = UserService.get_user(username)
         if not user:
             return None
         auth = UserService.auth_user(user, password)
