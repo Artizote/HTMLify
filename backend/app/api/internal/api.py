@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends
 from app.services.auth_service import AuthService
 
 from .routes import (
+    dashboard,
     file,
     frames,
     pen,
@@ -12,6 +13,7 @@ from .routes import (
 
 router = APIRouter(include_in_schema=True, dependencies=[Depends(AuthService.verify_internal_code)])
 
+router.include_router(dashboard.router)
 router.include_router(file.router)
 router.include_router(frames.router)
 router.include_router(pen.router)
