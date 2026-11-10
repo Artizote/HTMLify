@@ -13,6 +13,7 @@ import { FileIcon } from "@/components/dashboard/file-icon";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { env } from "@/lib/env";
 import { getFolderByPath } from "@/lib/modules/file/file.api";
+import { getUserDashboardStats, getUserDashboardLatestModefiesItems } from "lib/utils/dashboard";
 import { FileItem, isFolderItem } from "@/lib/modules/file/file.types";
 import { getPens } from "@/lib/modules/pen/pen.api";
 import { getMe } from "@/lib/modules/user/user.actions";
@@ -30,37 +31,8 @@ const DashboardOverviewPage = async () => {
   const user = await getMe();
   if (!user) redirect("/");
 
-  const [{ data: folder }, { data: pens }] = await Promise.all([
-    getFolderByPath(`/${user.username}`, true, 1, 6, "-modified"),
-    getPens(),
-  ]);
-
-  const fileCount = folder?.items_count ?? 0;
-  const penCount = pens?.length ?? 0;
-
-  const files = (folder?.items ?? []).filter(
-    (item): item is FileItem => !isFolderItem(item),
-  );
-
-  const recent = [
-    ...files.map((file) => ({
-      kind: "file" as const,
-      id: file.id,
-      title:
-        file.title || file.path.split("/").filter(Boolean).pop() || "Untitled",
-      path: file.path,
-      modified: Date.parse(file.modified) || 0,
-    })),
-    ...(pens ?? []).map((pen) => ({
-      kind: "pen" as const,
-      id: pen.id,
-      title: pen.title || "Untitled Pen",
-      path: `/pen/${pen.id}`,
-      modified: Date.parse(pen.modified) || 0,
-    })),
-  ]
-    .sort((a, b) => b.modified - a.modified)
-    .slice(0, 6);
+  const stats = await getUserDashboardStats(user.username);
+  const recent = await getUserDashboardLatestModefiesItems(user.username);
 
   return (
     <>
@@ -93,17 +65,15 @@ const DashboardOverviewPage = async () => {
             href="/dashboard/files"
             className="rounded-lg border bg-card p-4 transition-colors hover:bg-accent/50"
           >
-            <div className="text-2xl font-semibold">{fileCount}</div>
-            <div className="text-sm text-muted-foreground">
-              Files &amp; folders
-            </div>
+            <div className="text-2xl font-semibold">{stats.file.count}</div>
+            <div className="text-sm text-muted-foreground">{stats.file.count == 1 ? "File" : "Files"}</div>
           </Link>
           <Link
             href="/dashboard/pens"
             className="rounded-lg border bg-card p-4 transition-colors hover:bg-accent/50"
           >
-            <div className="text-2xl font-semibold">{penCount}</div>
-            <div className="text-sm text-muted-foreground">Pens</div>
+            <div className="text-2xl font-semibold">{stats.pen.count}</div>
+            <div className="text-sm text-muted-foreground">{stats.pen.count == 1 ? "Pen" : "Pens"}</div>
           </Link>
         </div>
 
@@ -119,16 +89,16 @@ const DashboardOverviewPage = async () => {
             ) : (
               <ul className="divide-y">
                 {recent.map((item) => (
-                  <li key={`${item.kind}:${item.path}`}>
+                  <li key={`${item.type}:${item.path}`}>
                     <Link
                       href={
-                        item.kind === "pen"
+                        item.type === "pen"
                           ? `/dashboard/pens/edit?id=${item.id}`
                           : `/dashboard/file/edit/${item.id}`
                       }
                       className="flex items-center gap-3 rounded-sm px-3 py-2.5 transition-colors hover:bg-muted/50"
                     >
-                      {item.kind === "pen" ? (
+                      {item.type === "pen" ? (
                         <PenTool className="h-4 w-4 shrink-0 text-muted-foreground" />
                       ) : (
                         <FileIcon path={item.path} />
