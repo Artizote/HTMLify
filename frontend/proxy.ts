@@ -11,12 +11,14 @@ import {
 import { serverFile } from "@/lib/modules/file/file.proxy";
 import { serverPenContent } from "@/lib/modules/pen/pen.proxy";
 import { excludePaths } from "@/lib/modules/proxy/proxy.config";
+import { serveUserDp }  from "@/lib/modules/dp/dp.proxy";
 import { serveShortlink } from "@/lib/modules/shortlink/shortlink.proxy";
 import { serveTmpFile } from "@/lib/modules/tmp/tmp.proxy";
 
 import { env } from "@/lib/env";
 
 
+const dpPaths         = ["/dp"];
 const shortnerPaths   = ["/r"];
 const tmpPaths        = ["/tmp"];
 const penPaths        = ["/pen"];
@@ -29,6 +31,7 @@ const matchRoute = (pathname: string, routes: string[]) =>
       pathname.startsWith(`${route}/`),
   );
 
+const isDp             = (pathname: string) => matchRoute(pathname, dpPaths);
 const isTmp            = (pathname: string) => matchRoute(pathname, tmpPaths);
 const isShortLink      = (pathname: string) => matchRoute(pathname, shortnerPaths);
 const isPen            = (pathname: string) => matchRoute(pathname, penPaths);
@@ -82,6 +85,12 @@ export async function proxy(request: NextRequest) {
     if (redirect) {
       return redirect;
     }
+  }
+
+  // DP
+  if (isDp(pathname)) {
+    const username = pathname.split("/")[2];
+    return await serveUserDp(username);
   }
 
   // TmpFile
