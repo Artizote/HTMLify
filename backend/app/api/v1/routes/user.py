@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import FileResponse
 from starlette import status
 
 from app.models import User
@@ -54,6 +55,16 @@ def get_user_info(username: str) -> UserPublicInfo:
             "User not found with this username"
         )
     return UserPublicInfo.from_orm(user)
+
+@router.get("/users/{username}/dp")
+def get_user_dp(username: str) -> FileResponse:
+    dp_path = UserService.get_user_dp_path(username)
+    if not dp_path:
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND,
+            "User not  found with this  username"
+        )
+    return FileResponse(dp_path,  media_type="image/jpg")
 
 @router.get("/users/me/api-key")
 def get_my_api_key(user: User = Depends(AuthService.get_current_user)) -> APIKeyResponse:

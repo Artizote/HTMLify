@@ -1,6 +1,10 @@
-from typing import Optional
+from  requests  import get
 
-from app.utils import is_valid_email_address
+from typing import Optional
+from hashlib import md5
+import os.path
+
+from app.utils import is_valid_email_address, file_path
 from app.models import User
 
 
@@ -93,6 +97,25 @@ class UserService:
         if not user:
             raise UserNotFound()
         user.set_password(password)
+
+    @staticmethod
+    def get_user_dp_path(username: str):
+        username = username.lower()
+        dp_path = file_path("dp", username)
+
+        if os.path.exists(dp_path):
+            return dp_path
+
+        user = User.by_username(username)
+        if not user:
+            return None
+
+        hash = md5(str(user.email).encode()).hexdigest()
+        gravatar_url = "https://gravatar.com/avatar/" + hash + "?d=retro"
+        dp = get(gravatar_url).content
+        with open(dp_path, "wb") as f: f.write(dp)
+
+        return dp_path
 
     @staticmethod
     def auth_user(user_or_username: str | User, password: str) -> bool:
