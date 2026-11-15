@@ -18,6 +18,10 @@ import { signOut } from "@/lib/modules/auth/client.actons";
 import { UserFullInfo } from "@/lib/modules/user/user.types";
 
 export const NavUser = ({ user }: { user: UserFullInfo | null }) => {
+  if (!user) {
+    return  null;
+  }
+
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleLogout = async () => {
@@ -37,12 +41,12 @@ export const NavUser = ({ user }: { user: UserFullInfo | null }) => {
   return (
     <div className="flex items-center gap-3 rounded-xl border bg-background/80 p-2 backdrop-blur">
       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/5 text-sm font-semibold text-primary">
-        {user?.name?.charAt(0).toUpperCase() || "U"}
+        <img src={`/dp/${user.username}`} />
       </div>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <p className="truncate text-sm font-medium">{user?.name || "Guest"}</p>
-        <p className="truncate text-xs text-muted-foreground">{user?.email}</p>
+        <p className="truncate text-sm font-medium">{user.name}</p>
+        <p className="truncate text-xs text-muted-foreground">{user.email}</p>
       </div>
 
       <DropdownMenu>
