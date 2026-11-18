@@ -14,9 +14,15 @@ import { MediaActions } from "@/components/media-actions";
 import { MediaViewer } from "@/components/media-viewer";
 import { CodePlayground } from "@/components/playgroud/code-playground";
 import { Button } from "@/components/ui/button";
-import { getFileContentByPath } from "@/lib/modules/file/file.api";
+import { getFileContentByPath, getFolderByPath } from "@/lib/modules/file/file.api";
 import { getFileContentType } from "@/lib/modules/file/file.utils";
 import { getLanguageByPath } from "@/lib/modules/playgournd/editor.utils";
+import FileExplorer from "@/components/file/file-explorer"
+
+/*
+ * Can't avoid anymore, this require serious refactoring
+ * to be maintanable in future
+ */
 
 type FileData =
   | {
@@ -52,11 +58,22 @@ const StaticServe = async ({
 
   const response = await getFileContentByPath(filename);
   if (!response) {
+    const responnse = await getFolderByPath(filename);
+    if (!responnse || responnse.data === null) {
+      return (
+        <div className="flex-1 flex items-center justify-center text-destructive">
+          No file exists.
+        </div>
+      );
+    }
     return (
-      <div className="flex-1 flex items-center justify-center text-destructive">
-        Failed to load file content or file not found.
+      <div className="flex-1 flex items-center justify-center px-4">
+        <div className="w-full max-w-7xl">
+          <FileExplorer data={responnse.data} />
+        </div>
       </div>
     );
+
   }
 
   const contentType = response.headers.get("content-type");
