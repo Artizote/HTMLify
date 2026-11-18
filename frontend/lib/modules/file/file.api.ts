@@ -155,15 +155,17 @@ export const getFolderByPath = async (
   path: string,
   expand: boolean = true,
   page: number = 1,
-  pageSize: number = env.NEXT_PUBLIC_PAGE_SIZE,
+  pageSize: number | null= null,
   sort?: string,
 ): Promise<{ data: FolderResponse | null; error: string | null }> => {
   const params = new URLSearchParams({
     path,
     expand: expand.toString(),
     page: page.toString(),
-    page_size: pageSize.toString(),
   });
+  if (pageSize != null) {
+    params.append("page_size", pageSize.toString());
+  }
   if (sort) {
     params.set("sort", sort);
   }

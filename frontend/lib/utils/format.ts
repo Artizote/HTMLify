@@ -19,6 +19,9 @@ export function formatSize(size: number): string {
     degree++;
   }
   let formated = size.toFixed(2);
+  if (degree == 0) {
+    formated = size.toFixed(0);
+  }
   return `${formated} ${units[degree]}`;
 }
 

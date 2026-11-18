@@ -69,7 +69,7 @@ const StaticServe = async ({
     return (
       <div className="flex-1 flex items-center justify-center px-4">
         <div className="w-full max-w-7xl">
-          <FileExplorer data={responnse.data} />
+          <FileExplorer data={responnse.data as any} /> {/* refactor later */}
         </div>
       </div>
     );
