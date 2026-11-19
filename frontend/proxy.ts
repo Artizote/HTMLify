@@ -12,14 +12,12 @@ import { serverFile } from "@/lib/modules/file/file.proxy";
 import { serverPenContent } from "@/lib/modules/pen/pen.proxy";
 import { excludePaths } from "@/lib/modules/proxy/proxy.config";
 import { serveUserDp }  from "@/lib/modules/dp/dp.proxy";
-import { serveShortlink } from "@/lib/modules/shortlink/shortlink.proxy";
 import { serveTmpFile } from "@/lib/modules/tmp/tmp.proxy";
 
 import { env } from "@/lib/env";
 
 
 const dpPaths         = ["/dp"];
-const shortnerPaths   = ["/r"];
 const tmpPaths        = ["/tmp"];
 const penPaths        = ["/pen"];
 const protectedRoutes = [...AUTH_ONLY_ROUTES, ...PROTECTED_ROUTES];
@@ -33,7 +31,6 @@ const matchRoute = (pathname: string, routes: string[]) =>
 
 const isDp             = (pathname: string) => matchRoute(pathname, dpPaths);
 const isTmp            = (pathname: string) => matchRoute(pathname, tmpPaths);
-const isShortLink      = (pathname: string) => matchRoute(pathname, shortnerPaths);
 const isPen            = (pathname: string) => matchRoute(pathname, penPaths);
 const isDashboardRoute = (pathname: string) => matchRoute(pathname, DASHBOARD_ROUTES);
 const isStaticAsset    = (pathname: string) => {
@@ -76,15 +73,6 @@ export async function proxy(request: NextRequest) {
   // API docs
   if (pathname === "/api") {
     return NextResponse.redirect(`${env.NEXT_PUBLIC_BACKEND_API_URL}/docs`);
-  }
-
-  // ShortLink
-  if (isShortLink(pathname)) {
-    const redirect = await serveShortlink(pathname);
-
-    if (redirect) {
-      return redirect;
-    }
   }
 
   // DP
