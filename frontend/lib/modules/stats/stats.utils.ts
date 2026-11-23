@@ -30,47 +30,47 @@ export async function getRandomStatsInsightLine() {
   switch (resource) {
     case "user": {
       switch (field) {
-        case "count": return `${value} registered Users.`;
+        case "count": return `${value} registered users.`;
       }
       break;
     }
 
     case "blob": {
       switch (field) {
-        case "count": return `Hosting ${value} Blobs.`;
-        case "size": return `${value} size of Blobs hosted.`;
+        case "count": return `${value} blobs hosted and counting.`;
+        case "size": return `${value} of blob storage in use.`;
       }
       break;
     }
 
     case "file": {
       switch (field) {
-        case "count": return `${value} Files are hosted live.`;
-        case "size": return `${value} of Files hosted.`;
-        case "hits": return `${value} File hits.`;
+        case "count": return `${value} files hosted.`;
+        case "size": return `${value} of files hosted.`;
+        case "hits": return `${value} file requests served.`;
       }
       break;
     }
 
     case "pen": {
       switch (field) {
-        case "count": return `${value} Pens created.`;
-        case "hits": return `${value} Pen hits.`;
+        case "count": return `${value} pens created and shared.`;
+        case "hits": return `${value} pen views served.`;
       }
       break;
     }
 
     case "shortlink": {
       switch (field) {
-        case "count": return `${value} Shortened Links.`;
-        case "hits": return `${value} Shortlink hits.`;
+        case "count": return `${value} links shortened.`;
+        case "hits": return `${value} shortlink redirects served.`;
       }
       break;
     }
 
     case "tmpfile": {
       switch (field) {
-        case "count": return `Currently ${value} Temp Files.`;
+        case "count": return `${value} temporary files currently stored.`;
         case "size": return `${value} size of Temp Files.`;
       }
       break;
@@ -78,7 +78,7 @@ export async function getRandomStatsInsightLine() {
 
     case "tmpfolder": {
       switch (field) {
-        case "count": return `Currently ${value} Temp Folders.`;
+        case "count": return `${value} temporary folders in use.`;
       }
       break;
     }
