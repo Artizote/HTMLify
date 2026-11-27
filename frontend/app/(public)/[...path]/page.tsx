@@ -58,7 +58,9 @@ const StaticServe = async ({
 
   const response = await getFileContentByPath(filename);
   if (!response) {
-    const responnse = await getFolderByPath(filename);
+    const responnse = await getFolderByPath(
+      decodeURIComponent(filename)
+    );
     if (!responnse || responnse.data === null) {
       return (
         <div className="flex-1 flex items-center justify-center text-destructive">
